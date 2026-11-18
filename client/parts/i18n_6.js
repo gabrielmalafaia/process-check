@@ -1,0 +1,21 @@
+DICT.push(
+  ['E-mail de aprovação enviado', 'Approval e-mail sent', 'Correo de aprobación enviado'],
+  ['E-mail de aprovação não enviado', 'Approval e-mail not sent', 'Correo de aprobación no enviado'],
+  ['Cargo informado: {0}', 'Job title provided: {0}', 'Cargo informado: {0}'],
+  ['Ativo: {0} → {1}', 'Active: {0} → {1}', 'Activo: {0} → {1}'],
+  ['Nome: {0} → {1}', 'Name: {0} → {1}', 'Nombre: {0} → {1}'],
+  ['Perfil: {0} → {1}', 'Profile: {0} → {1}', 'Perfil: {0} → {1}'],
+  ['Perfil: {0}; Ativo: {1}', 'Profile: {0}; Active: {1}', 'Perfil: {0}; Activo: {1}'],
+  ['Nome: {0}', 'Name: {0}', 'Nombre: {0}'],
+  ['Permissões: {0}', 'Permissions: {0}', 'Permisos: {0}'],
+  ['Telas: {0}', 'Screens: {0}', 'Pantallas: {0}'],
+  ['Dados: {0}', 'Data: {0}', 'Datos: {0}'],
+  ['Sem Time', 'No team', 'Sin equipo'],
+  ['No ritmo: {0}', 'On track: {0}', 'En ritmo: {0}'],
+  ['Em risco: {0}', 'At risk: {0}', 'En riesgo: {0}'],
+  ['Atingidas: {0}', 'Achieved: {0}', 'Alcanzadas: {0}'],
+  ['Não atingidas: {0}', 'Not achieved: {0}', 'No alcanzadas: {0}'],
+  ['Todos os turnos.', 'All shifts.', 'Todos los turnos.'],
+  ['Todos os processos.', 'All processes.', 'Todos los procesos.'],
+);
+DICT.push(['indisponível','unavailable','no disponible']);

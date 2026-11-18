@@ -1,0 +1,12 @@
+{
+  "name": "process-check",
+  "version": "7.2.0",
+  "description": "WebApp de auditoria de processos logisticos em Google Apps Script e Google Sheets.",
+  "private": true,
+  "scripts": {
+    "build": "bash client/build.sh",
+    "test": "bash tests/run-all.sh",
+    "lint": "eslint --no-eslintrc --env es2021 --rule '{\"no-undef\":0}' --ext .gs src/Code.gs"
+  },
+  "devDependencies": { "eslint": "^8.57.1", "jsdom": "^24.1.3" }
+}

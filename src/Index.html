@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<!--
+Process Check - Auditoria de processos do hub
+(c) 2026 Gabriel Malafaia (desenvolvimento) e Karina Ferreira (concepção dos processos e estrutura da auditoria).
+Todos os direitos reservados. Versão 7.0
+-->
+<html lang="pt-BR">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Process Check</title>
+  <script>try { var t = localStorage.getItem('pcTema'); if (t === 'auto') t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; if (t === 'dark' || t === 'orange') document.documentElement.setAttribute('data-theme', t); } catch (e) { /* sem armazenamento: tema padrão */ }</script>
+  <?!= include('Styles'); ?>
+</head>
+<body>
+  <div id="carregando" role="status" aria-live="polite">
+    <div class="pl-bar" aria-hidden="true"><i></i></div>
+    <div class="pl-box">
+      <div class="pl-mark" aria-hidden="true"><span class="pl-ring"></span><span class="logo pl-logo">PC</span></div>
+      <div class="pl-name">Process Check<small>Auditoria de processos</small></div>
+      <div class="pl-txt"><span id="plTxt">Carregando o sistema</span><span class="pl-d" aria-hidden="true"><i></i><i></i><i></i></span></div>
+      <button type="button" class="btn hidden" id="plRetry">Tentar novamente</button>
+    </div>
+  </div>
+
+  <div id="login" class="hidden">
+    <div class="lg-tema" role="group" aria-label="Idioma e tema">
+      <span class="lg-lang" role="group" aria-label="Idioma"><button type="button" data-lang="pt" aria-pressed="false">PT</button><button type="button" data-lang="en" aria-pressed="false">EN</button><button type="button" data-lang="es" aria-pressed="false">ES</button></span>
+      <button type="button" class="sw sw-light" data-tema="light" title="Tema claro" aria-label="Tema claro"></button>
+      <button type="button" class="sw sw-dark" data-tema="dark" title="Tema escuro" aria-label="Tema escuro"></button>
+      <button type="button" class="sw sw-orange" data-tema="orange" title="Tema laranja" aria-label="Tema laranja"></button>
+    </div>
+    <div class="lg-brand">
+      <div class="lg-top"><span class="lg-logo">PC</span><div><b>Process Check</b><small>Auditoria de processos</small></div></div>
+      <div class="lg-msg"><h2>Auditoria de processos do hub</h2><p>Registre auditorias, acompanhe metas e consulte os resultados da operação em um só lugar.</p></div>
+      <div class="lg-foot">&copy; 2026 Gabriel Malafaia e Karina Ferreira<br>Todos os direitos reservados</div>
+    </div>
+    <div class="lg-main">
+      <section class="lg-card" id="lgEntrar" aria-labelledby="lgT1">
+        <h1 id="lgT1">Entrar</h1>
+        <p class="lg-sub">Use a sua conta Google para acessar o sistema.</p>
+        <div class="lg-conta hidden" id="lgConta"><span data-ico="user"></span><span><small>Conta Google em uso</small><b id="lgEmail"></b></span></div>
+        <button type="button" class="btn pri lg-btn" id="lgGoogle"><span data-ico="user"></span><span id="lgGoogleT">Entrar com Google</span></button>
+        <div class="lg-or" id="lgOu"><span>ou</span></div>
+        <button type="button" class="btn lg-btn" id="lgCadastrar"><span data-ico="user-check"></span><span id="lgCadT">Cadastrar-se</span></button>
+        <button type="button" class="lg-link" id="lgOutra">Usar outra conta Google</button>
+        <p class="lg-hint hidden" id="lgHint"></p>
+      </section>
+      <section class="lg-card hidden" id="lgCad" aria-labelledby="lgT2">
+        <h1 id="lgT2">Cadastro</h1>
+        <p class="lg-sub">Preencha os dados abaixo. Um administrador vai analisar o pedido.</p>
+        <label>Nome completo <span class="req">*</span><input id="cdNome" maxlength="120" autocomplete="name"><span class="err" data-lg-err="nome"></span></label>
+        <label>Cargo <span class="req">*</span><select id="cdCargo"><option value="">Selecione o cargo</option><option>Analista</option><option>Líder</option><option>Site Leader</option><option>Coordenador</option><option>Outros</option></select><span class="err" data-lg-err="cargo"></span></label>
+        <label class="hidden" id="cdOutroW">Qual é o cargo? <span class="req">*</span><input id="cdOutro" maxlength="60"><span class="err" data-lg-err="cargoOutro"></span></label>
+        <label>E-mail corporativo <span class="req">*</span><input id="cdEmail" type="email" maxlength="120" autocomplete="email"><span class="err" data-lg-err="email"></span><span class="lg-dica">Use o mesmo e-mail da conta Google com a qual você entrou.</span></label>
+        <div class="lg-acoes"><button type="button" class="btn pri lg-btn" id="cdEnviar">Enviar cadastro</button><button type="button" class="btn lg-btn" id="cdVoltar">Voltar</button></div>
+      </section>
+      <section class="lg-card hidden" id="lgOk" aria-labelledby="lgT3">
+        <h1 id="lgT3">Cadastro enviado</h1>
+        <p class="lg-sub">Seu pedido está em análise. Quando for aprovado, você receberá um e-mail em <b id="lgOkEmail"></b>.</p>
+        <button type="button" class="btn lg-btn" id="lgOkVoltar">Voltar ao início</button>
+      </section>
+    </div>
+  </div>
+
+  <div id="app" class="hidden">
+    <aside id="side" aria-label="Menu principal">
+      <button class="brand" id="brand" type="button" title="Recolher ou expandir o menu" aria-label="Recolher ou expandir o menu">
+        <span class="logo">PC</span><b>Process Check<br><small>Auditoria de processos</small></b>
+      </button>
+      <nav id="nav"></nav>
+      <div class="who" id="who">
+        <button type="button" id="userBtn" aria-haspopup="true" aria-expanded="false" aria-label="Menu do usuário"><span class="av" id="av" aria-hidden="true"></span><span class="wn"><b id="whoN"></b><small id="whoP"></small></span><span data-ico="more"></span></button>
+        <div id="userMenu" class="hidden" role="menu">
+          <div class="um-t">Idioma</div>
+          <div class="um-row" role="group" aria-label="Idioma"><button type="button" data-lang="pt" aria-pressed="false">Português</button><button type="button" data-lang="en" aria-pressed="false">English</button><button type="button" data-lang="es" aria-pressed="false">Español</button></div>
+          <div class="um-t">Tema</div>
+          <div class="um-col" role="group" aria-label="Tema">
+            <button type="button" data-tema="auto" aria-pressed="false"><span class="sw sw-auto"></span>Automático</button>
+            <button type="button" data-tema="light" aria-pressed="false"><span class="sw sw-light"></span>Claro</button>
+            <button type="button" data-tema="dark" aria-pressed="false"><span class="sw sw-dark"></span>Escuro</button>
+            <button type="button" data-tema="orange" aria-pressed="false"><span class="sw sw-orange"></span>Laranja</button>
+          </div>
+          <button type="button" class="um-k" id="kbdBtn"><span data-ico="search"></span>Atalhos de teclado</button>
+        </div>
+      </div>
+      <div class="autoria">&copy; 2026 Gabriel Malafaia e Karina Ferreira<br>Todos os direitos reservados</div>
+    </aside>
+
+    <main>
+      <header>
+        <button id="burger" type="button" title="Menu" aria-label="Abrir menu" data-ico="menu"></button>
+        <h1 id="titulo"></h1>
+        <button id="busca" type="button" title="Buscar (Ctrl+K)" aria-label="Buscar"><span data-ico="search"></span><span class="t">Buscar</span><kbd>Ctrl K</kbd></button>
+        <span id="atualizado" class="upd"></span>
+        <button id="btnPrint" type="button" class="hidden" title="Imprimir ou salvar em PDF (A4)"><span data-ico="printer"></span><span class="t">Imprimir / PDF</span></button>
+        <button id="refresh" type="button" title="Atualizar dados"><span data-ico="refresh"></span><span class="t">Atualizar</span></button>
+      </header>
+
+      <div id="fbar" class="hidden" role="search" aria-label="Filtros dos relatórios">
+        <div class="fg"><label>Período</label>
+          <div class="seg" id="fper">
+            <button type="button" data-k="7">7 dias</button><button type="button" data-k="15">15 dias</button><button type="button" data-k="30">30 dias</button><button type="button" data-k="90">Trimestre</button>
+          </div></div>
+        <div class="fg"><label for="f-de">De</label><input type="date" id="f-de"></div>
+        <div class="fg"><label for="f-ate">Até</label><input type="date" id="f-ate"></div>
+        <div class="fg"><label for="f-processo">Processo</label><select id="f-processo"></select></div>
+        <div class="fg"><label for="f-turno">Turno</label><select id="f-turno"></select></div>
+        <div class="fg"><label>&nbsp;</label><button type="button" class="btn" id="f-mais" aria-expanded="false" aria-controls="fmais"><span class="t">Mais filtros</span><span class="cnt-n hidden" id="f-mais-n"></span></button></div>
+        <div class="fg"><label>&nbsp;</label><button type="button" class="btn" id="f-limpar">Limpar filtros</button></div>
+        <div id="fmais" class="fmais hidden">
+          <div class="fg"><label for="f-doca">Doca / cluster</label><select id="f-doca"></select></div>
+          <div class="fg"><label for="f-lider">Líder</label><select id="f-lider"></select></div>
+          <div class="fg"><label for="f-colaborador">Colaborador</label><input id="f-colaborador" list="dl-colab" autocomplete="off" placeholder="Todos"><datalist id="dl-colab"></datalist></div>
+          <div class="fg"><label for="f-auditor">Auditor</label><select id="f-auditor"></select></div>
+          <div class="fg"><label for="f-faixa">Faixa de nota</label><select id="f-faixa"></select></div>
+          <div class="fg"><label for="f-obs">Texto nas observações</label><input id="f-obs" type="search" maxlength="120" autocomplete="off" placeholder="Buscar nas observações"></div>
+        </div>
+      </div>
+
+      <div id="printHd" class="print-only" aria-hidden="true"></div>
+
+      <section class="view hidden" id="v-matriz"></section>
+      <section class="view hidden" id="v-form"></section>
+      <section class="view hidden" id="v-minhas"></section>
+      <section class="view hidden" id="v-geral"></section>
+      <section class="view hidden" id="v-auditorias"></section>
+      <section class="view hidden" id="v-auditores"></section>
+      <section class="view hidden" id="v-proc"></section>
+      <section class="view hidden" id="v-doca"></section>
+      <section class="view hidden" id="v-colab"></section>
+      <section class="view hidden" id="v-tend"></section>
+      <section class="view hidden" id="v-export"></section>
+      <section class="view hidden" id="v-cad"></section>
+      <section class="view hidden" id="v-cfg"></section>
+      <section class="view hidden" id="v-acessos"></section>
+      <section class="view hidden" id="v-autorizar"></section>
+    </main>
+  </div>
+  <div id="cmdk" class="hidden" role="dialog" aria-modal="true" aria-label="Buscar">
+    <div class="cbox"><div class="cin"><span data-ico="search"></span><input id="cmdIn" autocomplete="off" placeholder="Buscar telas e ações" aria-label="Buscar"><kbd>Esc</kbd></div><ul id="cmdList" role="listbox"></ul></div>
+  </div>
+  <div id="modal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="modalT"></div>
+  <div id="toast" class="hidden" role="status" aria-live="polite"></div>
+  <div id="rpcbar" aria-hidden="true"><i></i></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <?!= include('JS_Client'); ?>
+</body>
+</html>

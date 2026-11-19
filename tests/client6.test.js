@@ -100,5 +100,24 @@ const respostas = t => Object.keys(t.win.__S.F.resp).length;
     try { await t.click('#emailRel [data-eagora]'); } finally { A.ctx.enviarRelatorioAgora = orig; }
     const b = t.$('#emailRel [data-eagora]'); ok(b && !/Enviando/.test(b.textContent) && !b.disabled, b && b.textContent);
   });
+  await TA('boot: erro ao iniciar o app mostra o motivo na tela de carregamento', async () => {
+    const orig = A.call.bind(A);
+    A.call = function (n, ...a) { const r = orig(n, ...a); if (n === 'bootstrap' && r && r.user) r.user.telas = null; return r; };
+    let t;
+    try { t = await abrir(A, 'ana@x.com'); await t.idle(); await sleep(900); } finally { A.call = orig; }
+    ok(t.$('#carregando').classList.contains('pl-erro'), 'sem estado de erro');
+    ok(/Não foi possível carregar/.test(t.$('#plTxt').textContent));
+    ok(!t.$('#plRetry').classList.contains('hidden'));
+  });
+  await TA('boot: erro de script antes do boot aparece na tela de carregamento', async () => {
+    const t = await abrir(A, 'ana@x.com');
+    t.$('#carregando').classList.remove('hidden'); t.$('#carregando').classList.remove('pl-erro');
+    const cap = require('fs').readFileSync(__dirname + '/../src/Index.html', 'utf8').match(/<script>(window\.addEventListener\('error'[\s\S]*?)<\/script>/);
+    ok(cap, 'captador ausente no Index.html'); t.win.eval(cap[1]);
+    t.win.dispatchEvent(new t.win.ErrorEvent('error', { message: 'falha simulada' }));
+    ok(/Erro ao iniciar: falha simulada/.test(t.$('#plTxt').textContent), t.$('#plTxt').textContent);
+    ok(t.$('#carregando').classList.contains('pl-erro'));
+  });
   console.log('Cliente v7.2 (perda de dado e estado errado):', R.ok, 'passaram,', R.f.length, 'falharam'); R.f.forEach(x => console.log('  FALHA: ' + x)); process.exit(R.f.length ? 1 : 0);
 })();
+

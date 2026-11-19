@@ -483,6 +483,7 @@ function renderCad(preset) {
     '<div class="dr-ft"><small class="muted">Campos com <span class="req">*</span> são obrigatórios.</small><span class="sp"></span><button type="button" class="btn" id="cCancel">Cancelar</button><button type="button" class="btn pri" id="cSalvar">' + (ed ? 'Salvar alteração' : 'Adicionar') + '</button></div></aside>';
   listaCad();
   ajustarLiderCad();
+  v8CargaBtn(aba);
   atualizarPrevCS();
   if (preset && preset.erros) mostrarErrosCad(preset.erros);
   if (S.cadOpen && !preset) { const f = $('#v-cad .drawer [data-c]'); if (f && f.focus) f.focus(); }

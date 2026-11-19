@@ -7,7 +7,7 @@ const { novo, cenario } = require('./seed.js');
   T('setup: abas, perfis padrão e Admin dono', () => {
     ['Auditorias_Historico', 'Auditorias_Colaboradores', 'Cad_Perfis', 'Metas', 'Log_Permissoes', 'Configuracoes'].forEach(n => ok(A.sheets[n], 'falta ' + n));
     eq(A.sheets.Cad_Perfis.getLastRow(), 5);
-    eq(A.sheets.Auditorias_Historico.d[0].length, 15);
+    eq(A.sheets.Auditorias_Historico.d[0].length, 16);
   });
   T('setup/migração é idempotente (não duplica perfis)', () => { A.as('owner@x.com'); A.call('migrarV6'); A.call('migrarV6'); eq(A.sheets.Cad_Perfis.getLastRow(), 5); });
   T('bloqueados: não cadastrado, inativo e sem e-mail', () => {
@@ -162,7 +162,7 @@ const { novo, cenario } = require('./seed.js');
     const h = A.hist(), l = h.d[h.getLastRow() - 1];
     eq([l[4], l[5], l[6], l[8]], ['Ana Souza; Bruno Lima; Eva Nunes', 'Carlos Lider', 'T1', 80]);
     const ax = A.sheets.Auditorias_Colaboradores; eq(ax.getLastRow(), 4);
-    eq(ax.d.slice(1).map(x => x.slice(1)), [['Ana Souza', 'Carlos Lider', 'T1'], ['Bruno Lima', 'Carlos Lider', 'T1'], ['Eva Nunes', 'Carlos Lider', 'T1']]);
+    eq(ax.d.slice(1).map(x => x.slice(1, 4)), [['Ana Souza', 'Carlos Lider', 'T1'], ['Bruno Lima', 'Carlos Lider', 'T1'], ['Eva Nunes', 'Carlos Lider', 'T1']]);
     eq(new Set(ax.d.slice(1).map(x => x[0])).size, 1); eq(ax.d[1][0], r.id);
   });
   T('multi: líderes e turnos diferentes — líderes resumidos, turno exigido', () => {

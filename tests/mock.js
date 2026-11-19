@@ -27,12 +27,14 @@ function criarSheet(nome) {
   S.setFrozenRows = () => S;
   S.appendRow = (arr) => { const r = S.getLastRow() + 1; if (r > S.maxR) S.maxR = r; arr.forEach((v, j) => set(r, j + 1, conv(v, r, j + 1))); };
   S.deleteRow = (r) => { S.d.splice(r - 1, 1); };
+  S.deleteRows = (r, n) => { S.d.splice(r - 1, n); };
   S.insertRowBefore = (r) => { S.d.splice(r - 1, 0, []); S.maxR++; };
   S.getRange = (r, c, nr = 1, nc = 1) => {
     if (r < 1 || c < 1 || r + nr - 1 > S.maxR || c + nc - 1 > S.maxC) throw new Error('Coordenadas inválidas: ' + [r, c, nr, nc]);
     const R = {
       getValues: () => { global.__cells = (global.__cells || 0) + nr * nc; const o = []; for (let i = 0; i < nr; i++) { const l = []; for (let j = 0; j < nc; j++) l.push(get(r + i, c + j)); o.push(l); } return o; },
       setValues: (vs) => { if (vs.length !== nr || vs[0].length !== nc) throw new Error('Dimensões não conferem'); vs.forEach((row, i) => row.forEach((v, j) => set(r + i, c + j, conv(v, r + i, c + j)))); return R; },
+      getValue: () => get(r, c),
       setValue: (v) => { set(r, c, conv(v, r, c)); return R; },
       setNumberFormat: (f) => { for (let i = 0; i < nr; i++) for (let j = 0; j < nc; j++) S.fmt[(r + i) + ',' + (c + j)] = f; return R; },
       setFontWeight: () => R, setBackground: () => R, setFontColor: () => R
@@ -56,14 +58,17 @@ function criarAmbiente(codePath) {
   const fmtData = (d, p) => p.replace('yyyy', d.getUTCFullYear()).replace('MM', pad(d.getUTCMonth() + 1)).replace('dd', pad(d.getUTCDate())).replace('HH', pad(d.getUTCHours())).replace('mm', pad(d.getUTCMinutes())).replace('ss', pad(d.getUTCSeconds()));
   const ctx = {
     console, Date, JSON, Math, Object, Array, String, Number, Error, RegExp, isNaN, parseInt, parseFloat,
-    SpreadsheetApp: { getActive: () => ss },
-    PropertiesService: { getScriptProperties: () => ({ getProperty: k => (A.props = A.props || {})[k] || null, setProperty: (k, v) => { (A.props = A.props || {})[k] = v; } }) },
+    SpreadsheetApp: { getActive: () => ss,
+      create: (nome) => { const id = 'ARQ' + (A.planilhasExtra = A.planilhasExtra || {}, Object.keys(A.planilhasExtra).length + 1); if (A.arquivoFalha) throw new Error('Sem autorização do Google'); A.planilhasExtra[id] = { sheets: {}, getId: () => id, getSheetByName: n => A.planilhasExtra[id].sheets[n] || null, insertSheet: n => (A.planilhasExtra[id].sheets[n] = criarSheet(n)) }; return A.planilhasExtra[id]; },
+      openById: (id) => { if (!A.planilhasExtra || !A.planilhasExtra[id]) throw new Error('Planilha não encontrada'); return A.planilhasExtra[id]; } },
+    PropertiesService: { getScriptProperties: () => ({ getProperty: k => (A.props = A.props || {})[k] || null, setProperty: (k, v) => { (A.props = A.props || {})[k] = v; }, deleteProperty: k => { delete (A.props = A.props || {})[k]; } }) },
     Utilities: { formatDate: (d, tz, p) => fmtData(d, p) },
     Session: { getActiveUser: () => ({ getEmail: () => A.email }), getEffectiveUser: () => ({ getEmail: () => A.efetivo }), getScriptTimeZone: () => 'UTC' },
     CacheService: { getScriptCache: () => ({
       get: k => (A.cache.has(k) ? A.cache.get(k) : null),
       put: (k, v) => { if (String(v).length > 100000) throw new Error('Argument too large'); A.cache.set(k, String(v)); },
-      remove: k => A.cache.delete(k), removeAll: ks => ks.forEach(k => A.cache.delete(k)) }) },
+      remove: k => A.cache.delete(k), removeAll: ks => ks.forEach(k => A.cache.delete(k)),
+      getAll: ks => { const o = {}; ks.forEach(k => { if (A.cache.has(k)) o[k] = A.cache.get(k); }); return o; } }) },
     LockService: { getScriptLock: () => ({ waitLock: () => {}, releaseLock: () => {} }) },
     HtmlService: { createTemplateFromFile: () => ({ evaluate: () => ({ setTitle() { return this; }, setXFrameOptionsMode() { return this; }, addMetaTag() { return this; } }) }), createHtmlOutputFromFile: n => ({ getContent: () => '<' + n + '>' }), XFrameOptionsMode: { ALLOWALL: 1 } },
     Logger: { log() {} },
@@ -80,6 +85,9 @@ function criarAmbiente(codePath) {
   };
   vm.createContext(ctx);
   vm.runInContext(fs.readFileSync(codePath, 'utf8'), ctx, { filename: 'Code.gs' });
+  // demais arquivos .gs do projeto (Hubs, Log, Online...): no Apps Script todos compartilham o mesmo escopo global
+  const dir = require('path').dirname(codePath);
+  fs.readdirSync(dir).filter(f => /\.gs$/.test(f) && f !== 'Code.gs').sort().forEach(f => vm.runInContext(fs.readFileSync(require('path').join(dir, f), 'utf8'), ctx, { filename: f }));
   A.ctx = ctx;
   A.run = (src) => vm.runInContext(src, ctx);
   A.as = (email) => { A.email = email; };

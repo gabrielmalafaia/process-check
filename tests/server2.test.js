@@ -291,9 +291,9 @@ const acoes = {
   excluirUsuario: [() => A.ctx.excluirUsuario(9999, {}), ['owner', 'ana', 'sl', 'gest']],
   salvarPerfil: [() => A.ctx.salvarPerfil({}, true), ['owner', 'gest']],
   excluirPerfil: [() => A.ctx.excluirPerfil('x'), ['owner', 'gest']],
-  listarSolicitacoes: [() => A.ctx.listarSolicitacoes(), ['owner']],
-  contarPendentes: [() => A.ctx.contarPendentes(), ['owner']],
-  recusarSolicitacao: [() => A.ctx.recusarSolicitacao('x'), ['owner']],
+  listarSolicitacoes: [() => A.ctx.listarSolicitacoes(), ['owner', 'sl']],
+  contarPendentes: [() => A.ctx.contarPendentes(), ['owner', 'sl']],
+  recusarSolicitacao: [() => A.ctx.recusarSolicitacao('x'), ['owner', 'sl']],
   setupPlanilha: [() => A.ctx.setupPlanilha(), ['owner']],
   migrarV6: [() => A.ctx.migrarV6(), ['owner']],
   migrarV4: [() => A.ctx.migrarV4(), ['owner']],
@@ -383,7 +383,7 @@ T('Admin é protegido: não edita, não exclui, nome reservado; perfis padrão n
 T('Admin vem do código: adulterar a linha do Admin na planilha não tira nem dá poder', () => {
   const sh = A.sheets.Cad_Perfis; const row = sh.d.findIndex(r => r[0] === 'Admin');
   sh.d[row][2] = ''; sh.d[row][3] = 'matriz'; sh.d[row][4] = '{"modo":"proprias"}'; A.run('limparCache_()');
-  A.as('owner@x.com'); const u = A.call('bootstrap').user; eq(u.perms.length, 12); eq(u.escopo.modo, 'todos'); ok(u.telas.indexOf('acessos') > -1);
+  A.as('owner@x.com'); const u = A.call('bootstrap').user; eq(u.perms.length, 15); eq(u.escopo.modo, 'todos'); ok(u.telas.indexOf('acessos') > -1);
 });
 T('adulteração da planilha falha FECHADA: escopo ilegível = só as próprias; lista inválida ≠ "todos"', () => {
   const sh = A.sheets.Cad_Perfis; const row = sh.d.findIndex(r => r[0] === 'Gerente Expedicao');

@@ -148,6 +148,7 @@ function avisoLogin() {
     else if (u.solicitacao === 'Recusada') dialogo('Cadastro não aprovado', 'O último cadastro de ' + e + ' não foi aprovado. Você pode enviar um novo pedido em Cadastrar-se.');
     else dialogo('Login não encontrado', 'Não existe login para ' + e + '. Use o botão Cadastrar-se para solicitar o acesso.');
   } else if (u.motivo === 'inativo') dialogo('Acesso desativado', 'O acesso de ' + e + ' está desativado. Fale com quem administra o sistema.');
+  else if (u.motivo === 'sem_hub') dialogo('Hub não definido', 'O acesso de ' + e + ' ainda não está ligado a um Hub ativo. Fale com quem administra o sistema.');
   else if (u.motivo === 'perfil_invalido') dialogo('Acesso indisponível', 'O perfil de ' + e + ' não está mais disponível. Fale com quem administra o sistema.');
 }
 function atualizarLogin(avisar) {
@@ -174,24 +175,28 @@ async function entrarGoogle() {
   const b = $('#lgGoogle'), t = $('#lgGoogleT'); b.disabled = true; t.textContent = 'Verificando…';
   try {
     const r = await rpc('bootstrap', true);
-    if (r.user.ok) { iniciarApp(r); sair($('#login')); return; }
+    if (r.user.ok) { if (entrarApp(r)) sair($('#login')); return; }
     S.bl = r.user; S.appUrl = r.appUrl || S.appUrl; atualizarLogin(true);
   } catch (e) { /* aviso já exibido */ } finally { b.disabled = false; t.textContent = 'Entrar com Google'; }
 }
 function abrirCadastro() {
   if (!S.bl.email) { dialogo('Entre com o Google primeiro', 'Para solicitar o cadastro, o sistema precisa identificar a sua conta Google. Clique em Entrar com Google e escolha a conta com o seu e-mail corporativo.'); return; }
   ['cdNome', 'cdOutro'].forEach(function (id) { $('#' + id).value = ''; });
-  $('#cdCargo').value = ''; $('#cdOutroW').classList.add('hidden');
+  $('#cdCargo').value = ''; $('#cdOutroW').classList.add('hidden'); $('#cdTurno').value = ''; $('#cdTurnoW').classList.add('hidden');
+  const hs = S.bl.hubs || []; $('#cdHubW').classList.toggle('hidden', !hs.length);
+  $('#cdHub').innerHTML = '<option value="">' + esc(tr('Selecione o Hub')) + '</option>' + hs.map(function (h) { return '<option value="' + esc(h.id) + '">' + esc(h.nome) + '</option>'; }).join('');
   $('#cdEmail').value = S.bl.email; $('#cdEmail').readOnly = true;
   $$('[data-lg-err]').forEach(function (s) { s.textContent = ''; });
   painelLogin('lgCad'); $('#cdNome').focus();
 }
 async function enviarCadastro() {
   if (S.busy) return;
-  const o = { nome: $('#cdNome').value.replace(/\s+/g, ' ').trim(), cargo: $('#cdCargo').value, cargoOutro: $('#cdOutro').value.replace(/\s+/g, ' ').trim(), email: $('#cdEmail').value.trim().toLowerCase(), idioma: idiomaAtual() }, e = {};
+  const o = { nome: $('#cdNome').value.replace(/\s+/g, ' ').trim(), cargo: $('#cdCargo').value, cargoOutro: $('#cdOutro').value.replace(/\s+/g, ' ').trim(), email: $('#cdEmail').value.trim().toLowerCase(), idioma: idiomaAtual(), hub: $('#cdHub').value, turno: $('#cdTurno').value }, e = {};
   $$('[data-lg-err]').forEach(function (s) { s.textContent = ''; });
   if (o.nome.length < 3) e.nome = 'Informe o nome completo.';
   if (!o.cargo) e.cargo = 'Selecione o cargo.'; else if (o.cargo === 'Outros' && o.cargoOutro.length < 2) e.cargoOutro = 'Digite o cargo.';
+  if ((S.bl.hubs || []).length && !o.hub) e.hub = 'Selecione o Hub.';
+  if ((S.bl.hubs || []).length && o.cargo === 'Líder' && !o.turno) e.turno = 'Selecione o turno.';
   if (!o.email) e.email = 'Campo obrigatório.'; else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(o.email)) e.email = 'E-mail inválido.';
   const mostrar = function (er) { Object.keys(er).forEach(function (k) { const s = $('[data-lg-err="' + k + '"]'); if (s) s.textContent = er[k]; }); };
   if (Object.keys(e).length) { mostrar(e); return; }
@@ -203,9 +208,9 @@ async function enviarCadastro() {
     if (r.msg) dialogo('Não foi possível enviar', esc(r.msg));
   } catch (x) { /* aviso já exibido */ } finally { S.busy = false; b.disabled = false; b.textContent = 'Enviar cadastro'; }
 }
-function falhaCarga() {
+function falhaCarga(motivo) {
   $('#carregando').classList.add('pl-erro');
-  $('#plTxt').textContent = 'Não foi possível carregar o sistema.'; $('#carregando .pl-d').classList.add('hidden'); $('#plRetry').classList.remove('hidden');
+  $('#plTxt').textContent = 'Não foi possível carregar o sistema.' + (motivo ? ' (' + String(motivo).slice(0, 160) + ')' : ''); $('#carregando .pl-d').classList.add('hidden'); $('#plRetry').classList.remove('hidden');
 }
 function bindGlobais() {
   $('#btnPrint').addEventListener('click', imprimirRel);
@@ -244,7 +249,7 @@ function bindGlobais() {
     if (e.key === 'Enter' && e.target && e.target.closest && e.target.closest('#lgCad') && e.target.tagName !== 'SELECT') { e.preventDefault(); enviarCadastro(); }
   });
   document.addEventListener('input', function (e) { if (e.target && e.target.id === 'cmdIn') { S.cmd.idx = 0; cmdDesenhar(); } });
-  $('#cdCargo').addEventListener('change', function () { $('#cdOutroW').classList.toggle('hidden', this.value !== 'Outros'); if (this.value === 'Outros') $('#cdOutro').focus(); });
+  $('#cdCargo').addEventListener('change', function () { $('#cdTurnoW').classList.toggle('hidden', !((S.bl.hubs || []).length && this.value === 'Líder')); $('#cdOutroW').classList.toggle('hidden', this.value !== 'Outros'); if (this.value === 'Outros') $('#cdOutro').focus(); });
   try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { if (S.temaSel === 'auto') aplicarTema('auto', false); }); } catch (e) { /* sem matchMedia */ }
 }
 
@@ -269,6 +274,7 @@ function iniciarApp(b) {
   marcar();
   $('#brand').onclick = function () { document.body.classList.toggle('col'); };
   fbarInit();
+  v8Init();
   nav(['matriz', 'form', 'minhas', 'geral'].filter(tela)[0] || S.u.telas[0]);
   setInterval(relUpd, 30000);
   if (pode('autorizar')) setInterval(sondar, window.PC_POLL || 120000);
@@ -276,13 +282,17 @@ function iniciarApp(b) {
 async function boot() {
   iniciarIdioma(); aplicarTema(temaSalvo(), false); icones(document);
   $$('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === idiomaAtual())); });
-  bindGlobais();
+  bindGlobais(); v8Eventos();
   const ini = Date.now(), min = window.PC_MIN_LOAD != null ? window.PC_MIN_LOAD : 700;
-  let b;
-  try { b = await rpc('bootstrap', false); } catch (e) { falhaCarga(); return; }
+  let b, fim = false;
+  const vigia = setTimeout(function () { if (!fim) falhaCarga('o servidor não respondeu em 60 s'); }, 60000);
+  try { b = await rpc('bootstrap', false); } catch (e) { fim = true; clearTimeout(vigia); falhaCarga(e && e.message); return; }
   const resto = min - (Date.now() - ini);
   if (resto > 0) await new Promise(function (r) { setTimeout(r, resto); });
-  if (b.user.ok) { iniciarApp(b); } else { mostrarLogin(b); }
+  try {
+    if (b.user.ok) { if (!entrarApp(b)) { fim = true; clearTimeout(vigia); sair($('#carregando')); return; } } else { mostrarLogin(b); }
+  } catch (e) { fim = true; clearTimeout(vigia); falhaCarga(e && e.message); return; }
+  fim = true; clearTimeout(vigia);
   sair($('#carregando'));
 }
 boot();

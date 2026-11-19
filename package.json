@@ -6,7 +6,7 @@
   "scripts": {
     "build": "bash client/build.sh",
     "test": "bash tests/run-all.sh",
-    "lint": "eslint --no-eslintrc --env es2021 --rule '{\"no-undef\":0}' --ext .gs src/Code.gs"
+    "lint": "eslint --no-eslintrc --env es2021 --rule '{\"no-undef\":0}' --ext .gs src"
   },
   "devDependencies": { "eslint": "^8.57.1", "jsdom": "^24.1.3" }
 }

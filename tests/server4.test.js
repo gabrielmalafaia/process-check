@@ -235,7 +235,7 @@ T('migrarV7: planilha v6.2 (sem colunas de tradução, sem aba de e-mail, perfis
 });
 T('migração a partir da v6.1 (Cad_Solicitacoes com 9 colunas) continua funcionando', () => {
   const B = novo(); B.as('owner@x.com'); B.sheets.Cad_Solicitacoes.d = B.sheets.Cad_Solicitacoes.d.map(l => l.slice(0, 9)); B.call('migrarV7');
-  eq(B.sheets.Cad_Solicitacoes.d[0].length, 10);
+  eq(B.sheets.Cad_Solicitacoes.d[0].length, 12);
 });
 T('perfis padrão: Admin/Analista/Site Leader têm ver_nomes e email_rel; Auditor não', () => {
   A.as('owner@x.com'); const p = A.call('listarAcessos').perfis; const g = n => p.find(x => x.nome === n).perms;

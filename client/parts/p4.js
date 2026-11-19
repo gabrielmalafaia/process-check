@@ -25,8 +25,9 @@ function resumoPerf(p) {
 async function loadAcessos() {
   const el = $('#v-acessos'); el.innerHTML = '<div class="card">' + skel(5) + '</div>';
   try {
-    S.ac = await rpc('listarAcessos');
-    if (pode('autorizar')) { S.sol = await rpc('listarSolicitacoes'); S.pend = S.sol.pendentes.length; renderNav(); }
+    const par = await Promise.all([rpc('listarAcessos'), pode('autorizar') ? rpc('listarSolicitacoes') : Promise.resolve(null)]);
+    S.ac = par[0];
+    if (par[1]) { S.sol = par[1]; S.pend = S.sol.pendentes.length; renderNav(); }
   } catch (e) { el.innerHTML = '<div class="card">Não foi possível carregar os acessos.</div>'; return; }
   if (S.v !== 'acessos') return;
   const abas = abasAc();
@@ -42,16 +43,17 @@ function abasAc() {
   if (S.ac.pode.perfis) a.push('perfis');
   a.push('log');
   if (S.ac.pode.perfis) a.push('seg');
+  if (hubsAba()) a.push('hubs');
   return a;
 }
-const AC_NOME = { autorizar: 'Autorizações', usuarios: 'Usuários', perfis: 'Perfis', log: 'Histórico de alterações', seg: 'Segurança' };
+const AC_NOME = { autorizar: 'Autorizações', usuarios: 'Usuários', perfis: 'Perfis', log: 'Histórico de alterações', seg: 'Segurança', hubs: 'Hubs' };
 function renderAcessos() {
   const el = $('#v-acessos'), abas = abasAc();
   const tabs = '<div class="tabs">' + abas.map(function (k) { return '<button type="button" class="' + (k === S.acTab ? 'on' : '') + '" data-at="' + k + '">' + AC_NOME[k] + (k === 'autorizar' && S.pend > 0 ? '<span class="badge-n">' + S.pend + '</span>' : '') + '</button>'; }).join('') + '</div>';
   el.innerHTML = tabs + '<div id="acBody"></div>';
-  if (S.acTab === 'usuarios' && S.acSol) drawUsuarios({ vals: { Email_Google: S.acSol.email, Nome: S.acSol.nome, Status_Ativo: 'Sim' }, edit: null, erros: {} });
+  if (S.acTab === 'usuarios' && S.acSol) drawUsuarios({ vals: { Email_Google: S.acSol.email, Nome: S.acSol.nome, Status_Ativo: 'Sim', Hub: S.acSol.hub || '' }, edit: null, erros: {} });
   else if (S.acTab === 'autorizar') drawAutorizar('#acBody');
-  else ({ usuarios: drawUsuarios, perfis: drawPerfis, log: drawLog, seg: drawSeg })[S.acTab]();
+  else ({ usuarios: drawUsuarios, perfis: drawPerfis, log: drawLog, seg: drawSeg, hubs: drawHubs })[S.acTab]();
 }
 /** Atualiza só o número de pendentes na aba Autorizar, sem redesenhar a tela. */
 function atualizarSeloAcessos() {
@@ -69,14 +71,14 @@ function drawUsuarios(preset) {
   const sel = function (n, arr, cur) { return '<select data-u="' + n + '"><option value="">Selecione…</option>' + arr.map(function (x) { return '<option' + (x === cur ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') + '</select>'; };
   const rows = u.map(function (r, i) {
     const pf = A.perfis.find(function (p) { return p.nome === r.Perfil; });
-    return '<tr><td>' + esc(r.Email_Google) + '</td><td>' + esc(r.Nome) + (r.semLider ? ' <span class="tag-t" title="' + esc(tr('Este perfil enxerga só o time do líder, mas não há líder ativo com este nome no cadastro de pessoas. A pessoa não verá nenhum dado.')) + '">' + esc(tr('líder não encontrado')) + '</span>' : '') + '</td><td>' + esc(r.Perfil) + (pf && pf.atribuivel ? '' : ' <span class="tag-t">acima do seu</span>') + '</td><td>' + (r.Status_Ativo === 'Não' ? pill('', 'Inativo') : pill('verde', 'Ativo')) + '</td><td>' +
+    return '<tr><td>' + esc(r.Email_Google) + '</td><td>' + esc(r.Nome) + v8TagHub(r) + (r.semLider ? ' <span class="tag-t" title="' + esc(tr('Este perfil enxerga só o time do líder, mas não há líder ativo com este nome no cadastro de pessoas. A pessoa não verá nenhum dado.')) + '">' + esc(tr('líder não encontrado')) + '</span>' : '') + '</td><td>' + esc(r.Perfil) + (pf && pf.atribuivel ? '' : ' <span class="tag-t">acima do seu</span>') + '</td><td>' + (r.Status_Ativo === 'Não' ? pill('', 'Inativo') : pill('verde', 'Ativo')) + '</td><td>' +
       (r.editavel ? '<button type="button" class="btn sm" data-ue="' + i + '">' + ic('pencil', 14) + 'Editar</button> <button type="button" class="btn sm bad" data-ux="' + i + '">' + ic('trash', 14) + (S.acDel === i ? 'Confirmar exclusão?' : 'Excluir') + '</button>' : '<span class="muted">somente leitura</span>') + '</td></tr>';
   }).join('') || '<tr><td colspan="5" class="muted">Nenhum usuário.</td></tr>';
   $('#acBody').innerHTML = '<div class="card"><div class="hd"><b>' + (ed ? 'Editar usuário' : (sol ? 'Cadastro aprovado: definir perfil' : 'Novo usuário')) + '</b></div>' + (sol ? aviso('Solicitação de <b>' + esc(sol.nome) + '</b>. Cargo informado: <b>' + esc(sol.cargo) + '</b>. Escolha o perfil e confirme para liberar o acesso. A pessoa será avisada por e-mail.') : '') + aviso('Você só pode atribuir perfis com permissões, telas e dados iguais ou menores que os seus, e não pode alterar o seu próprio acesso.') +
     '<div class="grid" style="margin-top:12px"><label>E-mail Google <span class="req">*</span><input data-u="Email_Google" value="' + esc(v.Email_Google || '') + '" maxlength="120"' + (sol ? ' readonly class="ro"' : '') + '><span class="err" data-ue-err="Email_Google"></span></label>' +
     '<label>Nome <span class="req">*</span><input data-u="Nome" value="' + esc(v.Nome || '') + '" maxlength="120"><span class="err" data-ue-err="Nome"></span></label>' +
     '<label>Perfil <span class="req">*</span>' + sel('Perfil', perfs, v.Perfil) + '<span class="err" data-ue-err="Perfil"></span></label>' +
-    '<label>Ativo <span class="req">*</span>' + sel('Status_Ativo', ['Sim', 'Não'], v.Status_Ativo || (ed ? '' : 'Sim')) + '<span class="err" data-ue-err="Status_Ativo"></span></label></div>' +
+    v8HubCampo(v) + '<label>Ativo <span class="req">*</span>' + sel('Status_Ativo', ['Sim', 'Não'], v.Status_Ativo || (ed ? '' : 'Sim')) + '<span class="err" data-ue-err="Status_Ativo"></span></label></div>' +
     '<div style="margin-top:12px"><button type="button" class="btn pri" id="uSalvar">' + (ed ? 'Salvar alteração' : (sol ? 'Aprovar e cadastrar' : 'Adicionar usuário')) + '</button> <button type="button" class="btn ' + (ed || sol ? '' : 'hidden') + '" id="uCancel">' + (sol ? 'Voltar às autorizações' : 'Cancelar edição') + '</button></div></div>' +
     '<div class="card"><div class="toolbar"><input type="search" data-busca placeholder="Buscar usuário…" aria-label="Buscar usuário"></div><div class="scroll"><table data-sort><thead><tr><th data-s="t">E-mail</th><th data-s="t">Nome</th><th data-s="t">Perfil</th><th>Situação</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
   tabelaInterativa($('#acBody'));
@@ -88,7 +90,7 @@ async function salvarUsuarioUI() {
   const o = lerUsuario(), ed = S.acEdit, e = {};
   $$('#acBody [data-ue-err]').forEach(function (s) { s.textContent = ''; });
   if (!o.Email_Google) e.Email_Google = 'Campo obrigatório.'; else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(o.Email_Google)) e.Email_Google = 'E-mail inválido.';
-  if (!o.Nome) e.Nome = 'Campo obrigatório.'; if (!o.Perfil) e.Perfil = 'Campo obrigatório.'; if (!o.Status_Ativo) e.Status_Ativo = 'Campo obrigatório.';
+  if (hubGlobal() && !o.Hub) e.Hub = 'Selecione o Hub do usuário.'; if (!o.Nome) e.Nome = 'Campo obrigatório.'; if (!o.Perfil) e.Perfil = 'Campo obrigatório.'; if (!o.Status_Ativo) e.Status_Ativo = 'Campo obrigatório.';
   if (Object.keys(e).length) { Object.keys(e).forEach(function (k) { $('#acBody [data-ue-err="' + k + '"]').textContent = e[k]; }); toast('Há campos obrigatórios ou inválidos.', true); return; }
   S.busy = true; const b = $('#uSalvar'); b.disabled = true; b.textContent = 'Salvando…';
   try {

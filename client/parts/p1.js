@@ -77,11 +77,11 @@ function icones(raiz) {
 }
 
 /* ---------- constantes de exibição ---------- */
-const TIT = { matriz: 'Matriz de Processos', form: 'Formulário de Auditoria', minhas: 'Minhas metas', geral: 'Visão Geral', auditorias: 'Auditorias realizadas', auditores: 'Auditores e metas', proc: 'Por processo', doca: 'Por doca e cluster', colab: 'Por colaborador e equipe', tend: 'Tendência', export: 'Exportar', cad: 'Cadastros', cfg: 'Configurações', acessos: 'Acessos', autorizar: 'Autorizações' };
+const TIT = { matriz: 'Matriz de Processos', form: 'Formulário de Auditoria', minhas: 'Minhas metas', geral: 'Visão Geral', auditorias: 'Auditorias realizadas', auditores: 'Auditores e metas', proc: 'Por processo', doca: 'Por doca e cluster', colab: 'Por colaborador e equipe', tend: 'Tendência', export: 'Exportar', cad: 'Cadastros', cfg: 'Configurações', acessos: 'Acessos', autorizar: 'Autorizações', log: 'Log de atividade' };
 const NAV = [
   { sec: 'Operação', itens: [{ id: 'matriz', ic: 'layout-grid' }, { id: 'form', ic: 'clipboard-check' }, { id: 'minhas', ic: 'target' }] },
   { sec: 'Análise', itens: [{ id: 'rel', ic: 'bar-chart', t: 'Relatórios', kids: ['geral', 'auditorias', 'auditores', 'proc', 'doca', 'colab', 'tend', 'export'] }] },
-  { sec: 'Administração', itens: [{ id: 'cad', ic: 'database' }, { id: 'cfg', ic: 'settings' }, { id: 'acessos', ic: 'shield' }, { id: 'autorizar', ic: 'user-check' }] }
+  { sec: 'Administração', itens: [{ id: 'cad', ic: 'database' }, { id: 'cfg', ic: 'settings' }, { id: 'acessos', ic: 'shield' }, { id: 'autorizar', ic: 'user-check' }, { id: 'log', ic: 'list' }] }
 ];
 const NAV_ITENS = NAV.reduce(function (a, s) { return a.concat(s.itens); }, []);
 const KID_IC = { geral: 'layout-dashboard', auditorias: 'list', auditores: 'users', proc: 'layers', doca: 'package', colab: 'user', tend: 'trending-up', export: 'download' };
@@ -234,7 +234,7 @@ function renderNav() {
 }
 const LOAD = {
   matriz: function () { return loadMatriz(); }, form: function () { if (!S.F) novoForm(); renderForm(); }, minhas: function () { return loadMinhas(); },
-  cad: function () { renderCad(); }, cfg: function () { loadCfg(); }, acessos: function () { return loadAcessos(); }, autorizar: function () { return loadAutorizar(); }
+  cad: function () { renderCad(); }, cfg: function () { loadCfg(); }, acessos: function () { return loadAcessos(); }, autorizar: function () { return loadAutorizar(); }, log: function () { return loadLog(); }
 };
 function nav(v) {
   if (v === 'autorizar' && tela('acessos')) { S.acTab = 'autorizar'; v = 'acessos'; }

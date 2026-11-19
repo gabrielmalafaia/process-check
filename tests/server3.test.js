@@ -5,8 +5,8 @@ const F = { nome: 'Maria da Silva', cargo: 'Analista', cargoOutro: '' };
 const sol = (email, o) => { A.as(email); return A.call('solicitarCadastro', Object.assign({ email }, F, o || {})); };
 const rows = () => A.call('lerDireto_', 'Cad_Solicitacoes');
 
-T('migração cria Cad_Solicitacoes com 10 colunas e é idempotente', () => {
-  ok(A.sheets.Cad_Solicitacoes); eq(A.sheets.Cad_Solicitacoes.d[0].length, 10); A.as('owner@x.com'); A.call('migrarV6'); eq(A.sheets.Cad_Solicitacoes.getLastRow(), 1);
+T('migração cria Cad_Solicitacoes com 12 colunas e é idempotente', () => {
+  ok(A.sheets.Cad_Solicitacoes); eq(A.sheets.Cad_Solicitacoes.d[0].length, 12); A.as('owner@x.com'); A.call('migrarV6'); eq(A.sheets.Cad_Solicitacoes.getLastRow(), 1);
 });
 T('bootstrap bloqueado: motivo nao_cadastrado / inativo / sem_email e nenhum dado', () => {
   A.as('novo@x.com'); let b = A.call('bootstrap'); eq([b.user.ok, b.user.motivo, b.user.solicitacao], [false, 'nao_cadastrado', '']); ok(!b.db && !b.config); ok(/script\.google\.com/.test(b.appUrl));
@@ -56,9 +56,10 @@ T('fila cheia (300) bloqueia novas solicitações', () => {
   for (let i = 0; i < 300; i++) B.ctx.anexar_('Cad_Solicitacoes', ['SOL-' + i, 'p' + i + '@x.com', 'P', 'Analista', '2026-11-14 10:00:00', 'Pendente', '', '', '']);
   B.as('ultimo@x.com'); eq(B.call('solicitarCadastro', Object.assign({ email: 'ultimo@x.com' }, F)).msg, 'Há solicitações demais em análise no momento. Tente novamente mais tarde.');
 });
-T('permissões: só Admin tem autorizar; Analista/Site Leader/Auditor não', () => {
+T('permissões: Admin e Site Leader têm autorizar (o Site Leader, só do próprio Hub); Analista/Auditor não', () => {
   A.as('owner@x.com'); const b = A.call('bootstrap'); ok(b.user.perms.includes('autorizar') && b.user.telas.includes('autorizar'));
-  ['ana@x.com', 'sl@x.com', 'aud1@x.com'].forEach(e => { A.as(e); const u = A.call('bootstrap').user; ok(!u.perms.includes('autorizar') && !u.telas.includes('autorizar'), e); nega(() => A.ctx.listarSolicitacoes(), 'não tem permissão'); nega(() => A.ctx.contarPendentes(), 'não tem permissão'); nega(() => A.ctx.recusarSolicitacao('x'), 'não tem permissão'); });
+  A.as('sl@x.com'); { const u = A.call('bootstrap').user; ok(u.perms.includes('autorizar') && u.telas.includes('autorizar')); }
+  ['ana@x.com', 'aud1@x.com'].forEach(e => { A.as(e); const u = A.call('bootstrap').user; ok(!u.perms.includes('autorizar') && !u.telas.includes('autorizar'), e); nega(() => A.ctx.listarSolicitacoes(), 'não tem permissão'); nega(() => A.ctx.contarPendentes(), 'não tem permissão'); nega(() => A.ctx.recusarSolicitacao('x'), 'não tem permissão'); });
   A.as('novo@x.com'); nega(() => A.ctx.listarSolicitacoes(), 'Acesso negado');
 });
 T('contagem e lista: pendentes aparecem para o Admin; bootstrap traz o número', () => {
@@ -102,7 +103,7 @@ T('e-mail no idioma escolhido no cadastro (EN e ES); idioma inválido cai em por
 });
 T('migração acrescenta a coluna Idioma em planilhas antigas (9 colunas)', () => {
   const B = novo(); B.sheets.Cad_Solicitacoes.d[0].length = 9; B.sheets.Cad_Solicitacoes.d[0][9] = undefined; B.as('owner@x.com'); B.call('migrarV6');
-  eq(B.sheets.Cad_Solicitacoes.d[0][9], 'Idioma'); B.call('migrarV6'); eq(B.sheets.Cad_Solicitacoes.d[0].length, 10);
+  eq(B.sheets.Cad_Solicitacoes.d[0][9], 'Idioma'); B.call('migrarV6'); eq(B.sheets.Cad_Solicitacoes.d[0].length, 12);
   B.as('nv@x.com'); eq(B.call('solicitarCadastro', { email: 'nv@x.com', nome: 'Nova Pessoa', cargo: 'Líder', idioma: 'es' }).ok, true); eq(B.call('lerDireto_', 'Cad_Solicitacoes')[0].Idioma, 'es');
 });
 T('falha no envio não desfaz o cadastro e informa o aviso', () => {

@@ -22,7 +22,7 @@ const TELAS_ADM = TELAS_ALL.concat('autorizar');
   [['vis@x.com', 'Vis', 'Visualizador'], ['ges@x.com', 'Gestora', 'Gestor'], ['cad@x.com', 'Cadastrista', 'Cadastrista'], ['res@x.com', 'Restrito', 'Restrito'], ['tim@x.com', 'Time', 'Meu time']].forEach(u => A.ctx.anexar_('Cad_Usuarios', [u[0], u[1], u[2], 'Sim']));
 
   const esperado = {
-    'owner@x.com': TELAS_ALL, 'ana@x.com': TELAS_ALL, 'sl@x.com': TELAS_ALL,
+    'owner@x.com': TELAS_ALL.concat('log'), 'ana@x.com': TELAS_ALL, 'sl@x.com': TELAS_ALL.concat('log'),
     'aud1@x.com': ['matriz', 'form', 'minhas'],
     'vis@x.com': ['geral', 'proc', 'doca', 'tend'],
     'ges@x.com': ['matriz', 'geral', 'auditorias', 'auditores', 'colab', 'export'],
@@ -564,7 +564,8 @@ const TELAS_ADM = TELAS_ALL.concat('autorizar');
     A.as('owner@x.com'); const n = A.call('contarPendentes'); ok(n >= 3);
     const t = await abrir(A, 'owner@x.com'); ok(t.menu().includes('acessos') && !t.menu().includes('autorizar'), 'vira aba de Acessos');
     const b = t.$('#nav button[data-v="acessos"]'); ok(b.classList.contains('alerta')); eq(b.querySelector('.badge-n').textContent, String(n)); eq(b.textContent.replace(String(n), ''), 'Acessos'); await t.nav('acessos'); eq(t.$('#v-acessos .tabs [data-at="autorizar"] .badge-n').textContent, String(n), 'selo também na aba');
-    for (const e of ['ana@x.com', 'sl@x.com', 'aud1@x.com']) { const u = await abrir(A, e); ok(!u.menu().includes('autorizar'), e); ok(!u.$('.badge-n'), e); }
+    for (const e of ['ana@x.com', 'aud1@x.com']) { const u = await abrir(A, e); ok(!u.menu().includes('autorizar'), e); ok(!u.$('.badge-n'), e); }
+    { const u = await abrir(A, 'sl@x.com'); ok(u.menu().includes('autorizar') || u.menu().includes('acessos'), 'Site Leader aprova cadastros'); }
   });
   await TA('Autorizações: tabela com pendentes, dados escapados (XSS) e histórico', async () => {
     solicitar('xss1@x.com', { nome: '<img src=x onerror=alert(1)> Fulano', cargo: 'Outros', cargoOutro: '<b>Cargo</b>' });

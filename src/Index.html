@@ -23,6 +23,7 @@ Todos os direitos reservados. Versão 7.0
       <button type="button" class="btn hidden" id="plRetry">Tentar novamente</button>
     </div>
   </div>
+  <script>window.addEventListener('error', function (e) { var c = document.getElementById('carregando'), t = document.getElementById('plTxt'); if (c && t && !c.classList.contains('hidden')) { c.classList.add('pl-erro'); t.textContent = 'Erro ao iniciar: ' + String(e && e.message || e).slice(0, 160); } });</script>
 
   <div id="login" class="hidden">
     <div class="lg-tema" role="group" aria-label="Idioma e tema">
@@ -53,6 +54,8 @@ Todos os direitos reservados. Versão 7.0
         <label>Nome completo <span class="req">*</span><input id="cdNome" maxlength="120" autocomplete="name"><span class="err" data-lg-err="nome"></span></label>
         <label>Cargo <span class="req">*</span><select id="cdCargo"><option value="">Selecione o cargo</option><option>Analista</option><option>Líder</option><option>Site Leader</option><option>Coordenador</option><option>Outros</option></select><span class="err" data-lg-err="cargo"></span></label>
         <label class="hidden" id="cdOutroW">Qual é o cargo? <span class="req">*</span><input id="cdOutro" maxlength="60"><span class="err" data-lg-err="cargoOutro"></span></label>
+        <label class="hidden" id="cdHubW">Hub <span class="req">*</span><select id="cdHub"></select><span class="err" data-lg-err="hub"></span></label>
+        <label class="hidden" id="cdTurnoW">Turno <span class="req">*</span><select id="cdTurno"><option value="">Selecione o turno</option><option>T1</option><option>T2</option><option>T3</option></select><span class="err" data-lg-err="turno"></span></label>
         <label>E-mail corporativo <span class="req">*</span><input id="cdEmail" type="email" maxlength="120" autocomplete="email"><span class="err" data-lg-err="email"></span><span class="lg-dica">Use o mesmo e-mail da conta Google com a qual você entrou.</span></label>
         <div class="lg-acoes"><button type="button" class="btn pri lg-btn" id="cdEnviar">Enviar cadastro</button><button type="button" class="btn lg-btn" id="cdVoltar">Voltar</button></div>
       </section>
@@ -93,6 +96,8 @@ Todos os direitos reservados. Versão 7.0
         <button id="burger" type="button" title="Menu" aria-label="Abrir menu" data-ico="menu"></button>
         <h1 id="titulo"></h1>
         <button id="busca" type="button" title="Buscar (Ctrl+K)" aria-label="Buscar"><span data-ico="search"></span><span class="t">Buscar</span><kbd>Ctrl K</kbd></button>
+        <span id="hubChip" class="hubchip hidden"></span>
+        <button id="onlineBtn" type="button" class="hidden" title="Usuários online"><span data-ico="user"></span><span class="t">Online</span> <b id="onlineN">0</b></button>
         <span id="atualizado" class="upd"></span>
         <button id="btnPrint" type="button" class="hidden" title="Imprimir ou salvar em PDF (A4)"><span data-ico="printer"></span><span class="t">Imprimir / PDF</span></button>
         <button id="refresh" type="button" title="Atualizar dados"><span data-ico="refresh"></span><span class="t">Atualizar</span></button>
@@ -136,6 +141,7 @@ Todos os direitos reservados. Versão 7.0
       <section class="view hidden" id="v-cfg"></section>
       <section class="view hidden" id="v-acessos"></section>
       <section class="view hidden" id="v-autorizar"></section>
+      <section class="view hidden" id="v-log"></section>
     </main>
   </div>
   <div id="cmdk" class="hidden" role="dialog" aria-modal="true" aria-label="Buscar">

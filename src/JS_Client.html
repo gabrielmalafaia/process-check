@@ -984,6 +984,63 @@ DICT.push(
   ['Agendamento com falhas', 'Scheduled send with failures', 'Envío programado con fallos'],
   ['Relatório enviado, data do envio não gravada', 'Report sent, send date not saved', 'Informe enviado, fecha de envío no guardada']
 );
+DICT.push(
+  /* v8: Hub, online, log, carga em massa, aviso de transparência */
+  ['Adicionar Hub', 'Add Hub', 'Agregar Hub'],
+  ['Admin global', 'Global admin', 'Admin global'],
+  ['Admin global (todos os Hubs)', 'Global admin (all Hubs)', 'Admin global (todos los Hubs)'],
+  ['Aviso de transparência', 'Transparency notice', 'Aviso de transparencia'],
+  ['Carga em massa', 'Bulk upload', 'Carga masiva'],
+  ['Carga em massa: docas', 'Bulk upload: docks', 'Carga masiva: andenes'],
+  ['Carga em massa: pessoas', 'Bulk upload: people', 'Carga masiva: personas'],
+  ['Cole a tabela do Excel (com cabeçalho). Se qualquer linha tiver erro, nada é gravado e o sistema mostra a linha e a coluna.', 'Paste the Excel table (with header). If any row has an error, nothing is saved and the system shows the row and column.', 'Pegue la tabla de Excel (con encabezado). Si alguna fila tiene error, no se guarda nada y el sistema muestra la fila y la columna.'],
+  ['Cole a tabela do Excel na caixa.', 'Paste the Excel table into the box.', 'Pegue la tabla de Excel en el cuadro.'],
+  ['Considera online quem usou o sistema nos últimos {0} minutos.', 'Counts as online anyone who used the system in the last {0} minutes.', 'Se considera en línea a quien usó el sistema en los últimos {0} minutos.'],
+  ['Copiar modelo', 'Copy template', 'Copiar modelo'],
+  ['Editar Hub', 'Edit Hub', 'Editar Hub'],
+  ['Filtrar', 'Filter', 'Filtrar'],
+  ['Gravar', 'Save', 'Guardar'],
+  ['Hub ativo', 'Active Hub', 'Hub activo'],
+  ['Hub salvo', 'Hub saved', 'Hub guardado'],
+  ['Li e aceito', 'I have read and accept', 'He leído y acepto'],
+  ['Linha {0}', 'Row {0}', 'Fila {0}'],
+  ['Log de atividade', 'Activity log', 'Registro de actividad'],
+  ['Modelo colocado na caixa; copie e cole no Excel', 'Template placed in the box; copy and paste into Excel', 'Modelo colocado en el cuadro; cópielo y péguelo en Excel'],
+  ['Modelo copiado', 'Template copied', 'Modelo copiado'],
+  ['Mostra as ações dos últimos {0} dias; registros mais antigos ficam na planilha de arquivo, por até 1 ano.', 'Shows actions from the last {0} days; older records stay in the archive spreadsheet for up to 1 year.', 'Muestra las acciones de los últimos {0} días; los registros más antiguos quedan en la hoja de archivo por hasta 1 año.'],
+  ['Mostrando as primeiras {0} linhas.', 'Showing the first {0} rows.', 'Mostrando las primeras {0} filas.'],
+  ['Nada foi gravado.', 'Nothing was saved.', 'No se guardó nada.'],
+  ['Nenhum registro encontrado.', 'No records found.', 'No se encontraron registros.'],
+  ['Ninguém online no momento.', 'Nobody online right now.', 'Nadie en línea en este momento.'],
+  ['Nome do Hub', 'Hub name', 'Nombre del Hub'],
+  ['Nome ou e-mail', 'Name or e-mail', 'Nombre o correo'],
+  ['Novo Hub', 'New Hub', 'Nuevo Hub'],
+  ['Não foi possível carregar o log.', 'Could not load the log.', 'No se pudo cargar el registro.'],
+  ['Não foi possível carregar os Hubs.', 'Could not load the Hubs.', 'No se pudieron cargar los Hubs.'],
+  ['Tabela colada do Excel', 'Table pasted from Excel', 'Tabla pegada desde Excel'],
+  ['Texto da ação', 'Action text', 'Texto de la acción'],
+  ['Usuário', 'User', 'Usuario'],
+  ['Usuários online', 'Online users', 'Usuarios en línea'],
+  ['Validar', 'Validate', 'Validar'],
+  ['Você precisa aceitar para continuar. Um novo aceite é pedido sempre que este texto mudar.', 'You must accept to continue. A new acceptance is requested whenever this text changes.', 'Debe aceptar para continuar. Se pide un nuevo aceptación cada vez que cambie este texto.'],
+  ['agora', 'now', 'ahora'],
+  ['coluna', 'column', 'columna'],
+  ['há {0} min', '{0} min ago', 'hace {0} min'],
+  ['no Hub', 'in Hub', 'en el Hub'],
+  ['{0} erro(s) encontrado(s):', '{0} error(s) found:', '{0} error(es) encontrado(s):'],
+  ['{0} linhas gravadas', '{0} rows saved', '{0} filas guardadas'],
+  ['{0} linhas prontas para gravar', '{0} rows ready to save', '{0} filas listas para guardar'],
+  ['Última atividade', 'Last activity', 'Última actividad'],
+  ['Selecione o Hub', 'Select the Hub', 'Seleccione el Hub'],
+  ['Selecione o Hub.', 'Select the Hub.', 'Seleccione el Hub.'],
+  ['Selecione o Hub do usuário.', 'Select the user\'s Hub.', 'Seleccione el Hub del usuario.'],
+  ['Selecione o turno.', 'Select the shift.', 'Seleccione el turno.'],
+  ['Hub não definido', 'Hub not set', 'Hub no definido'],
+  ['O acesso de {0} ainda não está ligado a um Hub ativo. Fale com quem administra o sistema.', 'Access for {0} is not linked to an active Hub yet. Contact whoever administers the system.', 'El acceso de {0} aún no está vinculado a un Hub activo. Hable con quien administra el sistema.'],
+  ['Hubs', 'Hubs', 'Hubs'],
+  ['Operação', 'Operation', 'Operación'],
+  ['Turno', 'Shift', 'Turno']
+);
 /* ---------- idiomas: português (base), inglês e espanhol ----------
    O texto-fonte do sistema é o português. Cada texto exibido é traduzido por dicionário (DICT em i18n.js),
    no próprio navegador, em telas, menus, janelas, avisos, tabelas e dicas. Textos sem tradução ficam em português. */
@@ -1186,11 +1243,11 @@ function icones(raiz) {
 }
 
 /* ---------- constantes de exibição ---------- */
-const TIT = { matriz: 'Matriz de Processos', form: 'Formulário de Auditoria', minhas: 'Minhas metas', geral: 'Visão Geral', auditorias: 'Auditorias realizadas', auditores: 'Auditores e metas', proc: 'Por processo', doca: 'Por doca e cluster', colab: 'Por colaborador e equipe', tend: 'Tendência', export: 'Exportar', cad: 'Cadastros', cfg: 'Configurações', acessos: 'Acessos', autorizar: 'Autorizações' };
+const TIT = { matriz: 'Matriz de Processos', form: 'Formulário de Auditoria', minhas: 'Minhas metas', geral: 'Visão Geral', auditorias: 'Auditorias realizadas', auditores: 'Auditores e metas', proc: 'Por processo', doca: 'Por doca e cluster', colab: 'Por colaborador e equipe', tend: 'Tendência', export: 'Exportar', cad: 'Cadastros', cfg: 'Configurações', acessos: 'Acessos', autorizar: 'Autorizações', log: 'Log de atividade' };
 const NAV = [
   { sec: 'Operação', itens: [{ id: 'matriz', ic: 'layout-grid' }, { id: 'form', ic: 'clipboard-check' }, { id: 'minhas', ic: 'target' }] },
   { sec: 'Análise', itens: [{ id: 'rel', ic: 'bar-chart', t: 'Relatórios', kids: ['geral', 'auditorias', 'auditores', 'proc', 'doca', 'colab', 'tend', 'export'] }] },
-  { sec: 'Administração', itens: [{ id: 'cad', ic: 'database' }, { id: 'cfg', ic: 'settings' }, { id: 'acessos', ic: 'shield' }, { id: 'autorizar', ic: 'user-check' }] }
+  { sec: 'Administração', itens: [{ id: 'cad', ic: 'database' }, { id: 'cfg', ic: 'settings' }, { id: 'acessos', ic: 'shield' }, { id: 'autorizar', ic: 'user-check' }, { id: 'log', ic: 'list' }] }
 ];
 const NAV_ITENS = NAV.reduce(function (a, s) { return a.concat(s.itens); }, []);
 const KID_IC = { geral: 'layout-dashboard', auditorias: 'list', auditores: 'users', proc: 'layers', doca: 'package', colab: 'user', tend: 'trending-up', export: 'download' };
@@ -1343,7 +1400,7 @@ function renderNav() {
 }
 const LOAD = {
   matriz: function () { return loadMatriz(); }, form: function () { if (!S.F) novoForm(); renderForm(); }, minhas: function () { return loadMinhas(); },
-  cad: function () { renderCad(); }, cfg: function () { loadCfg(); }, acessos: function () { return loadAcessos(); }, autorizar: function () { return loadAutorizar(); }
+  cad: function () { renderCad(); }, cfg: function () { loadCfg(); }, acessos: function () { return loadAcessos(); }, autorizar: function () { return loadAutorizar(); }, log: function () { return loadLog(); }
 };
 function nav(v) {
   if (v === 'autorizar' && tela('acessos')) { S.acTab = 'autorizar'; v = 'acessos'; }
@@ -2381,6 +2438,7 @@ function renderCad(preset) {
     '<div class="dr-ft"><small class="muted">Campos com <span class="req">*</span> são obrigatórios.</small><span class="sp"></span><button type="button" class="btn" id="cCancel">Cancelar</button><button type="button" class="btn pri" id="cSalvar">' + (ed ? 'Salvar alteração' : 'Adicionar') + '</button></div></aside>';
   listaCad();
   ajustarLiderCad();
+  v8CargaBtn(aba);
   atualizarPrevCS();
   if (preset && preset.erros) mostrarErrosCad(preset.erros);
   if (S.cadOpen && !preset) { const f = $('#v-cad .drawer [data-c]'); if (f && f.focus) f.focus(); }
@@ -2596,8 +2654,9 @@ function resumoPerf(p) {
 async function loadAcessos() {
   const el = $('#v-acessos'); el.innerHTML = '<div class="card">' + skel(5) + '</div>';
   try {
-    S.ac = await rpc('listarAcessos');
-    if (pode('autorizar')) { S.sol = await rpc('listarSolicitacoes'); S.pend = S.sol.pendentes.length; renderNav(); }
+    const par = await Promise.all([rpc('listarAcessos'), pode('autorizar') ? rpc('listarSolicitacoes') : Promise.resolve(null)]);
+    S.ac = par[0];
+    if (par[1]) { S.sol = par[1]; S.pend = S.sol.pendentes.length; renderNav(); }
   } catch (e) { el.innerHTML = '<div class="card">Não foi possível carregar os acessos.</div>'; return; }
   if (S.v !== 'acessos') return;
   const abas = abasAc();
@@ -2613,16 +2672,17 @@ function abasAc() {
   if (S.ac.pode.perfis) a.push('perfis');
   a.push('log');
   if (S.ac.pode.perfis) a.push('seg');
+  if (hubsAba()) a.push('hubs');
   return a;
 }
-const AC_NOME = { autorizar: 'Autorizações', usuarios: 'Usuários', perfis: 'Perfis', log: 'Histórico de alterações', seg: 'Segurança' };
+const AC_NOME = { autorizar: 'Autorizações', usuarios: 'Usuários', perfis: 'Perfis', log: 'Histórico de alterações', seg: 'Segurança', hubs: 'Hubs' };
 function renderAcessos() {
   const el = $('#v-acessos'), abas = abasAc();
   const tabs = '<div class="tabs">' + abas.map(function (k) { return '<button type="button" class="' + (k === S.acTab ? 'on' : '') + '" data-at="' + k + '">' + AC_NOME[k] + (k === 'autorizar' && S.pend > 0 ? '<span class="badge-n">' + S.pend + '</span>' : '') + '</button>'; }).join('') + '</div>';
   el.innerHTML = tabs + '<div id="acBody"></div>';
-  if (S.acTab === 'usuarios' && S.acSol) drawUsuarios({ vals: { Email_Google: S.acSol.email, Nome: S.acSol.nome, Status_Ativo: 'Sim' }, edit: null, erros: {} });
+  if (S.acTab === 'usuarios' && S.acSol) drawUsuarios({ vals: { Email_Google: S.acSol.email, Nome: S.acSol.nome, Status_Ativo: 'Sim', Hub: S.acSol.hub || '' }, edit: null, erros: {} });
   else if (S.acTab === 'autorizar') drawAutorizar('#acBody');
-  else ({ usuarios: drawUsuarios, perfis: drawPerfis, log: drawLog, seg: drawSeg })[S.acTab]();
+  else ({ usuarios: drawUsuarios, perfis: drawPerfis, log: drawLog, seg: drawSeg, hubs: drawHubs })[S.acTab]();
 }
 /** Atualiza só o número de pendentes na aba Autorizar, sem redesenhar a tela. */
 function atualizarSeloAcessos() {
@@ -2640,14 +2700,14 @@ function drawUsuarios(preset) {
   const sel = function (n, arr, cur) { return '<select data-u="' + n + '"><option value="">Selecione…</option>' + arr.map(function (x) { return '<option' + (x === cur ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') + '</select>'; };
   const rows = u.map(function (r, i) {
     const pf = A.perfis.find(function (p) { return p.nome === r.Perfil; });
-    return '<tr><td>' + esc(r.Email_Google) + '</td><td>' + esc(r.Nome) + (r.semLider ? ' <span class="tag-t" title="' + esc(tr('Este perfil enxerga só o time do líder, mas não há líder ativo com este nome no cadastro de pessoas. A pessoa não verá nenhum dado.')) + '">' + esc(tr('líder não encontrado')) + '</span>' : '') + '</td><td>' + esc(r.Perfil) + (pf && pf.atribuivel ? '' : ' <span class="tag-t">acima do seu</span>') + '</td><td>' + (r.Status_Ativo === 'Não' ? pill('', 'Inativo') : pill('verde', 'Ativo')) + '</td><td>' +
+    return '<tr><td>' + esc(r.Email_Google) + '</td><td>' + esc(r.Nome) + v8TagHub(r) + (r.semLider ? ' <span class="tag-t" title="' + esc(tr('Este perfil enxerga só o time do líder, mas não há líder ativo com este nome no cadastro de pessoas. A pessoa não verá nenhum dado.')) + '">' + esc(tr('líder não encontrado')) + '</span>' : '') + '</td><td>' + esc(r.Perfil) + (pf && pf.atribuivel ? '' : ' <span class="tag-t">acima do seu</span>') + '</td><td>' + (r.Status_Ativo === 'Não' ? pill('', 'Inativo') : pill('verde', 'Ativo')) + '</td><td>' +
       (r.editavel ? '<button type="button" class="btn sm" data-ue="' + i + '">' + ic('pencil', 14) + 'Editar</button> <button type="button" class="btn sm bad" data-ux="' + i + '">' + ic('trash', 14) + (S.acDel === i ? 'Confirmar exclusão?' : 'Excluir') + '</button>' : '<span class="muted">somente leitura</span>') + '</td></tr>';
   }).join('') || '<tr><td colspan="5" class="muted">Nenhum usuário.</td></tr>';
   $('#acBody').innerHTML = '<div class="card"><div class="hd"><b>' + (ed ? 'Editar usuário' : (sol ? 'Cadastro aprovado: definir perfil' : 'Novo usuário')) + '</b></div>' + (sol ? aviso('Solicitação de <b>' + esc(sol.nome) + '</b>. Cargo informado: <b>' + esc(sol.cargo) + '</b>. Escolha o perfil e confirme para liberar o acesso. A pessoa será avisada por e-mail.') : '') + aviso('Você só pode atribuir perfis com permissões, telas e dados iguais ou menores que os seus, e não pode alterar o seu próprio acesso.') +
     '<div class="grid" style="margin-top:12px"><label>E-mail Google <span class="req">*</span><input data-u="Email_Google" value="' + esc(v.Email_Google || '') + '" maxlength="120"' + (sol ? ' readonly class="ro"' : '') + '><span class="err" data-ue-err="Email_Google"></span></label>' +
     '<label>Nome <span class="req">*</span><input data-u="Nome" value="' + esc(v.Nome || '') + '" maxlength="120"><span class="err" data-ue-err="Nome"></span></label>' +
     '<label>Perfil <span class="req">*</span>' + sel('Perfil', perfs, v.Perfil) + '<span class="err" data-ue-err="Perfil"></span></label>' +
-    '<label>Ativo <span class="req">*</span>' + sel('Status_Ativo', ['Sim', 'Não'], v.Status_Ativo || (ed ? '' : 'Sim')) + '<span class="err" data-ue-err="Status_Ativo"></span></label></div>' +
+    v8HubCampo(v) + '<label>Ativo <span class="req">*</span>' + sel('Status_Ativo', ['Sim', 'Não'], v.Status_Ativo || (ed ? '' : 'Sim')) + '<span class="err" data-ue-err="Status_Ativo"></span></label></div>' +
     '<div style="margin-top:12px"><button type="button" class="btn pri" id="uSalvar">' + (ed ? 'Salvar alteração' : (sol ? 'Aprovar e cadastrar' : 'Adicionar usuário')) + '</button> <button type="button" class="btn ' + (ed || sol ? '' : 'hidden') + '" id="uCancel">' + (sol ? 'Voltar às autorizações' : 'Cancelar edição') + '</button></div></div>' +
     '<div class="card"><div class="toolbar"><input type="search" data-busca placeholder="Buscar usuário…" aria-label="Buscar usuário"></div><div class="scroll"><table data-sort><thead><tr><th data-s="t">E-mail</th><th data-s="t">Nome</th><th data-s="t">Perfil</th><th>Situação</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
   tabelaInterativa($('#acBody'));
@@ -2659,7 +2719,7 @@ async function salvarUsuarioUI() {
   const o = lerUsuario(), ed = S.acEdit, e = {};
   $$('#acBody [data-ue-err]').forEach(function (s) { s.textContent = ''; });
   if (!o.Email_Google) e.Email_Google = 'Campo obrigatório.'; else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(o.Email_Google)) e.Email_Google = 'E-mail inválido.';
-  if (!o.Nome) e.Nome = 'Campo obrigatório.'; if (!o.Perfil) e.Perfil = 'Campo obrigatório.'; if (!o.Status_Ativo) e.Status_Ativo = 'Campo obrigatório.';
+  if (hubGlobal() && !o.Hub) e.Hub = 'Selecione o Hub do usuário.'; if (!o.Nome) e.Nome = 'Campo obrigatório.'; if (!o.Perfil) e.Perfil = 'Campo obrigatório.'; if (!o.Status_Ativo) e.Status_Ativo = 'Campo obrigatório.';
   if (Object.keys(e).length) { Object.keys(e).forEach(function (k) { $('#acBody [data-ue-err="' + k + '"]').textContent = e[k]; }); toast('Há campos obrigatórios ou inválidos.', true); return; }
   S.busy = true; const b = $('#uSalvar'); b.disabled = true; b.textContent = 'Salvando…';
   try {
@@ -2976,6 +3036,7 @@ function avisoLogin() {
     else if (u.solicitacao === 'Recusada') dialogo('Cadastro não aprovado', 'O último cadastro de ' + e + ' não foi aprovado. Você pode enviar um novo pedido em Cadastrar-se.');
     else dialogo('Login não encontrado', 'Não existe login para ' + e + '. Use o botão Cadastrar-se para solicitar o acesso.');
   } else if (u.motivo === 'inativo') dialogo('Acesso desativado', 'O acesso de ' + e + ' está desativado. Fale com quem administra o sistema.');
+  else if (u.motivo === 'sem_hub') dialogo('Hub não definido', 'O acesso de ' + e + ' ainda não está ligado a um Hub ativo. Fale com quem administra o sistema.');
   else if (u.motivo === 'perfil_invalido') dialogo('Acesso indisponível', 'O perfil de ' + e + ' não está mais disponível. Fale com quem administra o sistema.');
 }
 function atualizarLogin(avisar) {
@@ -3002,24 +3063,28 @@ async function entrarGoogle() {
   const b = $('#lgGoogle'), t = $('#lgGoogleT'); b.disabled = true; t.textContent = 'Verificando…';
   try {
     const r = await rpc('bootstrap', true);
-    if (r.user.ok) { iniciarApp(r); sair($('#login')); return; }
+    if (r.user.ok) { if (entrarApp(r)) sair($('#login')); return; }
     S.bl = r.user; S.appUrl = r.appUrl || S.appUrl; atualizarLogin(true);
   } catch (e) { /* aviso já exibido */ } finally { b.disabled = false; t.textContent = 'Entrar com Google'; }
 }
 function abrirCadastro() {
   if (!S.bl.email) { dialogo('Entre com o Google primeiro', 'Para solicitar o cadastro, o sistema precisa identificar a sua conta Google. Clique em Entrar com Google e escolha a conta com o seu e-mail corporativo.'); return; }
   ['cdNome', 'cdOutro'].forEach(function (id) { $('#' + id).value = ''; });
-  $('#cdCargo').value = ''; $('#cdOutroW').classList.add('hidden');
+  $('#cdCargo').value = ''; $('#cdOutroW').classList.add('hidden'); $('#cdTurno').value = ''; $('#cdTurnoW').classList.add('hidden');
+  const hs = S.bl.hubs || []; $('#cdHubW').classList.toggle('hidden', !hs.length);
+  $('#cdHub').innerHTML = '<option value="">' + esc(tr('Selecione o Hub')) + '</option>' + hs.map(function (h) { return '<option value="' + esc(h.id) + '">' + esc(h.nome) + '</option>'; }).join('');
   $('#cdEmail').value = S.bl.email; $('#cdEmail').readOnly = true;
   $$('[data-lg-err]').forEach(function (s) { s.textContent = ''; });
   painelLogin('lgCad'); $('#cdNome').focus();
 }
 async function enviarCadastro() {
   if (S.busy) return;
-  const o = { nome: $('#cdNome').value.replace(/\s+/g, ' ').trim(), cargo: $('#cdCargo').value, cargoOutro: $('#cdOutro').value.replace(/\s+/g, ' ').trim(), email: $('#cdEmail').value.trim().toLowerCase(), idioma: idiomaAtual() }, e = {};
+  const o = { nome: $('#cdNome').value.replace(/\s+/g, ' ').trim(), cargo: $('#cdCargo').value, cargoOutro: $('#cdOutro').value.replace(/\s+/g, ' ').trim(), email: $('#cdEmail').value.trim().toLowerCase(), idioma: idiomaAtual(), hub: $('#cdHub').value, turno: $('#cdTurno').value }, e = {};
   $$('[data-lg-err]').forEach(function (s) { s.textContent = ''; });
   if (o.nome.length < 3) e.nome = 'Informe o nome completo.';
   if (!o.cargo) e.cargo = 'Selecione o cargo.'; else if (o.cargo === 'Outros' && o.cargoOutro.length < 2) e.cargoOutro = 'Digite o cargo.';
+  if ((S.bl.hubs || []).length && !o.hub) e.hub = 'Selecione o Hub.';
+  if ((S.bl.hubs || []).length && o.cargo === 'Líder' && !o.turno) e.turno = 'Selecione o turno.';
   if (!o.email) e.email = 'Campo obrigatório.'; else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(o.email)) e.email = 'E-mail inválido.';
   const mostrar = function (er) { Object.keys(er).forEach(function (k) { const s = $('[data-lg-err="' + k + '"]'); if (s) s.textContent = er[k]; }); };
   if (Object.keys(e).length) { mostrar(e); return; }
@@ -3031,9 +3096,9 @@ async function enviarCadastro() {
     if (r.msg) dialogo('Não foi possível enviar', esc(r.msg));
   } catch (x) { /* aviso já exibido */ } finally { S.busy = false; b.disabled = false; b.textContent = 'Enviar cadastro'; }
 }
-function falhaCarga() {
+function falhaCarga(motivo) {
   $('#carregando').classList.add('pl-erro');
-  $('#plTxt').textContent = 'Não foi possível carregar o sistema.'; $('#carregando .pl-d').classList.add('hidden'); $('#plRetry').classList.remove('hidden');
+  $('#plTxt').textContent = 'Não foi possível carregar o sistema.' + (motivo ? ' (' + String(motivo).slice(0, 160) + ')' : ''); $('#carregando .pl-d').classList.add('hidden'); $('#plRetry').classList.remove('hidden');
 }
 function bindGlobais() {
   $('#btnPrint').addEventListener('click', imprimirRel);
@@ -3072,7 +3137,7 @@ function bindGlobais() {
     if (e.key === 'Enter' && e.target && e.target.closest && e.target.closest('#lgCad') && e.target.tagName !== 'SELECT') { e.preventDefault(); enviarCadastro(); }
   });
   document.addEventListener('input', function (e) { if (e.target && e.target.id === 'cmdIn') { S.cmd.idx = 0; cmdDesenhar(); } });
-  $('#cdCargo').addEventListener('change', function () { $('#cdOutroW').classList.toggle('hidden', this.value !== 'Outros'); if (this.value === 'Outros') $('#cdOutro').focus(); });
+  $('#cdCargo').addEventListener('change', function () { $('#cdTurnoW').classList.toggle('hidden', !((S.bl.hubs || []).length && this.value === 'Líder')); $('#cdOutroW').classList.toggle('hidden', this.value !== 'Outros'); if (this.value === 'Outros') $('#cdOutro').focus(); });
   try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { if (S.temaSel === 'auto') aplicarTema('auto', false); }); } catch (e) { /* sem matchMedia */ }
 }
 
@@ -3097,6 +3162,7 @@ function iniciarApp(b) {
   marcar();
   $('#brand').onclick = function () { document.body.classList.toggle('col'); };
   fbarInit();
+  v8Init();
   nav(['matriz', 'form', 'minhas', 'geral'].filter(tela)[0] || S.u.telas[0]);
   setInterval(relUpd, 30000);
   if (pode('autorizar')) setInterval(sondar, window.PC_POLL || 120000);
@@ -3104,13 +3170,17 @@ function iniciarApp(b) {
 async function boot() {
   iniciarIdioma(); aplicarTema(temaSalvo(), false); icones(document);
   $$('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === idiomaAtual())); });
-  bindGlobais();
+  bindGlobais(); v8Eventos();
   const ini = Date.now(), min = window.PC_MIN_LOAD != null ? window.PC_MIN_LOAD : 700;
-  let b;
-  try { b = await rpc('bootstrap', false); } catch (e) { falhaCarga(); return; }
+  let b, fim = false;
+  const vigia = setTimeout(function () { if (!fim) falhaCarga('o servidor não respondeu em 60 s'); }, 60000);
+  try { b = await rpc('bootstrap', false); } catch (e) { fim = true; clearTimeout(vigia); falhaCarga(e && e.message); return; }
   const resto = min - (Date.now() - ini);
   if (resto > 0) await new Promise(function (r) { setTimeout(r, resto); });
-  if (b.user.ok) { iniciarApp(b); } else { mostrarLogin(b); }
+  try {
+    if (b.user.ok) { if (!entrarApp(b)) { fim = true; clearTimeout(vigia); sair($('#carregando')); return; } } else { mostrarLogin(b); }
+  } catch (e) { fim = true; clearTimeout(vigia); falhaCarga(e && e.message); return; }
+  fim = true; clearTimeout(vigia);
   sair($('#carregando'));
 }
 boot();
@@ -3178,4 +3248,187 @@ document.addEventListener('change', async function (e) {
   if (meu !== erSeq) return; // chegou uma alteração mais nova: só a última resposta vale
   if (r) { S.er = r; toast('Alteração salva'); } desenharEmailRel();
 });
+/* ---------- v8: Hub, usuários online, log de atividade, aviso de transparência e carga em massa ---------- */
+function hubOn() { return !!(S.u && S.u.hub && S.u.hub.on); }
+function hubGlobal() { return hubOn() && !!S.u.hub.global; }
+function hubNomeDe(id) {
+  if (id === '*') return tr('Admin global');
+  const l = (S.u && S.u.hub && S.u.hub.lista) || (S.ac && S.ac.hubs) || [];
+  const h = l.find(function (x) { return x.id === id; });
+  return h ? h.nome : String(id || '');
+}
+/** Cabeçalho: Hub e Operação ativos; o Admin global escolhe o Hub (a escolha vale no servidor, por usuário). */
+function v8Cabecalho() {
+  const el = $('#hubChip'); if (!el) return;
+  const h = S.u.hub;
+  if (!hubOn() || !h.nome) { el.classList.add('hidden'); return; }
+  el.classList.remove('hidden');
+  if (h.global && h.lista && h.lista.length > 1) {
+    el.innerHTML = ic('globe', 14) + '<label class="sr" for="hubSel">' + esc(tr('Hub ativo')) + '</label><select id="hubSel" title="' + esc(tr('Hub ativo')) + '">' + h.lista.map(function (x) { return '<option value="' + esc(x.id) + '"' + (x.id === h.id ? ' selected' : '') + '>' + esc(x.nome) + '</option>'; }).join('') + '</select><span class="op">' + esc(h.operacao) + '</span>';
+  } else el.innerHTML = ic('globe', 14) + '<b>' + esc(h.nome) + '</b><span class="op">' + esc(h.operacao) + '</span>';
+}
+async function trocarHub(id) {
+  try { await rpc('definirHubAtivo', id); location.reload(); } catch (e) { /* aviso exibido */ }
+}
+/* ----- online ----- */
+function v8Pulso() {
+  if (typeof google === 'undefined' || document.hidden) return;
+  try { google.script.run.withSuccessHandler(function () { /* ok */ }).withFailureHandler(function () { /* silencioso */ }).pulso(); } catch (e) { /* sem conexão */ }
+}
+async function v8OnlineN() {
+  try {
+    const r = await new Promise(function (ok, er) { google.script.run.withSuccessHandler(ok).withFailureHandler(er).listarOnline(); });
+    const n = $('#onlineN'); if (n) n.textContent = r.total;
+    S.online = r;
+  } catch (e) { /* silencioso */ }
+}
+async function abrirOnline() {
+  let r; try { r = await rpc('listarOnline'); } catch (e) { return; }
+  S.online = r; const n = $('#onlineN'); if (n) n.textContent = r.total;
+  const rows = r.usuarios.map(function (u) { return '<tr><td>' + esc(u.nome) + '</td><td>' + esc(u.perfil) + '</td>' + (hubGlobal() ? '<td>' + esc(u.hub === '*' ? tr('Admin global') : u.hubNome) + '</td>' : '') + '<td>' + (u.segundos < 60 ? esc(tr('agora')) : esc(tpl('há {0} min', [Math.floor(u.segundos / 60)]))) + '</td></tr>'; }).join('') || '<tr><td colspan="4" class="muted">' + esc(tr('Ninguém online no momento.')) + '</td></tr>';
+  modal('<div class="mhd"><h2 id="modalT">' + esc(tr('Usuários online')) + ' (' + r.total + ')</h2><button type="button" class="btn ico" data-fechar aria-label="' + esc(tr('Fechar')) + '">' + ic('x', 16) + '</button></div>' +
+    '<div class="scroll"><table><thead><tr><th>' + esc(tr('Nome')) + '</th><th>' + esc(tr('Perfil')) + '</th>' + (hubGlobal() ? '<th>Hub</th>' : '') + '<th>' + esc(tr('Última atividade')) + '</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<p class="muted" style="margin-top:8px">' + esc(tpl('Considera online quem usou o sistema nos últimos {0} minutos.', [r.janelaMin])) + '</p>');
+  $('#modal .box').style.maxWidth = '560px';
+}
+/* ----- log de atividade ----- */
+function loadLog() { S.lg = S.lg || { pagina: 1, f: {} }; return desenharLog(); }
+async function desenharLog() {
+  const el = $('#v-log'), L = S.lg;
+  if (!$('#lgForm')) el.innerHTML = '<div class="card"><div class="hd"><b>' + esc(tr('Log de atividade')) + '</b></div><form id="lgForm" class="grid" autocomplete="off">' +
+    '<label>' + esc(tr('De')) + '<input type="date" data-lf="de"></label><label>' + esc(tr('Até')) + '<input type="date" data-lf="ate"></label>' +
+    '<label>' + esc(tr('Usuário')) + '<input data-lf="email" maxlength="120" placeholder="' + esc(tr('Nome ou e-mail')) + '"></label><label>' + esc(tr('Ação')) + '<input data-lf="acao" maxlength="120" placeholder="' + esc(tr('Texto da ação')) + '"></label>' +
+    (hubGlobal() ? '<label>Hub<select data-lf="hub"><option value="">' + esc(tr('Todos')) + '</option>' + S.u.hub.lista.map(function (x) { return '<option value="' + esc(x.id) + '">' + esc(x.nome) + '</option>'; }).join('') + '</select></label>' : '') +
+    '</form><div style="margin-top:10px"><button type="button" class="btn pri" id="lgBuscar">' + esc(tr('Filtrar')) + '</button> <button type="button" class="btn" id="lgLimpar">' + esc(tr('Limpar filtros')) + '</button></div></div><div class="card" id="lgRes">' + skel(5) + '</div>';
+  const f = Object.assign({}, L.f, { pagina: L.pagina });
+  let r; try { r = await rpc('consultarLog', f); } catch (e) { $('#lgRes').innerHTML = esc(tr('Não foi possível carregar o log.')); return; }
+  if (S.v !== 'log') return;
+  const pag = Math.max(1, Math.ceil(r.total / r.porPagina));
+  $('#lgRes').innerHTML = '<div class="scroll"><table><thead><tr><th>' + esc(tr('Quando')) + '</th>' + (hubGlobal() ? '<th>Hub</th>' : '') + '<th>' + esc(tr('Usuário')) + '</th><th>' + esc(tr('Perfil')) + '</th><th>' + esc(tr('Ação')) + '</th><th>' + esc(tr('Alvo')) + '</th><th>' + esc(tr('Detalhe')) + '</th></tr></thead><tbody>' +
+    (r.linhas.map(function (x) { return '<tr><td>' + esc(fmtDt(x.ts)) + '</td>' + (hubGlobal() ? '<td>' + esc(x.hubNome) + '</td>' : '') + '<td>' + esc(x.nome) + '<br><small class="muted">' + esc(x.email) + '</small></td><td>' + esc(x.perfil) + '</td><td>' + esc(x.acao) + '</td><td>' + esc(x.alvo) + '</td><td>' + esc(x.detalhe) + '</td></tr>'; }).join('') || '<tr><td colspan="7" class="muted">' + esc(tr('Nenhum registro encontrado.')) + '</td></tr>') +
+    '</tbody></table></div><div class="toolbar" style="margin-top:10px"><button type="button" class="btn" id="lgAnt"' + (L.pagina <= 1 ? ' disabled' : '') + '>' + esc(tr('Anterior')) + '</button><span class="muted">' + esc(tpl('Página {0} de {1}', [L.pagina, pag])) + ' · ' + esc(tpl('{0} registros', [r.total])) + '</span><button type="button" class="btn" id="lgProx"' + (L.pagina >= pag ? ' disabled' : '') + '>' + esc(tr('Próxima')) + '</button></div>' +
+    '<p class="muted">' + esc(tpl('Mostra as ações dos últimos {0} dias; registros mais antigos ficam na planilha de arquivo, por até 1 ano.', [r.vivoDias])) + '</p>';
+}
+function lerFiltroLog() { const f = {}; $$('#lgForm [data-lf]').forEach(function (i) { if (i.value.trim()) f[i.dataset.lf] = i.value.trim(); }); return f; }
+/* ----- aba Hubs (Admin global) ----- */
+function hubsAba() { return hubGlobal() && pode('hubs'); }
+async function drawHubs(preset) {
+  const el = $('#acBody'); el.innerHTML = '<div class="card">' + skel(4) + '</div>';
+  let r; try { r = await rpc('listarHubs'); } catch (e) { el.innerHTML = '<div class="card">' + esc(tr('Não foi possível carregar os Hubs.')) + '</div>'; return; }
+  S.hubs = r.hubs; const ed = preset && preset.edit, v = (preset && preset.vals) || ed || {};
+  el.innerHTML = '<div class="card"><div class="hd"><b>' + esc(ed ? tr('Editar Hub') : tr('Novo Hub')) + '</b></div><div class="grid" style="margin-top:12px">' +
+    '<label>' + esc(tr('Nome do Hub')) + ' <span class="req">*</span><input data-h="nome" maxlength="60" value="' + esc(v.nome || '') + '"><span class="err" data-he="nome"></span></label>' +
+    '<label>' + esc(tr('Operação')) + ' <span class="req">*</span><input data-h="operacao" maxlength="60" value="' + esc(v.operacao || '') + '"><span class="err" data-he="operacao"></span></label>' +
+    '<label>' + esc(tr('Ativo')) + '<select data-h="ativo"><option value="Sim"' + (v.ativo === false ? '' : ' selected') + '>' + esc(tr('Sim')) + '</option><option value="Não"' + (v.ativo === false ? ' selected' : '') + '>' + esc(tr('Não')) + '</option></select></label></div>' +
+    '<div style="margin-top:12px"><button type="button" class="btn pri" id="hbSalvar">' + esc(ed ? tr('Salvar alteração') : tr('Adicionar Hub')) + '</button> <button type="button" class="btn ' + (ed ? '' : 'hidden') + '" id="hbCancel">' + esc(tr('Cancelar')) + '</button></div></div>' +
+    '<div class="card"><div class="scroll"><table><thead><tr><th>' + esc(tr('Nome do Hub')) + '</th><th>' + esc(tr('Operação')) + '</th><th>' + esc(tr('Ativo')) + '</th><th>' + esc(tr('Usuários')) + '</th><th></th></tr></thead><tbody>' +
+    S.hubs.map(function (h, i) { return '<tr><td>' + esc(h.nome) + '</td><td>' + esc(h.operacao) + '</td><td>' + esc(h.ativo ? tr('Sim') : tr('Não')) + '</td><td>' + h.usuarios + '</td><td><button type="button" class="btn sm" data-he-ed="' + i + '">' + ic('pencil', 14) + esc(tr('Editar')) + '</button></td></tr>'; }).join('') + '</tbody></table></div></div>';
+  S.hubEd = ed || null;
+}
+async function salvarHubUI() {
+  if (S.busy) return;
+  const o = {}; $$('#acBody [data-h]').forEach(function (i) { o[i.dataset.h] = i.value.trim(); });
+  $$('#acBody [data-he]').forEach(function (s) { s.textContent = ''; });
+  S.busy = true;
+  try {
+    const r = await rpc('salvarHub', Object.assign({ _row: S.hubEd ? S.hubEd._row : 0 }, o, { ativo: o.ativo !== 'Não' }), S.hubEd);
+    if (!r.ok) { if (r.erros) Object.keys(r.erros).forEach(function (k) { const s = $('#acBody [data-he="' + k + '"]'); if (s) s.textContent = r.erros[k]; }); toast(r.msg || tr('Há campos obrigatórios ou inválidos.'), true); return; }
+    S.hubEd = null; toast(tr('Hub salvo')); await drawHubs();
+    S.u.hub.lista = r.hubs.filter(function (h) { return h.ativo; });
+  } catch (e) { /* aviso exibido */ } finally { S.busy = false; }
+}
+/** Campo Hub do formulário de usuário (só para o Admin global; os demais criam sempre no próprio Hub). */
+function v8HubCampo(v) {
+  if (!hubGlobal()) return '';
+  const lista = S.u.hub.lista || [];
+  return '<label>Hub <span class="req">*</span><select data-u="Hub"><option value="">' + esc(tr('Selecione…')) + '</option><option value="*"' + (v.Hub === '*' ? ' selected' : '') + '>' + esc(tr('Admin global (todos os Hubs)')) + '</option>' + lista.map(function (h) { return '<option value="' + esc(h.id) + '"' + (v.Hub === h.id ? ' selected' : '') + '>' + esc(h.nome) + '</option>'; }).join('') + '</select><span class="err" data-ue-err="Hub"></span></label>';
+}
+function v8TagHub(r) { return hubGlobal() && r.Hub ? ' <span class="tag-t">' + esc(hubNomeDe(r.Hub)) + '</span>' : ''; }
+/* ----- carga em massa ----- */
+function v8CargaBtn(aba) {
+  const tipo = aba === 'Cad_Pessoas' ? 'pessoas' : (aba === 'Cad_Estrutura' ? 'docas' : '');
+  const bar = $('#v-cad .cbar'); if (!bar || !tipo || $('#btnCarga')) return;
+  if (!pode(tipo === 'pessoas' ? 'cad_pessoas' : 'cad_estrutura')) return;
+  bar.insertAdjacentHTML('beforeend', '<button type="button" class="btn" id="btnCarga" data-ct="' + tipo + '">' + ic('download', 14) + esc(tr('Carga em massa')) + '</button>');
+}
+function abrirCarga(tipo) {
+  S.carga = { tipo: tipo, ok: false };
+  modal('<div class="mhd"><h2 id="modalT">' + esc(tipo === 'pessoas' ? tr('Carga em massa: pessoas') : tr('Carga em massa: docas')) + '</h2><button type="button" class="btn ico" data-fechar aria-label="' + esc(tr('Fechar')) + '">' + ic('x', 16) + '</button></div>' +
+    '<p class="muted">' + esc(tr('Cole a tabela do Excel (com cabeçalho). Se qualquer linha tiver erro, nada é gravado e o sistema mostra a linha e a coluna.')) + '</p>' +
+    '<div style="margin:8px 0"><button type="button" class="btn sm" id="cgModelo">' + esc(tr('Copiar modelo')) + '</button></div>' +
+    '<textarea id="cgTexto" rows="10" style="width:100%" spellcheck="false" aria-label="' + esc(tr('Tabela colada do Excel')) + '"></textarea>' +
+    '<div id="cgRes" style="margin-top:10px"></div>' +
+    '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"><button type="button" class="btn" id="cgValidar">' + esc(tr('Validar')) + '</button><button type="button" class="btn pri hidden" id="cgGravar">' + esc(tr('Gravar')) + '</button></div>');
+  $('#modal .box').style.maxWidth = '720px';
+}
+async function cargaModelo() {
+  let m; try { m = await rpc('importarModelo', S.carga.tipo); } catch (e) { return; }
+  const t = m.cabecalho + '\n' + m.exemplo;
+  try { await navigator.clipboard.writeText(t); toast(tr('Modelo copiado')); } catch (e) { const a = $('#cgTexto'); a.value = t; a.select(); toast(tr('Modelo colocado na caixa; copie e cole no Excel')); }
+}
+function cargaErros(r) {
+  return '<div class="note bad">' + ic('alert', 16) + '<span><b>' + esc(tr('Nada foi gravado.')) + '</b> ' + esc(tpl('{0} erro(s) encontrado(s):', [r.totalErros])) + '</span></div><ul class="cg-err">' +
+    r.erros.map(function (e) { return '<li>' + (e.linha ? esc(tpl('Linha {0}', [e.linha])) : '') + (e.coluna ? ', ' + esc(tr('coluna')) + ' <b>' + esc(e.coluna) + '</b>' : '') + ': ' + esc(e.msg) + '</li>'; }).join('') + '</ul>';
+}
+async function cargaValidar() {
+  const txt = $('#cgTexto').value; if (!txt.trim()) { $('#cgRes').innerHTML = '<div class="note">' + esc(tr('Cole a tabela do Excel na caixa.')) + '</div>'; return; }
+  let r; try { r = await rpc('importarPrevia', S.carga.tipo, txt); } catch (e) { return; }
+  S.carga.ok = r.ok; $('#cgGravar').classList.toggle('hidden', !r.ok);
+  if (!r.ok) { $('#cgRes').innerHTML = cargaErros(r); return; }
+  $('#cgRes').innerHTML = '<div class="note">' + ic('info', 16) + '<span>' + esc(tpl('{0} linhas prontas para gravar', [r.resumo.total])) + (r.hub ? ' ' + esc(tr('no Hub')) + ' <b>' + esc(r.hub) + '</b>' : '') + '.</span></div><div class="scroll"><table><thead><tr>' + r.cols.map(function (c) { return '<th>' + esc(c) + '</th>'; }).join('') + '</tr></thead><tbody>' + r.previa.map(function (l) { return '<tr>' + l.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>' + (r.resumo.total > r.previa.length ? '<p class="muted">' + esc(tpl('Mostrando as primeiras {0} linhas.', [r.previa.length])) + '</p>' : '');
+}
+async function cargaGravar() {
+  if (S.busy || !S.carga || !S.carga.ok) return;
+  S.busy = true;
+  try {
+    const r = await rpc('importarConfirmar', S.carga.tipo, $('#cgTexto').value);
+    if (!r.ok) { S.carga.ok = false; $('#cgGravar').classList.add('hidden'); $('#cgRes').innerHTML = cargaErros(r); return; }
+    fecharModal(); toast(tpl('{0} linhas gravadas', [r.gravados])); await atualizar();
+  } catch (e) { /* aviso exibido */ } finally { S.busy = false; }
+}
+/* ----- aviso de transparência (aceite) ----- */
+function mostrarAviso(b) {
+  S.avisoB = b;
+  let el = $('#avisoTela'); if (el) el.remove();
+  const idi = idiomaAtual(), texto = b.aviso.texto[idi] || b.aviso.texto.pt;
+  document.body.insertAdjacentHTML('beforeend', '<div id="avisoTela" class="aviso-tela" role="dialog" aria-modal="true" aria-labelledby="avT"><div class="box"><h2 id="avT">' + esc(tr('Aviso de transparência')) + '</h2><p>' + esc(texto) + '</p><p class="muted">' + esc(tr('Você precisa aceitar para continuar. Um novo aceite é pedido sempre que este texto mudar.')) + '</p><button type="button" class="btn pri" id="avAceitar">' + esc(tr('Li e aceito')) + '</button></div></div>');
+  $('#carregando') && $('#carregando').classList.add('hidden');
+  const l = $('#login'); if (l) l.classList.add('hidden');
+  $('#avAceitar').focus();
+}
+async function aceitarAvisoUI() {
+  if (S.busy) return; S.busy = true;
+  try {
+    const r = await rpc('aceitarAviso', S.avisoB.aviso.versao);
+    if (!r.ok) { toast(r.msg, true); const b = await rpc('bootstrap', false); mostrarAviso(b); return; }
+    const b = await rpc('bootstrap', false); const e = $('#avisoTela'); if (e) e.remove();
+    entrarApp(b);
+  } catch (e) { /* aviso exibido */ } finally { S.busy = false; }
+}
+/** Entrada única no app: com aceite pendente mostra o aviso; senão inicia. */
+function entrarApp(b) { if (b.bloqueado) { mostrarAviso(b); return false; } iniciarApp(b); return true; }
+function v8Init() {
+  v8Cabecalho();
+  if (pode('ver_online')) { $('#onlineBtn').classList.remove('hidden'); v8OnlineN(); setInterval(v8OnlineN, window.PC_POLL || 120000); }
+  v8Pulso(); setInterval(v8Pulso, window.PC_POLL || 120000);
+}
+function v8Eventos() {
+  document.addEventListener('change', function (e) { if (e.target && e.target.id === 'hubSel') trocarHub(e.target.value); });
+  document.addEventListener('click', function (e) {
+    const t = e.target && e.target.closest ? e.target.closest('button') : null; if (!t) return;
+    if (t.id === 'onlineBtn') abrirOnline();
+    else if (t.id === 'lgBuscar') { S.lg.f = lerFiltroLog(); S.lg.pagina = 1; desenharLog(); }
+    else if (t.id === 'lgLimpar') { S.lg.f = {}; S.lg.pagina = 1; $$('#lgForm [data-lf]').forEach(function (i) { i.value = ''; }); desenharLog(); }
+    else if (t.id === 'lgAnt') { S.lg.pagina = Math.max(1, S.lg.pagina - 1); desenharLog(); }
+    else if (t.id === 'lgProx') { S.lg.pagina++; desenharLog(); }
+    else if (t.id === 'hbSalvar') salvarHubUI();
+    else if (t.id === 'hbCancel') drawHubs();
+    else if (t.dataset && t.dataset.heEd !== undefined) drawHubs({ edit: S.hubs[Number(t.dataset.heEd)] });
+    else if (t.id === 'btnCarga') abrirCarga(t.dataset.ct);
+    else if (t.id === 'cgModelo') cargaModelo();
+    else if (t.id === 'cgValidar') cargaValidar();
+    else if (t.id === 'cgGravar') cargaGravar();
+    else if (t.id === 'avAceitar') aceitarAvisoUI();
+  });
+}
 </script>

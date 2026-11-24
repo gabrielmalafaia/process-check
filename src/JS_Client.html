@@ -269,6 +269,130 @@ const DICT = [
   ['Escolha cor e símbolo para ver o desenho.', 'Choose a color and symbol to see the drawing.', 'Elija color y símbolo para ver el dibujo.'],
 ];
 DICT.push(
+  /* v10: programar auditorias por líder */
+  ['Programação', 'Scheduling', 'Programación'],
+  ['Programar auditorias', 'Schedule audits', 'Programar auditorías'],
+  ['Defina quantas auditorias a pessoa deve fazer e até quando. Ela recebe um aviso por e-mail e vê a meta em Minhas metas. A meta só conta auditorias que a regra de auditoria dela permite.', 'Set how many audits the person must do and by when. They get an email notice and see the goal in My goals. The goal only counts audits their audit rule allows.', 'Defina cuántas auditorías debe hacer la persona y hasta cuándo. Recibe un aviso por correo y ve la meta en Mis metas. La meta solo cuenta auditorías que su regla de auditoría permite.'],
+  ['Responsável', 'Assignee', 'Responsable'],
+  ['Escolha a pessoa', 'Choose the person', 'Elija a la persona'],
+  ['Quantidade de auditorias', 'Number of audits', 'Cantidad de auditorías'],
+  ['Início', 'Start', 'Inicio'],
+  ['Prazo final', 'Final deadline', 'Plazo final'],
+  ['Observação (opcional)', 'Note (optional)', 'Observación (opcional)'],
+  ['Limitar a processos, turnos, cores ou times (opcional)', 'Limit to processes, shifts, colors or teams (optional)', 'Limitar a procesos, turnos, colores o equipos (opcional)'],
+  ['Processos (nenhum marcado = todos)', 'Processes (none checked = all)', 'Procesos (ninguno marcado = todos)'],
+  ['Turnos (nenhum marcado = todos)', 'Shifts (none checked = all)', 'Turnos (ninguno marcado = todos)'],
+  ['Quais times (nenhum marcado = todos)', 'Which teams (none checked = all)', 'Qué equipos (ninguno marcado = todos)'],
+  ['Programar meta', 'Schedule goal', 'Programar meta'],
+  ['Metas programadas', 'Scheduled goals', 'Metas programadas'],
+  ['Metas canceladas', 'Cancelled goals', 'Metas canceladas'],
+  ['Nenhuma meta ativa. Programe a primeira acima.', 'No active goal. Schedule the first one above.', 'Ninguna meta activa. Programe la primera arriba.'],
+  ['{0} deve fazer {1} auditoria(s) de {2} a {3}.', '{0} must do {1} audit(s) from {2} to {3}.', '{0} debe hacer {1} auditoría(s) del {2} al {3}.'],
+  ['auditoria(s)', 'audit(s)', 'auditoría(s)'],
+  ['a', 'to', 'al'],
+  ['de', 'of', 'de'],
+  ['O que fazer', 'What to do', 'Qué hacer'],
+  ['Prazo', 'Deadline', 'Plazo'],
+  ['Prazo vencido', 'Deadline passed', 'Plazo vencido'],
+  ['Progresso', 'Progress', 'Progreso'],
+  ['Situação', 'Status', 'Situación'],
+  ['Cancelada', 'Cancelled', 'Cancelada'],
+  ['Cancelar', 'Cancel', 'Cancelar'],
+  ['Confirmar cancelamento?', 'Confirm cancellation?', '¿Confirmar cancelación?'],
+  ['Cancelar a meta de {0}', 'Cancel the goal of {0}', 'Cancelar la meta de {0}'],
+  ['Ainda não aberta pelo líder', 'Not opened by the leader yet', 'Aún no abierta por el líder'],
+  ['Meta programada. O aviso foi enviado por e-mail.', 'Goal scheduled. The notice was sent by email.', 'Meta programada. El aviso fue enviado por correo.'],
+  ['Meta programada, mas o e-mail não foi enviado. O aviso será reenviado às 22h.', 'Goal scheduled, but the email was not sent. The notice will be resent at 10 PM.', 'Meta programada, pero el correo no fue enviado. El aviso se reenviará a las 22 h.'],
+  ['Meta cancelada', 'Goal cancelled', 'Meta cancelada'],
+  ['O servidor recusou a meta.', 'The server refused the goal.', 'El servidor rechazó la meta.'],
+  ['O servidor recusou o cancelamento.', 'The server refused the cancellation.', 'El servidor rechazó la cancelación.'],
+  ['Não foi possível carregar a programação.', 'Could not load the schedule.', 'No se pudo cargar la programación.'],
+  ['Programadas pela liderança', 'Scheduled by leadership', 'Programadas por la dirección'],
+  ['Metas individuais', 'Individual goals', 'Metas individuales'],
+  ['Nova', 'New', 'Nueva'],
+  ['Ações', 'Actions', 'Acciones'],
+  ['{0}: {1} nova(s)', '{0}: {1} new', '{0}: {1} nueva(s)'],
+  ['{0}: {1} pendente(s)', '{0}: {1} pending', '{0}: {1} pendiente(s)'],
+  ['Confirmar o cancelamento da meta de {0}', 'Confirm cancelling the goal of {0}', 'Confirmar la cancelación de la meta de {0}'],
+  ['Clique de novo para confirmar o cancelamento.', 'Click again to confirm the cancellation.', 'Haga clic de nuevo para confirmar la cancelación.'],
+  ['Aviso por e-mail pendente', 'Email notice pending', 'Aviso por correo pendiente'],
+  ['Já existe uma meta ativa idêntica para esta pessoa.', 'An identical active goal already exists for this person.', 'Ya existe una meta activa idéntica para esta persona.'],
+  ['O prazo está longe demais. Confira o ano.', 'The deadline is too far away. Check the year.', 'El plazo está demasiado lejos. Revise el año.'],
+  /* mensagens do servidor (v10, fase 2) */
+  ['Seu perfil não pode programar auditorias: ele enxerga só parte dos dados.', 'Your profile cannot schedule audits: it only sees part of the data.', 'Su perfil no puede programar auditorías: solo ve parte de los datos.'],
+  ['Usuário ativo com permissão de auditar não encontrado neste Hub (e não pode ser você).', 'Active user with audit permission not found in this Hub (and it cannot be you).', 'Usuario activo con permiso de auditar no encontrado en este Hub (y no puede ser usted).'],
+  ['A regra de auditoria deste líder não permite que ele audite. Ajuste a regra antes de programar a meta.', 'This leader\'s audit rule does not let them audit. Adjust the rule before scheduling the goal.', 'La regla de auditoría de este líder no le permite auditar. Ajuste la regla antes de programar la meta.'],
+  ['Meta não encontrada ou já cancelada. Atualize a tela.', 'Goal not found or already cancelled. Refresh the screen.', 'Meta no encontrada o ya cancelada. Actualice la pantalla.'],
+  ['Não foi possível registrar a meta no log; nada foi salvo. Tente de novo.', 'Could not record the goal in the log; nothing was saved. Try again.', 'No se pudo registrar la meta en el log; no se guardó nada. Inténtelo de nuevo.'],
+  ['Não foi possível registrar o cancelamento no log; nada foi alterado. Tente de novo.', 'Could not record the cancellation in the log; nothing was changed. Try again.', 'No se pudo registrar la cancelación en el log; no se cambió nada. Inténtelo de nuevo.'],
+  ['Prazo máximo de 366 dias.', 'Maximum deadline of 366 days.', 'Plazo máximo de 366 días.'],
+  ['O prazo não pode estar no passado.', 'The deadline cannot be in the past.', 'El plazo no puede estar en el pasado.'],
+  ['Cor ou símbolo inválido.', 'Invalid color or symbol.', 'Color o símbolo inválido.'],
+  ['Time inválido.', 'Invalid team.', 'Equipo inválido.'],
+  ['Não use < > nem iniciar com = + - @.', 'Do not use < > or start with = + - @.', 'No use < > ni inicie con = + - @.']
+);
+DICT.push(
+  /* v10 fase 3: feedback obrigatório */
+  ['Meus feedbacks', 'My feedbacks', 'Mis feedbacks'],
+  ['Metas por líder', 'Goals by leader', 'Metas por líder'],
+  ['Feedbacks obrigatórios', 'Mandatory feedbacks', 'Feedbacks obligatorios'],
+  ['{0} precisam de ação', '{0} need action', '{0} requieren acción'],
+  ['{0}: {1} precisam de ação', '{0}: {1} need action', '{0}: {1} requieren acción'],
+  ['{0}: {1} a registrar', '{0}: {1} to record', '{0}: {1} por registrar'],
+  ['{0} auditoria(s) abaixo de {1}%', '{0} audit(s) below {1}%', '{0} auditoría(s) por debajo de {1}%'],
+  ['Time na época: {0} ({1})', 'Team at the time: {0} ({1})', 'Equipo en ese momento: {0} ({1})'],
+  ['Hoje: {0} ({1})', 'Today: {0} ({1})', 'Hoy: {0} ({1})'],
+  ['Aguardando designação', 'Waiting for assignment', 'Esperando designación'],
+  ['Designado', 'Assigned', 'Designado'],
+  ['Concluído', 'Done', 'Concluido'],
+  ['Atrasado', 'Overdue', 'Atrasado'],
+  ['Prazo {0}', 'Due {0}', 'Plazo {0}'],
+  ['Não foi possível carregar os feedbacks.', 'Could not load the feedbacks.', 'No se pudieron cargar los feedbacks.'],
+  ['Escolha quem dará o feedback', 'Choose who will give the feedback', 'Elija quién dará el feedback'],
+  ['Escolha quem dará o feedback.', 'Choose who will give the feedback.', 'Elija quién dará el feedback.'],
+  ['Ver feedback registrado', 'View recorded feedback', 'Ver feedback registrado'],
+  ['Registrado por {0} em {1}', 'Recorded by {0} on {1}', 'Registrado por {0} el {1}'],
+  ['Quem dará o feedback a {0}', 'Who will give feedback to {0}', 'Quién dará el feedback a {0}'],
+  ['Reatribuir o feedback de {0}', 'Reassign the feedback of {0}', 'Reasignar el feedback de {0}'],
+  ['Designar o feedback de {0}', 'Assign the feedback of {0}', 'Designar el feedback de {0}'],
+  ['Reatribuir', 'Reassign', 'Reasignar'],
+  ['Designar', 'Assign', 'Designar'],
+  ['Quando um colaborador tem {0} ou mais auditorias abaixo da nota média em {1} dias, o feedback passa a ser obrigatório. Escolha quem vai conversar com ele: o líder tem {2} dias para registrar o que foi falado (mínimo de {3} caracteres).', 'When an employee has {0} or more audits below the average score within {1} days, feedback becomes mandatory. Choose who will talk to them: the leader has {2} days to record what was said (minimum {3} characters).', 'Cuando un colaborador tiene {0} o más auditorías por debajo de la nota promedio en {1} días, el feedback pasa a ser obligatorio. Elija quién hablará con él: el líder tiene {2} días para registrar lo conversado (mínimo {3} caracteres).'],
+  ['Colaborador', 'Employee', 'Colaborador'],
+  ['Auditorias', 'Audits', 'Auditorías'],
+  ['Quem dá o feedback', 'Who gives the feedback', 'Quién da el feedback'],
+  ['Nenhum feedback obrigatório no momento.', 'No mandatory feedback right now.', 'Ningún feedback obligatorio por ahora.'],
+  ['Atenção: esta pessoa fez uma ou mais das auditorias que geraram o feedback. Você pode designá-la mesmo assim.', 'Notice: this person did one or more of the audits that triggered the feedback. You can still assign them.', 'Atención: esta persona hizo una o más de las auditorías que generaron el feedback. Puede designarla de todos modos.'],
+  ['O servidor recusou a designação.', 'The server refused the assignment.', 'El servidor rechazó la designación.'],
+  ['Feedback designado. O aviso foi enviado por e-mail.', 'Feedback assigned. The notice was sent by email.', 'Feedback designado. El aviso fue enviado por correo.'],
+  ['Feedback designado, mas o e-mail não foi enviado. O aviso será reenviado às 22h.', 'Feedback assigned, but the email was not sent. The notice will be resent at 10 pm.', 'Feedback designado, pero el correo no fue enviado. El aviso se reenviará a las 22h.'],
+  ['O que foi conversado com o colaborador', 'What was discussed with the employee', 'Lo conversado con el colaborador'],
+  ['0 de {0} caracteres no mínimo', '0 of {0} minimum characters', '0 de {0} caracteres como mínimo'],
+  ['{0} de {1} caracteres no mínimo', '{0} of {1} minimum characters', '{0} de {1} caracteres como mínimo'],
+  ['{0} caracteres', '{0} characters', '{0} caracteres'],
+  ['Tamanho mínimo atingido.', 'Minimum length reached.', 'Tamaño mínimo alcanzado.'],
+  ['Registrar feedback de {0}', 'Record feedback of {0}', 'Registrar feedback de {0}'],
+  ['Registrar feedback', 'Record feedback', 'Registrar feedback'],
+  ['Você foi designado(a) para dar estes feedbacks. Registre o que foi conversado, com pelo menos {0} caracteres. O texto fica visível para você, para o Site Leader do Hub e para o Admin, e é guardado por 12 meses.', 'You were assigned to give these feedbacks. Record what was discussed, with at least {0} characters. The text is visible to you, the Hub Site Leader and the Admin, and is kept for 12 months.', 'Usted fue designado(a) para dar estos feedbacks. Registre lo conversado, con al menos {0} caracteres. El texto es visible para usted, el Site Leader del Hub y el Admin, y se conserva por 12 meses.'],
+  ['Nenhum feedback a registrar.', 'No feedback to record.', 'Ningún feedback por registrar.'],
+  ['Registrados recentemente', 'Recently recorded', 'Registrados recientemente'],
+  ['Registrado em {0}', 'Recorded on {0}', 'Registrado el {0}'],
+  ['O servidor recusou o feedback.', 'The server refused the feedback.', 'El servidor rechazó el feedback.'],
+  ['Feedback registrado', 'Feedback recorded', 'Feedback registrado'],
+  /* mensagens do servidor */
+  ['Pendência não encontrada ou já concluída. Atualize a tela.', 'Item not found or already completed. Refresh the screen.', 'Pendiente no encontrado o ya concluido. Actualice la pantalla.'],
+  ['Pessoa não encontrada ou inativa neste Hub.', 'Person not found or inactive in this Hub.', 'Persona no encontrada o inactiva en este Hub.'],
+  ['Não foi possível registrar a designação no log; nada foi alterado. Tente de novo.', 'Could not record the assignment in the log; nothing was changed. Try again.', 'No se pudo registrar la designación en el log; nada fue modificado. Intente de nuevo.'],
+  ['Feedback não encontrado ou não designado a você. Atualize a tela.', 'Feedback not found or not assigned to you. Refresh the screen.', 'Feedback no encontrado o no designado a usted. Actualice la pantalla.'],
+  ['Este feedback já foi registrado.', 'This feedback was already recorded.', 'Este feedback ya fue registrado.'],
+  ['Este texto é igual a um feedback que você já registrou. Escreva o que foi conversado com este colaborador.', 'This text is identical to a feedback you already recorded. Write what was discussed with this employee.', 'Este texto es igual a un feedback que usted ya registró. Escriba lo conversado con este colaborador.'],
+  ['Não foi possível registrar o feedback no log; nada foi salvo. Tente de novo.', 'Could not record the feedback in the log; nothing was saved. Try again.', 'No se pudo registrar el feedback en el log; no se guardó nada. Intente de nuevo.'],
+  ['O feedback precisa ter pelo menos 50 caracteres.', 'The feedback must have at least 50 characters.', 'El feedback debe tener al menos 50 caracteres.'],
+  ['O feedback pode ter no máximo 2000 caracteres.', 'The feedback can have at most 2000 characters.', 'El feedback puede tener como máximo 2000 caracteres.'],
+  ['O texto não pode começar com = + - @.', 'The text cannot start with = + - @.', 'El texto no puede comenzar con = + - @.'],
+  ['Descreva o que foi conversado com o colaborador, com pelo menos 8 palavras diferentes entre si.', 'Describe what was discussed with the employee, using at least 8 different words.', 'Describa lo conversado con el colaborador, con al menos 8 palabras diferentes entre sí.']
+);
+DICT.push(
   /* matriz */
   ['Cada card é uma doca.', 'Each card is a dock.', 'Cada tarjeta es un muelle.'],
   ['Cada card é um cluster.', 'Each card is a cluster.', 'Cada tarjeta es un clúster.'],
@@ -914,7 +1038,7 @@ DICT.push(
   ['Desligar envio agendado', 'Turn off scheduled sending', 'Desactivar el envío programado'],
   ['Ligar envio agendado', 'Turn on scheduled sending', 'Activar el envío programado'],
   ['Enviar agora para todos', 'Send now to everyone', 'Enviar ahora a todos'],
-  ['Envio agendado ligado: todo dia às 7h, cada pessoa recebe conforme a frequência escolhida (diário: o dia anterior; semanal: segunda-feira, últimos 7 dias; mensal: dia 1, últimos 30 dias).', 'Scheduled sending is on: every day at 7 a.m., each person receives it according to the chosen frequency (daily: the previous day; weekly: Monday, last 7 days; monthly: day 1, last 30 days).', 'Envío programado activado: todos los días a las 7 h, cada persona recibe según la frecuencia elegida (diario: el día anterior; semanal: lunes, últimos 7 días; mensual: día 1, últimos 30 días).'],
+  ['Envio agendado ligado: todo dia às 22h, cada pessoa recebe conforme a frequência escolhida (diário: o dia de hoje; semanal: segunda-feira, últimos 7 dias até hoje; mensal: dia 1, últimos 30 dias até hoje).', 'Scheduled sending is on: every day at 10 p.m., each person receives it according to the chosen frequency (daily: today; weekly: Monday, last 7 days up to today; monthly: day 1, last 30 days up to today).', 'Envío programado activado: todos los días a las 22 h, cada persona recibe según la frecuencia elegida (diario: hoy; semanal: lunes, últimos 7 días hasta hoy; mensual: día 1, últimos 30 días hasta hoy).'],
   ['Envio agendado desligado: os relatórios só saem quando você clicar em "Enviar agora".', 'Scheduled sending is off: reports are only sent when you click "Send now".', 'Envío programado desactivado: los informes solo salen cuando usted haga clic en "Enviar ahora".'],
   ['Cota diária de e-mails restante: {0}.', 'Remaining daily e-mail quota: {0}.', 'Cuota diaria de correos restante: {0}.'],
   ['Destinatário', 'Recipient', 'Destinatario'],
@@ -1037,9 +1161,109 @@ DICT.push(
   ['Selecione o turno.', 'Select the shift.', 'Seleccione el turno.'],
   ['Hub não definido', 'Hub not set', 'Hub no definido'],
   ['O acesso de {0} ainda não está ligado a um Hub ativo. Fale com quem administra o sistema.', 'Access for {0} is not linked to an active Hub yet. Contact whoever administers the system.', 'El acceso de {0} aún no está vinculado a un Hub activo. Hable con quien administra el sistema.'],
+  ['Trocar de Hub', 'Switch Hub', 'Cambiar de Hub'],
+  ['Hub ativo: {0}', 'Active Hub: {0}', 'Hub activo: {0}'],
+  ['O Hub ativo foi alterado em outra aba. Atualizando.', 'The active Hub was changed in another tab. Refreshing.', 'El Hub activo se cambió en otra pestaña. Actualizando.'],
+  ['Aguarde terminar a operação em andamento para trocar de Hub.', 'Wait for the current operation to finish before switching Hub.', 'Espere a que termine la operación en curso para cambiar de Hub.'],
+  ['O Hub não foi trocado. Tente de novo.', 'The Hub was not switched. Try again.', 'No se cambió el Hub. Inténtelo de nuevo.'],
+  ['O log é grande: só os registros mais recentes foram lidos. Use filtros de data para ver os mais antigos.', 'The log is large: only the most recent records were read. Use date filters to see older ones.', 'El registro es grande: solo se leyeron los más recientes. Use filtros de fecha para ver los más antiguos.'],
+  ['{0} ação(ões) foram concluídas mas não puderam ser registradas no log (veja os registros de execução do Apps Script).', '{0} action(s) completed but could not be written to the log (see the Apps Script execution logs).', '{0} acción(es) se completaron pero no pudieron registrarse en el log (vea los registros de ejecución de Apps Script).'],
+  ['Seu perfil não pode trocar de Hub.', 'Your profile cannot switch Hub.', 'Su perfil no puede cambiar de Hub.'],
+  ['Hub inexistente ou inativo.', 'Hub does not exist or is inactive.', 'Hub inexistente o inactivo.'],
+  ['Somente o Admin global gerencia Hubs.', 'Only the global Admin manages Hubs.', 'Solo el Admin global gestiona los Hubs.'],
+  ['Este Hub foi alterado ou removido. Clique em Atualizar e tente de novo.', 'This Hub was changed or removed. Click Refresh and try again.', 'Este Hub fue modificado o eliminado. Haga clic en Actualizar e inténtelo de nuevo.'],
+  ['Troque para outro Hub antes de desativar o Hub em uso.', 'Switch to another Hub before deactivating the Hub in use.', 'Cambie a otro Hub antes de desactivar el Hub en uso.'],
+  ['Tipo de carga inválido.', 'Invalid upload type.', 'Tipo de carga no válido.'],
+  ['Nenhum Hub ativo. Cadastre um Hub antes da carga.', 'No active Hub. Register a Hub before the upload.', 'Ningún Hub activo. Registre un Hub antes de la carga.'],
+  ['Nada foi gravado. Corrija os erros indicados.', 'Nothing was saved. Fix the errors listed.', 'No se guardó nada. Corrija los errores indicados.'],
+  ['Clusters são padrão para todos os Hubs e não entram por carga.', 'Clusters are standard for all Hubs and are not uploaded.', 'Los clusters son estándar para todos los Hubs y no entran por carga.'],
+  ['Não use os caracteres | ; = < > nem iniciar com + - @.', 'Do not use the characters | ; = < > or start with + - @.', 'No use los caracteres | ; = < > ni empiece con + - @.'],
+  ['Leia e aceite o aviso de transparência para continuar.', 'Read and accept the transparency notice to continue.', 'Lea y acepte el aviso de transparencia para continuar.'],
+  ['Perfis são iguais em todos os Hubs.', 'Profiles are the same in all Hubs.', 'Los perfiles son iguales en todos los Hubs.'],
+  ['ainda não está ligado a um Hub ativo. Fale com quem administra o sistema.', 'is not linked to an active Hub yet. Talk to whoever administers the system.', 'aún no está vinculado a un Hub activo. Hable con quien administra el sistema.'],
+  ['Selecione o turno.', 'Select the shift.', 'Seleccione el turno.'],
+  ['Já existe um Hub com este nome.', 'A Hub with this name already exists.', 'Ya existe un Hub con este nombre.'],
+  ['Limite de 50 Hubs atingido.', 'Limit of 50 Hubs reached.', 'Límite de 50 Hubs alcanzado.'],
+  ['Texto grande demais (máximo 100000 caracteres).', 'Text too large (maximum 100000 characters).', 'Texto demasiado grande (máximo 100000 caracteres).'],
+  ['Máximo de 500 linhas por carga.', 'Maximum of 500 rows per upload.', 'Máximo de 500 filas por carga.'],
+  ['Esta solicitação é de outro Hub.', 'This request belongs to another Hub.', 'Esta solicitud es de otro Hub.'],
+  ['Este usuário pertence a outro Hub.', 'This user belongs to another Hub.', 'Este usuario pertenece a otro Hub.'],
+  ['Somente o Admin global cadastra outro Admin.', 'Only the global Admin can register another Admin.', 'Solo el Admin global registra a otro Admin.'],
+  ['Este cadastro é padrão para todos os Hubs e só o Admin global pode alterá-lo.', 'This record is standard for all Hubs and only the global Admin can change it.', 'Este registro es estándar para todos los Hubs y solo el Admin global puede modificarlo.'],
+  ['O texto do aviso mudou. Leia a nova versão.', 'The notice text has changed. Read the new version.', 'El texto del aviso cambió. Lea la nueva versión.'],
+  ['Nenhuma linha de dados abaixo do cabeçalho.', 'No data rows below the header.', 'Ninguna fila de datos debajo del encabezado.'],
+  ['Nenhum Hub ativo para gravar. Cadastre ou ative um Hub.', 'No active Hub to save to. Register or activate a Hub.', 'Ningún Hub activo para guardar. Registre o active un Hub.'],
   ['Hubs', 'Hubs', 'Hubs'],
   ['Operação', 'Operation', 'Operación'],
   ['Turno', 'Shift', 'Turno']
+);
+DICT.push(
+  /* v9: regras de auditoria por líder */
+  ['Regras de auditoria', 'Audit rules', 'Reglas de auditoría'],
+  ['Regras de auditoria por líder', 'Audit rules per leader', 'Reglas de auditoría por líder'],
+  ['Audita o próprio time e outros times', 'Audits their own team and other teams', 'Audita su propio equipo y otros equipos'],
+  ['Audita só o próprio time', 'Audits only their own team', 'Audita solo su propio equipo'],
+  ['Audita só outros times', 'Audits only other teams', 'Audita solo otros equipos'],
+  ['Não audita ninguém', 'Audits nobody', 'No audita a nadie'],
+  ['Times de: {0}', 'Teams of: {0}', 'Equipos de: {0}'],
+  ['Qualquer time', 'Any team', 'Cualquier equipo'],
+  ['Turnos: {0}', 'Shifts: {0}', 'Turnos: {0}'],
+  ['Todos os turnos', 'All shifts', 'Todos los turnos'],
+  ['Cores e símbolos: {0}', 'Colors and symbols: {0}', 'Colores y símbolos: {0}'],
+  ['Todas as cores e símbolos', 'All colors and symbols', 'Todos los colores y símbolos'],
+  ['Processos: {0}', 'Processes: {0}', 'Procesos: {0}'],
+  ['Todos os processos', 'All processes', 'Todos los procesos'],
+  ['Vê os resultados do próprio time', 'Sees the results of their own team', 'Ve los resultados de su propio equipo'],
+  ['Não vê os resultados do próprio time', 'Does not see the results of their own team', 'No ve los resultados de su propio equipo'],
+  ['Vê o histórico dos times que pode auditar', 'Sees the history of the teams they can audit', 'Ve el historial de los equipos que puede auditar'],
+  ['Vê só as auditorias que fez em outros times', 'Sees only the audits they did on other teams', 'Ve solo las auditorías que hizo en otros equipos'],
+  ['Não foi possível carregar as regras.', 'Could not load the rules.', 'No se pudieron cargar las reglas.'],
+  ['Padrão', 'Default', 'Predeterminado'],
+  ['Exceção', 'Exception', 'Excepción'],
+  ['Regra inválida', 'Invalid rule', 'Regla inválida'],
+  ['Editar', 'Edit', 'Editar'],
+  ['Editar regra de {0}', 'Edit rule of {0}', 'Editar regla de {0}'],
+  ['Nenhum líder com perfil de time neste Hub.', 'No leader with a team profile in this Hub.', 'Ningún líder con perfil de equipo en este Hub.'],
+  ['Defina, para cada líder, quem ele pode auditar e o que ele vê. Sem regra, o líder audita só o próprio time. Você não edita a própria regra.', 'Define, for each leader, who they can audit and what they see. Without a rule, the leader audits only their own team. You cannot edit your own rule.', 'Defina, para cada líder, a quién puede auditar y qué ve. Sin regla, el líder audita solo su propio equipo. Usted no edita su propia regla.'],
+  ['Líder', 'Leader', 'Líder'],
+  ['Situação', 'Status', 'Situación'],
+  ['Regra', 'Rule', 'Regla'],
+  ['Regra de {0}', 'Rule for {0}', 'Regla de {0}'],
+  ['Quem este líder pode auditar', 'Who this leader can audit', 'A quién puede auditar este líder'],
+  ['O próprio time', 'Their own team', 'Su propio equipo'],
+  ['Desmarque para evitar conflito de interesse.', 'Clear to avoid a conflict of interest.', 'Desmarque para evitar conflicto de interés.'],
+  ['Outros times', 'Other teams', 'Otros equipos'],
+  ['Quais times (nenhum marcado = todos)', 'Which teams (none checked = all)', 'Qué equipos (ninguno marcado = todos)'],
+  ['Turnos (nenhum marcado = todos)', 'Shifts (none checked = all)', 'Turnos (ninguno marcado = todos)'],
+  ['Cores e símbolos das docas e clusters (nenhum marcado = todos)', 'Colors and symbols of docks and clusters (none checked = all)', 'Colores y símbolos de muelles y clústeres (ninguno marcado = todos)'],
+  ['Processos (nenhum marcado = todos)', 'Processes (none checked = all)', 'Procesos (ninguno marcado = todos)'],
+  ['O que este líder vê nos relatórios', 'What this leader sees in the reports', 'Qué ve este líder en los informes'],
+  ['Resultados do próprio time', 'Results of their own team', 'Resultados de su propio equipo'],
+  ['De outros times: só as auditorias que ele fez', 'Other teams: only the audits they did', 'De otros equipos: solo las auditorías que hizo'],
+  ['De outros times: o histórico dos times que pode auditar', 'Other teams: the history of the teams they can audit', 'De otros equipos: el historial de los equipos que puede auditar'],
+  ['Resumo', 'Summary', 'Resumen'],
+  ['Com esta regra o líder não poderá auditar ninguém.', 'With this rule the leader will not be able to audit anyone.', 'Con esta regla el líder no podrá auditar a nadie.'],
+  ['Salvar regra', 'Save rule', 'Guardar regla'],
+  ['Cancelar', 'Cancel', 'Cancelar'],
+  ['Voltar ao padrão', 'Back to default', 'Volver al predeterminado'],
+  ['Confirmar volta ao padrão?', 'Confirm back to default?', '¿Confirmar volver al predeterminado?'],
+  ['O servidor recusou a regra.', 'The server refused the rule.', 'El servidor rechazó la regla.'],
+  ['Regra salva', 'Rule saved', 'Regla guardada'],
+  ['Regra removida: o líder voltou ao padrão', 'Rule removed: the leader is back to the default', 'Regla eliminada: el líder volvió al predeterminado'],
+  /* mensagens do servidor (v9) */
+  ['Sua regra de auditoria não permite este colaborador. Fale com o Site Leader.', 'Your audit rule does not allow this employee. Talk to the Site Leader.', 'Su regla de auditoría no permite este colaborador. Hable con el Site Leader.'],
+  ['Sua regra de auditoria não permite este processo. Fale com o Site Leader.', 'Your audit rule does not allow this process. Talk to the Site Leader.', 'Su regla de auditoría no permite este proceso. Hable con el Site Leader.'],
+  ['Sua regra de auditoria não permite este turno. Fale com o Site Leader.', 'Your audit rule does not allow this shift. Talk to the Site Leader.', 'Su regla de auditoría no permite este turno. Hable con el Site Leader.'],
+  ['Sua regra de auditoria não permite esta cor e símbolo. Fale com o Site Leader.', 'Your audit rule does not allow this color and symbol. Talk to the Site Leader.', 'Su regla de auditoría no permite este color y símbolo. Hable con el Site Leader.'],
+  ['A regra de auditoria deste usuário está inválida. Fale com o Site Leader.', 'This user\'s audit rule is invalid. Talk to the Site Leader.', 'La regla de auditoría de este usuario es inválida. Hable con el Site Leader.'],
+  ['Ninguém edita a própria regra. Peça a outra pessoa com esta permissão.', 'Nobody edits their own rule. Ask another person with this permission.', 'Nadie edita su propia regla. Pida a otra persona con este permiso.'],
+  ['Regra inválida. Confira os campos e tente de novo.', 'Invalid rule. Check the fields and try again.', 'Regla inválida. Revise los campos e intente de nuevo.'],
+  ['Líder não encontrado neste Hub, ou o perfil dele não permite regra individual.', 'Leader not found in this Hub, or their profile does not allow an individual rule.', 'Líder no encontrado en este Hub, o su perfil no permite una regla individual.'],
+  ['Sua regra de auditoria não permite auditar. Fale com o Site Leader.', 'Your audit rule does not allow auditing. Talk to the Site Leader.', 'Su regla de auditoría no permite auditar. Hable con el Site Leader.'],
+  ['Não foi possível registrar a mudança no log; a regra não foi alterada.', 'Could not record the change in the log; the rule was not changed.', 'No se pudo registrar el cambio en el log; la regla no fue modificada.'],
+  ['Seu perfil só altera colaboradores do seu próprio time e não muda time, turno nem cargo. Fale com o Site Leader.', 'Your profile only changes employees of your own team and does not change team, shift or role. Talk to the Site Leader.', 'Su perfil solo modifica colaboradores de su propio equipo y no cambia equipo, turno ni cargo. Hable con el Site Leader.'],
+  ['Há mais de um líder com o seu nome no cadastro de pessoas. Fale com o Site Leader para corrigir.', 'There is more than one leader with your name in the people register. Talk to the Site Leader to fix it.', 'Hay más de un líder con su nombre en el registro de personas. Hable con el Site Leader para corregirlo.'],
+  ['Seu perfil só inclui colaboradores do seu próprio time.', 'Your profile only adds employees to your own team.', 'Su perfil solo agrega colaboradores a su propio equipo.']
 );
 /* ---------- idiomas: português (base), inglês e espanhol ----------
    O texto-fonte do sistema é o português. Cada texto exibido é traduzido por dicionário (DICT em i18n.js),
@@ -1212,6 +1436,7 @@ const ICON = {
   'settings': '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
   'shield': '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
   'lock': '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  'calendar': '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/>',
   'target': '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
   'alert': '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
   'info': '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
@@ -1243,11 +1468,11 @@ function icones(raiz) {
 }
 
 /* ---------- constantes de exibição ---------- */
-const TIT = { matriz: 'Matriz de Processos', form: 'Formulário de Auditoria', minhas: 'Minhas metas', geral: 'Visão Geral', auditorias: 'Auditorias realizadas', auditores: 'Auditores e metas', proc: 'Por processo', doca: 'Por doca e cluster', colab: 'Por colaborador e equipe', tend: 'Tendência', export: 'Exportar', cad: 'Cadastros', cfg: 'Configurações', acessos: 'Acessos', autorizar: 'Autorizações', log: 'Log de atividade' };
+const TIT = { matriz: 'Matriz de Processos', form: 'Formulário de Auditoria', minhas: 'Minhas metas', feedbacks: 'Meus feedbacks', programacao: 'Programação', geral: 'Visão Geral', auditorias: 'Auditorias realizadas', auditores: 'Auditores e metas', proc: 'Por processo', doca: 'Por doca e cluster', colab: 'Por colaborador e equipe', tend: 'Tendência', export: 'Exportar', cad: 'Cadastros', cfg: 'Configurações', acessos: 'Acessos', autorizar: 'Autorizações', log: 'Log de atividade' };
 const NAV = [
-  { sec: 'Operação', itens: [{ id: 'matriz', ic: 'layout-grid' }, { id: 'form', ic: 'clipboard-check' }, { id: 'minhas', ic: 'target' }] },
+  { sec: 'Operação', itens: [{ id: 'matriz', ic: 'layout-grid' }, { id: 'form', ic: 'clipboard-check' }, { id: 'minhas', ic: 'target' }, { id: 'feedbacks', ic: 'pencil' }] },
   { sec: 'Análise', itens: [{ id: 'rel', ic: 'bar-chart', t: 'Relatórios', kids: ['geral', 'auditorias', 'auditores', 'proc', 'doca', 'colab', 'tend', 'export'] }] },
-  { sec: 'Administração', itens: [{ id: 'cad', ic: 'database' }, { id: 'cfg', ic: 'settings' }, { id: 'acessos', ic: 'shield' }, { id: 'autorizar', ic: 'user-check' }, { id: 'log', ic: 'list' }] }
+  { sec: 'Administração', itens: [{ id: 'programacao', ic: 'calendar' }, { id: 'cad', ic: 'database' }, { id: 'cfg', ic: 'settings' }, { id: 'acessos', ic: 'shield' }, { id: 'autorizar', ic: 'user-check' }, { id: 'log', ic: 'list' }] }
 ];
 const NAV_ITENS = NAV.reduce(function (a, s) { return a.concat(s.itens); }, []);
 const KID_IC = { geral: 'layout-dashboard', auditorias: 'list', auditores: 'users', proc: 'layers', doca: 'package', colab: 'user', tend: 'trending-up', export: 'download' };
@@ -1255,8 +1480,8 @@ const REL = ['geral', 'auditorias', 'auditores', 'proc', 'doca', 'colab', 'tend'
 const TXT_FAIXA = { vermelho: 'Em Inconformidade', observacao: 'Em Observação', verde: 'Completo e em Conformidade' };
 const TXT_FAIXA_C = { vermelho: 'Inconforme', observacao: 'Em observação', verde: 'Conforme' };
 const COR = { verde: '#1E9E5A', observacao: '#F2B100', vermelho: '#D93025' };
-const TXT_META = { no_ritmo: 'No ritmo', em_risco: 'Em risco', atingida: 'Atingida', nao_atingida: 'Não atingida', futura: 'Não iniciada', inativa: 'Inativa' };
-const LEIT = ['bootstrap', 'getMatriz', 'relatorio', 'minhasMetas', 'listarAcessos'];
+const TXT_META = { no_ritmo: 'No ritmo', em_risco: 'Em risco', atingida: 'Atingida', nao_atingida: 'Não atingida', futura: 'Não iniciada', inativa: 'Inativa', cancelada: 'Cancelada' };
+const LEIT = ['bootstrap', 'getMatriz', 'relatorio', 'minhasMetas', 'minhasMetasLider', 'listarMetasLider', 'listarFeedbacks', 'meusFeedbacks', 'contarFeedbacks', 'listarAcessos'];
 const pode = function (p) { return !!S.u && S.u.perms.indexOf(p) > -1; };
 const tela = function (t) { return !!S.u && S.u.telas.indexOf(t) > -1; };
 /** Faixa da nota: abaixo do corte = vermelho; do corte até a média = observação (amarelo); média ou mais = verde. */
@@ -1306,7 +1531,7 @@ function rpc(fn) {
   return new Promise(function (ok, er) {
     const r = google.script.run
       .withSuccessHandler(function (x) { esperaFim(); if (LEIT.indexOf(fn) > -1) marcar(); ok(x); })
-      .withFailureHandler(function (e) { esperaFim(); toast((e && e.message) || String(e), true); er(e); });
+      .withFailureHandler(function (e) { esperaFim(); toast((e && e.message) || String(e), true); if (fn !== 'bootstrap' && /^Leia e aceite o aviso/.test((e && e.message) || '')) reavisar(); er(e); });
     r[fn].apply(r, a);
   });
 }
@@ -1372,15 +1597,16 @@ function chipEst(proc, id) {
 /* ---------- carga, menu e navegação ---------- */
 function aplicarBase(b) {
   S.cfg = b.config; S.procs = b.processos; S.tipos = b.tipos; S.db = b.db; S.visual = b.visual || { cores: [], simbolos: [] };
-  S.turnos = b.turnos || S.turnos; S.auditores = b.auditores || []; S.pend = b.pendentes || 0;
+  S.turnos = b.turnos || S.turnos; S.auditores = b.auditores || []; S.pend = b.pendentes || 0; S.metasNovas = b.metasNovas || 0; aplicarFb(b.fb, b.user);
   if (!S.mp || S.procs.indexOf(S.mp) < 0) S.mp = S.procs[0] || '';
 }
 /** O item "Autorizações" só aparece sozinho quando a pessoa não tem a tela Acessos (nela, vira uma aba). */
 const autorizarSolo = function () { return tela('autorizar') && !tela('acessos'); };
 function renderNav() {
   const btn = function (id, t, cls) {
-    const al = (id === 'acessos' || id === 'autorizar') && pode('autorizar') && S.pend > 0;
-    return '<button type="button" data-v="' + id + '" class="' + (cls || '') + (al ? ' alerta' : '') + '"' + (S.v === id ? ' aria-current="page"' : '') + (al ? ' aria-label="' + esc(t) + ': ' + S.pend + ' pendente(s)"' : '') + '>' + ic(KID_IC[id] || (NAV_ITENS.find(function (n) { return n.id === id; }) || {}).ic, 18) + '<span class="t">' + esc(t) + '</span>' + (al ? '<span class="badge-n">' + S.pend + '</span>' : '') + '</button>';
+    const al = (id === 'acessos' || id === 'autorizar') && pode('autorizar') && S.pend > 0, nm = id === 'minhas' && S.metasNovas > 0, fb = S.fb || {}, nf = id === 'feedbacks' && fb.fbMeus > 0, np = id === 'programacao' && pode('obrigacoes') && ((fb.fbAbertasHub | 0) + (fb.fbAtrasadosHub | 0)) > 0;
+    const n = nm ? S.metasNovas : nf ? fb.fbMeus : np ? (fb.fbAbertasHub | 0) + (fb.fbAtrasadosHub | 0) : S.pend, tot = al || nm || nf || np, rot = nm ? '{0}: {1} nova(s)' : nf ? '{0}: {1} a registrar' : np ? '{0}: {1} precisam de ação' : '{0}: {1} pendente(s)';
+    return '<button type="button" data-v="' + id + '" class="' + (cls || '') + (tot ? ' alerta' : '') + '"' + (S.v === id ? ' aria-current="page"' : '') + (tot ? ' aria-label="' + esc(tpl(tr(rot), [t, n])) + '"' : '') + '>' + ic(KID_IC[id] || (NAV_ITENS.find(function (x) { return x.id === id; }) || {}).ic, 18) + '<span class="t">' + esc(t) + '</span>' + (tot ? '<span class="badge-n">' + n + '</span>' : '') + '</button>';
   };
   let h = '';
   NAV.forEach(function (sec) {
@@ -1399,7 +1625,7 @@ function renderNav() {
   $$('#nav button[data-v]').forEach(function (b) { b.classList.toggle('on', b.dataset.v === S.v || (b.dataset.v === 'acessos' && S.v === 'acessos')); });
 }
 const LOAD = {
-  matriz: function () { return loadMatriz(); }, form: function () { if (!S.F) novoForm(); renderForm(); }, minhas: function () { return loadMinhas(); },
+  matriz: function () { return loadMatriz(); }, form: function () { if (!S.F) novoForm(); renderForm(); }, minhas: function () { return loadMinhas(); }, programacao: function () { return loadProgramacao(); }, feedbacks: function () { return loadFeedbacksMeus(); },
   cad: function () { renderCad(); }, cfg: function () { loadCfg(); }, acessos: function () { return loadAcessos(); }, autorizar: function () { return loadAutorizar(); }, log: function () { return loadLog(); }
 };
 function nav(v) {
@@ -1418,7 +1644,7 @@ function nav(v) {
 }
 async function atualizar() {
   const b = $('#refresh'), t = $('#refresh .t'); b.disabled = true; t.textContent = 'Atualizando…';
-  try { aplicarBase(await rpc('bootstrap', true)); S.mx = {}; S.edit = null; S.delIdx = -1; S.ac = null; fbarFill(); nav(S.v); } catch (e) { /* o aviso já foi exibido */ } finally { b.disabled = false; t.textContent = 'Atualizar'; }
+  try { const nb = await rpc('bootstrap', true); if (!aplicarBootstrap(nb)) return; S.mx = {}; S.edit = null; S.delIdx = -1; S.ac = null; fbarFill(); nav(S.v); } catch (e) { /* o aviso já foi exibido */ } finally { b.disabled = false; t.textContent = 'Atualizar'; }
 }
 
 /* ---------- filtros globais dos relatórios ---------- */
@@ -2007,14 +2233,21 @@ async function bannerMetas() {
 }
 async function loadMinhas() {
   const el = $('#v-minhas'); el.innerHTML = '<div class="card">' + skel(5) + '</div>';
-  let ms; try { ms = await rpc('minhasMetas'); } catch (e) { el.innerHTML = '<div class="card">Não foi possível carregar suas metas.</div>'; return; }
+  let ms, pg; try { const r = await Promise.all([rpc('minhasMetas'), rpc('minhasMetasLider')]); ms = r[0]; pg = r[1]; } catch (e) { el.innerHTML = '<div class="card">Não foi possível carregar suas metas.</div>'; return; }
   if (S.v !== 'minhas') return;
   ms.sort(function (a, b) { return b.ini.localeCompare(a.ini); });
-  el.innerHTML = ms.map(function (m) {
+  const prog = pg.slice().sort(function (a, b) { return a.fim.localeCompare(b.fim); }).map(function (m) {
+    const p = Math.min(100, m.feito / m.qtd * 100), venc = m.status === 'nao_atingida';
+    return '<div class="card"><div class="hd"><div><b>' + esc(m.qtd + ' ' + tr('auditoria(s)')) + '</b>' + (m.nova ? ' <span class="tag-t">' + esc(tr('Nova')) + '</span>' : '') + '<br><small class="muted">' + esc(fmtD(m.ini) + ' ' + tr('a') + ' ' + fmtD(m.fim)) + (venc ? ' · ' + esc(tr('Prazo vencido')) : '') + (m.desc ? ' · ' + esc(m.desc) : '') + '</small><br><small class="muted">' + esc(escopoMeta(m)) + '</small></div>' + pill(m.status, tr(TXT_META[m.status])) + '</div>' +
+      '<div class="meta-t"><span class="nm"><b>' + m.feito + '</b> ' + esc(tr('de')) + ' ' + m.qtd + '</span>' + meter(p, m.status) + '<span class="num">' + Math.round(p) + '%</span></div></div>';
+  }).join('');
+  const antes = prog ? '<div class="sect">' + esc(tr('Programadas pela liderança')) + '</div>' + prog : '';
+  if (S.metasNovas > 0 || pg.some(function (m) { return m.nova; })) { rpc('marcarMetasVistas').then(function () { S.metasNovas = 0; renderNav(); }).catch(function () { /* o contador volta no próximo ciclo */ }); }
+  el.innerHTML = antes + (prog && ms.length ? '<div class="sect">' + esc(tr('Metas individuais')) + '</div>' : '') + ms.map(function (m) {
     const p = Math.min(100, m.feito / m.qtd * 100);
     return '<div class="card"><div class="hd"><div><b>' + m.qtd + ' auditoria(s)' + (m.processos.length ? ' em ' + esc(m.processos.join(', ')) : ' em qualquer processo') + '</b><br><small class="muted">' + fmtD(m.ini) + ' a ' + fmtD(m.fim) + (m.desc ? ' · ' + esc(m.desc) : '') + '</small></div>' + pill(m.status, TXT_META[m.status]) + '</div>' +
       '<div class="meta-t"><span class="nm"><b>' + m.feito + '</b> de ' + m.qtd + '</span>' + meter(p, m.status) + '<span class="num">' + Math.round(p) + '%</span></div></div>';
-  }).join('') || '<div class="card">' + vz('Você não tem metas ativas no momento.') + '</div>';
+  }).join('') || (prog ? '' : '<div class="card">' + vz('Você não tem metas ativas no momento.') + '</div>');
 }
 
 /* ---------- formulário de auditoria (1 a N colaboradores) ---------- */
@@ -2670,19 +2903,20 @@ function abasAc() {
   if (pode('autorizar') && tela('autorizar')) a.push('autorizar');
   if (S.ac.pode.usuarios) a.push('usuarios');
   if (S.ac.pode.perfis) a.push('perfis');
+  if (S.ac.pode.regras) a.push('regras');
   a.push('log');
   if (S.ac.pode.perfis) a.push('seg');
   if (hubsAba()) a.push('hubs');
   return a;
 }
-const AC_NOME = { autorizar: 'Autorizações', usuarios: 'Usuários', perfis: 'Perfis', log: 'Histórico de alterações', seg: 'Segurança', hubs: 'Hubs' };
+const AC_NOME = { autorizar: 'Autorizações', usuarios: 'Usuários', perfis: 'Perfis', regras: 'Regras de auditoria', log: 'Histórico de alterações', seg: 'Segurança', hubs: 'Hubs' };
 function renderAcessos() {
   const el = $('#v-acessos'), abas = abasAc();
   const tabs = '<div class="tabs">' + abas.map(function (k) { return '<button type="button" class="' + (k === S.acTab ? 'on' : '') + '" data-at="' + k + '">' + AC_NOME[k] + (k === 'autorizar' && S.pend > 0 ? '<span class="badge-n">' + S.pend + '</span>' : '') + '</button>'; }).join('') + '</div>';
   el.innerHTML = tabs + '<div id="acBody"></div>';
   if (S.acTab === 'usuarios' && S.acSol) drawUsuarios({ vals: { Email_Google: S.acSol.email, Nome: S.acSol.nome, Status_Ativo: 'Sim', Hub: S.acSol.hub || '' }, edit: null, erros: {} });
   else if (S.acTab === 'autorizar') drawAutorizar('#acBody');
-  else ({ usuarios: drawUsuarios, perfis: drawPerfis, log: drawLog, seg: drawSeg, hubs: drawHubs })[S.acTab]();
+  else ({ usuarios: drawUsuarios, perfis: drawPerfis, regras: drawRegras, log: drawLog, seg: drawSeg, hubs: drawHubs })[S.acTab]();
 }
 /** Atualiza só o número de pendentes na aba Autorizar, sem redesenhar a tela. */
 function atualizarSeloAcessos() {
@@ -2957,6 +3191,16 @@ function sondar() {
   }).withFailureHandler(function () { /* silencioso: tenta de novo no próximo ciclo */ }).contarPendentes();
 }
 
+/** Consulta silenciosa de metas novas (a cada 2 minutos, só com a aba visível). */
+function sondarMetas() {
+  if (!S.u || !tela('minhas') || document.hidden) return;
+  google.script.run.withSuccessHandler(function (n) {
+    if (typeof n !== 'number' || n === S.metasNovas) return;
+    S.metasNovas = n; renderNav();
+    if (S.v === 'minhas' && !S.busy && $('#modal').classList.contains('hidden')) loadMinhas(); // quem já está na tela vê a meta nova na hora
+  }).withFailureHandler(function () { /* silencioso: tenta de novo no próximo ciclo */ }).contarMetasNovas();
+}
+
 /* ---------- temas: automático, claro, escuro e laranja ---------- */
 const TEMAS = ['auto', 'light', 'dark', 'orange'];
 function temaSalvo() { try { const t = localStorage.getItem('pcTema'); return TEMAS.indexOf(t) > -1 ? t : 'light'; } catch (e) { return 'light'; } }
@@ -3056,7 +3300,11 @@ function mostrarLogin(b) {
 }
 function irEscolherConta() {
   const url = 'https://accounts.google.com/AccountChooser' + (S.appUrl ? '?continue=' + encodeURIComponent(S.appUrl) : '');
-  try { window.open(url, '_top'); } catch (e) { toast('Não foi possível abrir o seletor de contas do Google.', true); }
+  /* O app roda num iframe protegido: window.open é bloqueado, mas um link com target="_top" acionado pelo clique do usuário navega a página inteira. */
+  try {
+    const a = document.createElement('a'); a.href = url; a.target = '_top'; a.rel = 'noopener'; a.style.display = 'none';
+    document.body.appendChild(a); a.click(); a.remove();
+  } catch (e) { toast('Não foi possível abrir o seletor de contas do Google.', true); }
 }
 async function entrarGoogle() {
   if (!S.bl.email) { irEscolherConta(); return; }
@@ -3119,7 +3367,7 @@ function bindGlobais() {
     else if (q('#lgOutra')) irEscolherConta();
     else if (q('#cdEnviar')) enviarCadastro();
     else if (q('#cdVoltar') || q('#lgOkVoltar')) painelLogin('lgEntrar');
-    else if (q('#plRetry')) window.location.reload();
+    else if (q('#plRetry')) tentarDeNovo();
     else if (q('#srOk')) recusarSolicitacaoUI();
     else if ((x = q('[data-sa]'))) aprovarSolicitacao(Number(x.dataset.sa));
     else if ((x = q('[data-sr]'))) pedirRecusa(Number(x.dataset.sr));
@@ -3143,8 +3391,21 @@ function bindGlobais() {
 
 /* ---------- inicialização ---------- */
 let appIniciado = false;
+/* Sessão do navegador: lembra que ESTA conta já confirmou o login, em todas as abas, por 8 h sem uso (renovada a cada pulso enquanto a aba está visível).
+   Guarda só o e-mail e a hora; quem muda de conta Google ou fica 8 h parado vê a tela de login de novo. */
+const SESSAO_MIN = 480;
+function pcLer() { try { return localStorage.getItem('pc_sess'); } catch (e) { return (window.__pcMem || {}).pc_sess || null; } }
+function pcGravar(v) { try { localStorage.setItem('pc_sess', v); } catch (e) { (window.__pcMem = window.__pcMem || {}).pc_sess = v; } }
+function sessaoAtiva(email) {
+  try { const s = JSON.parse(pcLer() || 'null'); return !!(s && email && s.e === String(email).toLowerCase() && Date.now() - s.t < SESSAO_MIN * 60000 && s.t <= Date.now() + 60000); } catch (e) { return false; }
+}
+function marcarSessao(email) { if (email) pcGravar(JSON.stringify({ e: String(email).toLowerCase(), t: Date.now() })); }
 function iniciarApp(b) {
-  if (appIniciado) return;
+  if (appIniciado) {
+    if (S.reentrar) { S.reentrar = false; S.u = b.user; aplicarBase(b); $('#app').classList.remove('hidden'); v8Cabecalho(); renderNav(); nav(S.v || S.u.telas[0]); }
+    return;
+  }
+  marcarSessao(b.user && b.user.email);
   appIniciado = true;
   aplicarBase(b); S.u = b.user;
   $('#whoN').textContent = S.u.nome; $('#whoP').textContent = S.u.perfil;
@@ -3166,11 +3427,20 @@ function iniciarApp(b) {
   nav(['matriz', 'form', 'minhas', 'geral'].filter(tela)[0] || S.u.telas[0]);
   setInterval(relUpd, 30000);
   if (pode('autorizar')) setInterval(sondar, window.PC_POLL || 120000);
+  if (tela('minhas')) setInterval(sondarMetas, window.PC_POLL || 120000);
+  setInterval(sondarFb, window.PC_POLL || 120000);
+}
+let bootLigado = false;
+function tentarDeNovo() {
+  $('#carregando').classList.remove('pl-erro'); $('#plTxt').textContent = 'Carregando o sistema'; $('#carregando .pl-d').classList.remove('hidden'); $('#plRetry').classList.add('hidden');
+  boot();
 }
 async function boot() {
-  iniciarIdioma(); aplicarTema(temaSalvo(), false); icones(document);
-  $$('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === idiomaAtual())); });
-  bindGlobais(); v8Eventos();
+  if (!bootLigado) {
+    iniciarIdioma(); aplicarTema(temaSalvo(), false); icones(document);
+    $$('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === idiomaAtual())); });
+    bindGlobais(); v8Eventos(); v9Eventos(); v10Eventos(); bootLigado = true;
+  }
   const ini = Date.now(), min = window.PC_MIN_LOAD != null ? window.PC_MIN_LOAD : 700;
   let b, fim = false;
   const vigia = setTimeout(function () { if (!fim) falhaCarga('o servidor não respondeu em 60 s'); }, 60000);
@@ -3178,7 +3448,8 @@ async function boot() {
   const resto = min - (Date.now() - ini);
   if (resto > 0) await new Promise(function (r) { setTimeout(r, resto); });
   try {
-    if (b.user.ok) { if (!entrarApp(b)) { fim = true; clearTimeout(vigia); sair($('#carregando')); return; } } else { mostrarLogin(b); }
+    if (b.user.ok && window.PC_GATE !== false && !sessaoAtiva(b.user.email)) { mostrarLogin(b); }
+    else if (b.user.ok) { if (!entrarApp(b)) { fim = true; clearTimeout(vigia); sair($('#carregando')); return; } } else { mostrarLogin(b); }
   } catch (e) { fim = true; clearTimeout(vigia); falhaCarga(e && e.message); return; }
   fim = true; clearTimeout(vigia);
   sair($('#carregando'));
@@ -3205,7 +3476,7 @@ function desenharEmailRel() {
   }).join('') || '<tr><td colspan="6" class="muted">Nenhum destinatário. Adicione quem deve receber o relatório.</td></tr>';
   el.innerHTML = '<div class="card" style="max-width:980px"><div class="hd"><div><b>Relatório por e-mail</b><br><small class="muted">Cada pessoa recebe somente o que o próprio perfil autoriza (um líder vê só o time dele; o Site Leader vê tudo). O e-mail traz as notas, a situação das auditorias, os itens críticos e os principais ofensores.</small></div>' +
     '<div><button type="button" class="btn' + (d.agendado ? '' : ' pri') + '" id="erAgenda">' + (d.agendado ? 'Desligar envio agendado' : 'Ligar envio agendado') + '</button> <button type="button" class="btn" id="erTodos">' + ic('mail', 14) + 'Enviar agora para todos</button></div></div>' +
-    '<p class="muted" style="margin:6px 0 10px">' + '<span>' + (d.agendado ? 'Envio agendado ligado: todo dia às 7h, cada pessoa recebe conforme a frequência escolhida (diário: o dia anterior; semanal: segunda-feira, últimos 7 dias; mensal: dia 1, últimos 30 dias).' : 'Envio agendado desligado: os relatórios só saem quando você clicar em "Enviar agora".') + '</span>' + (d.cota != null ? ' <span>' + esc(tpl('Cota diária de e-mails restante: {0}.', [d.cota])) + '</span>' : '') + '</p>' +
+    '<p class="muted" style="margin:6px 0 10px">' + '<span>' + (d.agendado ? 'Envio agendado ligado: todo dia às 22h, cada pessoa recebe conforme a frequência escolhida (diário: o dia de hoje; semanal: segunda-feira, últimos 7 dias até hoje; mensal: dia 1, últimos 30 dias até hoje).' : 'Envio agendado desligado: os relatórios só saem quando você clicar em "Enviar agora".') + '</span>' + (d.cota != null ? ' <span>' + esc(tpl('Cota diária de e-mails restante: {0}.', [d.cota])) + '</span>' : '') + '</p>' +
     '<div class="scroll"><table><thead><tr><th>Destinatário</th><th>Frequência</th><th>Idioma</th><th></th><th>Último envio</th><th></th></tr></thead><tbody>' + linhas + '</tbody></table></div>' +
     '<div class="sect">Adicionar destinatário</div><div class="grid" style="align-items:end"><label>Pessoa<select id="erPessoa"><option value="">Selecione…</option>' + d.candidatos.map(function (c) { return '<option value="' + esc(c.email) + '">' + esc(c.nome + ' · ' + c.perfil) + '</option>'; }).join('') + '</select></label>' +
     '<label>Frequência<select id="erFreq">' + opt(FREQ_TXT, 'Semanal') + '</select></label><label>Idioma<select id="erIdioma">' + opt(IDIOMA_TXT, idiomaAtual()) + '</select></label>' +
@@ -3251,9 +3522,30 @@ document.addEventListener('change', async function (e) {
 /* ---------- v8: Hub, usuários online, log de atividade, aviso de transparência e carga em massa ---------- */
 function hubOn() { return !!(S.u && S.u.hub && S.u.hub.on); }
 function hubGlobal() { return hubOn() && !!S.u.hub.global; }
+/** Aplica o bootstrap com segurança: aviso pendente ou usuário sem acesso nunca deixam o estado do cliente pela metade. */
+/** Esquece tudo o que é do Hub anterior (formulários abertos, filtros, listas, gráficos). */
+function resetEstadoHub() {
+  S.mx = {}; S.edit = null; S.delIdx = -1; S.ac = null; S.d = {}; S.det = null; S.F = null; S.pag = 1; S.lg = null; S.online = null; S.hubs = null; S.rg = null; S.rgEd = null; S.cadQ = ''; S.cadF = '';
+  ['processo', 'doca', 'turno', 'lider', 'colaborador', 'auditor', 'faixa', 'obs'].forEach(function (k) { S.flt[k] = ''; });
+  S.lgSeq = (S.lgSeq || 0) + 1; if ($('#v-log')) $('#v-log').innerHTML = '';
+  destruirGraficos();
+}
+function aplicarBootstrap(b) {
+  if (b && b.bloqueado) { S.reentrar = true; mostrarAviso(b); return false; }
+  if (!b || !b.user || !b.user.ok) { S.reentrar = true; $('#app').classList.add('hidden'); mostrarLogin(b || { user: { ok: false } }); return false; }
+  const idAntes = S.u && S.u.hub ? S.u.hub.id : null;
+  S.u = b.user; aplicarBase(b);
+  if (idAntes !== null && b.user.hub && b.user.hub.id !== idAntes) resetEstadoHub(); // Hub mudou (outra aba): nada do anterior pode sobrar
+  v8Cabecalho(); return true;
+}
+/** O servidor passou a exigir o aceite no meio da sessão: leva a pessoa à tela de aceite. */
+async function reavisar() {
+  if ($('#avisoTela')) return;
+  try { const b = await rpc('bootstrap', false); if (b && b.bloqueado) { S.reentrar = true; mostrarAviso(b); } } catch (e) { /* o aviso de erro já foi exibido */ }
+}
 function hubNomeDe(id) {
   if (id === '*') return tr('Admin global');
-  const l = (S.u && S.u.hub && S.u.hub.lista) || (S.ac && S.ac.hubs) || [];
+  const l = (S.u && S.u.hub && S.u.hub.lista) || S.hubs || (S.ac && S.ac.hubs) || [];
   const h = l.find(function (x) { return x.id === id; });
   return h ? h.nome : String(id || '');
 }
@@ -3264,18 +3556,34 @@ function v8Cabecalho() {
   if (!hubOn() || !h.nome) { el.classList.add('hidden'); return; }
   el.classList.remove('hidden');
   if (h.global && h.lista && h.lista.length > 1) {
-    el.innerHTML = ic('globe', 14) + '<label class="sr" for="hubSel">' + esc(tr('Hub ativo')) + '</label><select id="hubSel" title="' + esc(tr('Hub ativo')) + '">' + h.lista.map(function (x) { return '<option value="' + esc(x.id) + '"' + (x.id === h.id ? ' selected' : '') + '>' + esc(x.nome) + '</option>'; }).join('') + '</select><span class="op">' + esc(h.operacao) + '</span>';
+    el.innerHTML = '<label class="hl" for="hubSel">' + ic('globe', 14) + esc(tr('Hub ativo')) + '</label><select id="hubSel" title="' + esc(tr('Trocar de Hub')) + '">' + h.lista.map(function (x) { return '<option value="' + esc(x.id) + '"' + (x.id === h.id ? ' selected' : '') + '>' + esc(x.nome) + '</option>'; }).join('') + '</select><span class="op">' + esc(h.operacao) + '</span>';
   } else el.innerHTML = ic('globe', 14) + '<b>' + esc(h.nome) + '</b><span class="op">' + esc(h.operacao) + '</span>';
 }
+/** Troca o Hub sem recarregar a página (recarregar o iframe do Apps Script deixa a tela em branco). */
 async function trocarHub(id) {
-  try { await rpc('definirHubAtivo', id); location.reload(); } catch (e) { /* aviso exibido */ }
+  const sel = $('#hubSel'), antes = S.u.hub.id;
+  if (S.busy || (S.F && S.F.busy)) { v8Cabecalho(); toast(tr('Aguarde terminar a operação em andamento para trocar de Hub.'), true); return; }
+  S.busy = true; if (sel) sel.disabled = true;
+  let trocou = false;
+  try {
+    await rpc('definirHubAtivo', id); trocou = true;
+    const b = await rpc('bootstrap', false); // o servidor já separa o cache por Hub: não precisa limpar o de todos
+    if (!aplicarBootstrap(b)) return;
+    resetEstadoHub(); fbarFill(); renderNav(); nav(S.v);
+    v8OnlineN(); toast(tpl('Hub ativo: {0}', [S.u.hub.nome]));
+  } catch (e) {
+    if (trocou) { try { await rpc('definirHubAtivo', antes); } catch (e2) { /* sem como desfazer agora */ } toast(tr('O Hub não foi trocado. Tente de novo.'), true); }
+    S.u.hub.id = antes; v8Cabecalho();
+  } finally { S.busy = false; const s2 = $('#hubSel'); if (s2) s2.focus(); }
 }
 /* ----- online ----- */
 function v8Pulso() {
   if (typeof google === 'undefined' || document.hidden) return;
-  try { google.script.run.withSuccessHandler(function () { /* ok */ }).withFailureHandler(function () { /* silencioso */ }).pulso(); } catch (e) { /* sem conexão */ }
+  if (S.u && S.u.email) marcarSessao(S.u.email); // renova a sessão enquanto a pessoa usa o sistema
+  try { google.script.run.withSuccessHandler(function (r) { if (r && r.hub && hubOn() && S.u.hub.id && r.hub !== S.u.hub.id && !S.busy) { toast(tr('O Hub ativo foi alterado em outra aba. Atualizando.'), true); atualizar(); } }).withFailureHandler(function () { /* silencioso */ }).pulso(); } catch (e) { /* sem conexão */ }
 }
 async function v8OnlineN() {
+  if (document.hidden) return;
   try {
     const r = await new Promise(function (ok, er) { google.script.run.withSuccessHandler(ok).withFailureHandler(er).listarOnline(); });
     const n = $('#onlineN'); if (n) n.textContent = r.total;
@@ -3300,13 +3608,15 @@ async function desenharLog() {
     '<label>' + esc(tr('Usuário')) + '<input data-lf="email" maxlength="120" placeholder="' + esc(tr('Nome ou e-mail')) + '"></label><label>' + esc(tr('Ação')) + '<input data-lf="acao" maxlength="120" placeholder="' + esc(tr('Texto da ação')) + '"></label>' +
     (hubGlobal() ? '<label>Hub<select data-lf="hub"><option value="">' + esc(tr('Todos')) + '</option>' + S.u.hub.lista.map(function (x) { return '<option value="' + esc(x.id) + '">' + esc(x.nome) + '</option>'; }).join('') + '</select></label>' : '') +
     '</form><div style="margin-top:10px"><button type="button" class="btn pri" id="lgBuscar">' + esc(tr('Filtrar')) + '</button> <button type="button" class="btn" id="lgLimpar">' + esc(tr('Limpar filtros')) + '</button></div></div><div class="card" id="lgRes">' + skel(5) + '</div>';
-  const f = Object.assign({}, L.f, { pagina: L.pagina });
-  let r; try { r = await rpc('consultarLog', f); } catch (e) { $('#lgRes').innerHTML = esc(tr('Não foi possível carregar o log.')); return; }
-  if (S.v !== 'log') return;
+  const f = Object.assign({}, L.f, { pagina: L.pagina }), seq = S.lgSeq = (S.lgSeq || 0) + 1;
+  let r; try { r = await rpc('consultarLog', f); } catch (e) { if (seq === S.lgSeq && $('#lgRes')) $('#lgRes').innerHTML = esc(tr('Não foi possível carregar o log.')); return; }
+  if (S.v !== 'log' || seq !== S.lgSeq || !$('#lgRes')) return;
   const pag = Math.max(1, Math.ceil(r.total / r.porPagina));
   $('#lgRes').innerHTML = '<div class="scroll"><table><thead><tr><th>' + esc(tr('Quando')) + '</th>' + (hubGlobal() ? '<th>Hub</th>' : '') + '<th>' + esc(tr('Usuário')) + '</th><th>' + esc(tr('Perfil')) + '</th><th>' + esc(tr('Ação')) + '</th><th>' + esc(tr('Alvo')) + '</th><th>' + esc(tr('Detalhe')) + '</th></tr></thead><tbody>' +
     (r.linhas.map(function (x) { return '<tr><td>' + esc(fmtDt(x.ts)) + '</td>' + (hubGlobal() ? '<td>' + esc(x.hubNome) + '</td>' : '') + '<td>' + esc(x.nome) + '<br><small class="muted">' + esc(x.email) + '</small></td><td>' + esc(x.perfil) + '</td><td>' + esc(x.acao) + '</td><td>' + esc(x.alvo) + '</td><td>' + esc(x.detalhe) + '</td></tr>'; }).join('') || '<tr><td colspan="7" class="muted">' + esc(tr('Nenhum registro encontrado.')) + '</td></tr>') +
     '</tbody></table></div><div class="toolbar" style="margin-top:10px"><button type="button" class="btn" id="lgAnt"' + (L.pagina <= 1 ? ' disabled' : '') + '>' + esc(tr('Anterior')) + '</button><span class="muted">' + esc(tpl('Página {0} de {1}', [L.pagina, pag])) + ' · ' + esc(tpl('{0} registros', [r.total])) + '</span><button type="button" class="btn" id="lgProx"' + (L.pagina >= pag ? ' disabled' : '') + '>' + esc(tr('Próxima')) + '</button></div>' +
+    (r.truncado ? '<div class="note bad">' + ic('alert', 16) + '<span>' + esc(tr('O log é grande: só os registros mais recentes foram lidos. Use filtros de data para ver os mais antigos.')) + '</span></div>' : '') +
+    (r.falhasLog ? '<div class="note bad">' + ic('alert', 16) + '<span>' + esc(tpl('{0} ação(ões) foram concluídas mas não puderam ser registradas no log (veja os registros de execução do Apps Script).', [r.falhasLog])) + '</span></div>' : '') +
     '<p class="muted">' + esc(tpl('Mostra as ações dos últimos {0} dias; registros mais antigos ficam na planilha de arquivo, por até 1 ano.', [r.vivoDias])) + '</p>';
 }
 function lerFiltroLog() { const f = {}; $$('#lgForm [data-lf]').forEach(function (i) { if (i.value.trim()) f[i.dataset.lf] = i.value.trim(); }); return f; }
@@ -3334,7 +3644,7 @@ async function salvarHubUI() {
     const r = await rpc('salvarHub', Object.assign({ _row: S.hubEd ? S.hubEd._row : 0 }, o, { ativo: o.ativo !== 'Não' }), S.hubEd);
     if (!r.ok) { if (r.erros) Object.keys(r.erros).forEach(function (k) { const s = $('#acBody [data-he="' + k + '"]'); if (s) s.textContent = r.erros[k]; }); toast(r.msg || tr('Há campos obrigatórios ou inválidos.'), true); return; }
     S.hubEd = null; toast(tr('Hub salvo')); await drawHubs();
-    S.u.hub.lista = r.hubs.filter(function (h) { return h.ativo; });
+    S.u.hub.lista = r.hubs.filter(function (h) { return h.ativo; }); v8Cabecalho();
   } catch (e) { /* aviso exibido */ } finally { S.busy = false; }
 }
 /** Campo Hub do formulário de usuário (só para o Admin global; os demais criam sempre no próprio Hub). */
@@ -3368,9 +3678,10 @@ async function cargaModelo() {
 }
 function cargaErros(r) {
   return '<div class="note bad">' + ic('alert', 16) + '<span><b>' + esc(tr('Nada foi gravado.')) + '</b> ' + esc(tpl('{0} erro(s) encontrado(s):', [r.totalErros])) + '</span></div><ul class="cg-err">' +
-    r.erros.map(function (e) { return '<li>' + (e.linha ? esc(tpl('Linha {0}', [e.linha])) : '') + (e.coluna ? ', ' + esc(tr('coluna')) + ' <b>' + esc(e.coluna) + '</b>' : '') + ': ' + esc(e.msg) + '</li>'; }).join('') + '</ul>';
+    r.erros.map(function (e) { return '<li>' + (e.linha ? esc(tpl('Linha {0}', [e.linha])) : '') + (e.coluna ? ', ' + esc(tr('coluna')) + ' <b>' + esc(e.coluna) + '</b>' : '') + ': <span>' + esc(tr(e.msg)) + '</span></li>'; }).join('') + '</ul>';
 }
 async function cargaValidar() {
+  if (!$('#cgTexto')) return;
   const txt = $('#cgTexto').value; if (!txt.trim()) { $('#cgRes').innerHTML = '<div class="note">' + esc(tr('Cole a tabela do Excel na caixa.')) + '</div>'; return; }
   let r; try { r = await rpc('importarPrevia', S.carga.tipo, txt); } catch (e) { return; }
   S.carga.ok = r.ok; $('#cgGravar').classList.toggle('hidden', !r.ok);
@@ -3411,8 +3722,10 @@ function v8Init() {
   v8Cabecalho();
   if (pode('ver_online')) { $('#onlineBtn').classList.remove('hidden'); v8OnlineN(); setInterval(v8OnlineN, window.PC_POLL || 120000); }
   v8Pulso(); setInterval(v8Pulso, window.PC_POLL || 120000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) v8Pulso(); });
 }
 function v8Eventos() {
+  document.addEventListener('input', function (e) { if (e.target && e.target.id === 'cgTexto' && S.carga) { S.carga.ok = false; const g = $('#cgGravar'); if (g) g.classList.add('hidden'); } });
   document.addEventListener('change', function (e) { if (e.target && e.target.id === 'hubSel') trocarHub(e.target.value); });
   document.addEventListener('click', function (e) {
     const t = e.target && e.target.closest ? e.target.closest('button') : null; if (!t) return;
@@ -3429,6 +3742,394 @@ function v8Eventos() {
     else if (t.id === 'cgValidar') cargaValidar();
     else if (t.id === 'cgGravar') cargaGravar();
     else if (t.id === 'avAceitar') aceitarAvisoUI();
+  });
+}
+/* ---------- regras de auditoria por líder (v9) ---------- */
+const lst = function (a) { return a.join(', '); };
+function regraResumo(r) {
+  const p = [];
+  p.push(r.proprio && r.outros ? tr('Audita o próprio time e outros times') : r.proprio ? tr('Audita só o próprio time') : r.outros ? tr('Audita só outros times') : tr('Não audita ninguém'));
+  if (r.outros) p.push(r.times.length ? tpl(tr('Times de: {0}'), [lst(r.times)]) : tr('Qualquer time'));
+  p.push(r.turnos.length ? tpl(tr('Turnos: {0}'), [lst(r.turnos)]) : tr('Todos os turnos'));
+  p.push(r.cores.length ? tpl(tr('Cores e símbolos: {0}'), [lst(r.cores)]) : tr('Todas as cores e símbolos'));
+  p.push(r.processos.length ? tpl(tr('Processos: {0}'), [lst(r.processos)]) : tr('Todos os processos'));
+  p.push(r.verProprio ? tr('Vê os resultados do próprio time') : tr('Não vê os resultados do próprio time'));
+  p.push(r.verOutros === 'time' ? tr('Vê o histórico dos times que pode auditar') : tr('Vê só as auditorias que fez em outros times'));
+  return p.join('. ') + '.';
+}
+const regraCopia = function (r) { return { proprio: r.proprio, outros: r.outros, times: r.times.slice(), turnos: r.turnos.slice(), cores: r.cores.slice(), processos: r.processos.slice(), verProprio: r.verProprio, verOutros: r.verOutros }; };
+let rgSeq = 0;
+async function drawRegras() {
+  const el = $('#acBody'), n = ++rgSeq; el.innerHTML = '<div class="card">' + skel(4) + '</div>';
+  try { const r = await rpc('listarRegrasLider'); if (n !== rgSeq) return; S.rg = r; } catch (e) { el.innerHTML = '<div class="card">' + esc(tr('Não foi possível carregar as regras.')) + '</div>'; return; }
+  if (!naAba('regras')) return;
+  S.rgEd = null; S.rgDel = false; desenharRegras();
+}
+function desenharRegras() {
+  const R = S.rg, el = $('#acBody'), ed = S.rgEd ? R.lideres.find(function (l) { return l.email === S.rgEd; }) : null;
+  const linhas = R.lideres.map(function (l) {
+    const sit = !l.regra.existe ? tr('Padrão') : l.regra.ok ? tr('Exceção') : tr('Regra inválida');
+    return '<tr><td>' + esc(l.nome) + '<br><small class="muted">' + esc(l.email) + '</small></td><td><span class="tag-t">' + esc(sit) + '</span></td><td>' + esc(regraResumo(l.regra)) + '</td>' +
+      '<td><button type="button" class="btn sm" data-rg-ed="' + esc(l.email) + '" aria-label="' + esc(tpl(tr('Editar regra de {0}'), [l.nome])) + '">' + ic('pencil', 14) + esc(tr('Editar')) + '</button></td></tr>';
+  }).join('') || '<tr><td colspan="4" class="muted">' + esc(tr('Nenhum líder com perfil de time neste Hub.')) + '</td></tr>';
+  el.innerHTML = '<div class="card"><div class="hd"><b>' + esc(tr('Regras de auditoria por líder')) + '</b></div>' +
+    '<p class="muted" style="margin:6px 0 10px">' + esc(tr('Defina, para cada líder, quem ele pode auditar e o que ele vê. Sem regra, o líder audita só o próprio time. Você não edita a própria regra.')) + '</p></div>' +
+    (ed ? '<div id="rgEd"></div>' : '') +
+    '<div class="card"><div class="scroll"><table><thead><tr><th>' + esc(tr('Líder')) + '</th><th>' + esc(tr('Situação')) + '</th><th>' + esc(tr('Regra')) + '</th><th></th></tr></thead><tbody>' + linhas + '</tbody></table></div></div>';
+  if (ed) desenharEditorRegra(ed);
+}
+function desenharEditorRegra(l) {
+  const R = S.rg, f = S.rgForm; S.rgDel = false;
+  const grupo = function (attr, itens, marc) {
+    return '<div class="grid">' + itens.map(function (x) { return '<label class="perm"><input type="checkbox" ' + attr + '="' + esc(x) + '"' + (marc.indexOf(x) > -1 ? ' checked' : '') + '><span><b>' + esc(x) + '</b></span></label>'; }).join('') + '</div>';
+  };
+  $('#rgEd').innerHTML = '<div class="card"><div class="hd"><b>' + esc(tpl(tr('Regra de {0}'), [l.nome])) + '</b></div>' +
+    '<div class="sect">' + esc(tr('Quem este líder pode auditar')) + '</div>' +
+    '<div class="grid"><label class="perm"><input type="checkbox" data-rg="proprio"' + (f.proprio ? ' checked' : '') + '><span><b>' + esc(tr('O próprio time')) + '</b><small>' + esc(tr('Desmarque para evitar conflito de interesse.')) + '</small></span></label>' +
+    '<label class="perm"><input type="checkbox" data-rg="outros"' + (f.outros ? ' checked' : '') + '><span><b>' + esc(tr('Outros times')) + '</b></span></label></div>' +
+    (f.outros ? '<div class="sect">' + esc(tr('Quais times (nenhum marcado = todos)')) + '</div>' + grupo('data-rg-t', R.times, f.times) : '') +
+    '<div class="sect">' + esc(tr('Turnos (nenhum marcado = todos)')) + '</div>' + grupo('data-rg-tu', R.turnos, f.turnos) +
+    '<div class="sect">' + esc(tr('Cores e símbolos das docas e clusters (nenhum marcado = todos)')) + '</div>' + grupo('data-rg-c', R.cores, f.cores) +
+    '<div class="sect">' + esc(tr('Processos (nenhum marcado = todos)')) + '</div>' + grupo('data-rg-p', R.processos, f.processos) +
+    '<div class="sect">' + esc(tr('O que este líder vê nos relatórios')) + '</div>' +
+    '<div class="grid"><label class="perm"><input type="checkbox" data-rg="verProprio"' + (f.verProprio ? ' checked' : '') + '><span><b>' + esc(tr('Resultados do próprio time')) + '</b></span></label></div>' +
+    '<div class="grid"><label class="perm"><input type="radio" name="rgvo" data-rg-vo="proprias"' + (f.verOutros === 'proprias' ? ' checked' : '') + '><span><b>' + esc(tr('De outros times: só as auditorias que ele fez')) + '</b></span></label>' +
+    '<label class="perm"><input type="radio" name="rgvo" data-rg-vo="time"' + (f.verOutros === 'time' ? ' checked' : '') + '><span><b>' + esc(tr('De outros times: o histórico dos times que pode auditar')) + '</b></span></label></div>' +
+    '<div id="rgPrev" class="resumo" aria-live="polite"></div><div id="rgAv"></div>' +
+    '<div style="margin-top:12px"><button type="button" class="btn pri" id="rgSalvar">' + esc(tr('Salvar regra')) + '</button> <button type="button" class="btn" id="rgCancel">' + esc(tr('Cancelar')) + '</button>' +
+    (l.regra.existe ? ' <button type="button" class="btn bad" id="rgPadrao">' + esc(tr('Voltar ao padrão')) + '</button>' : '') + '</div></div>';
+  prevRegra();
+}
+function prevRegra() {
+  const f = S.rgForm, p = $('#rgPrev'), av = $('#rgAv'); if (!p) return;
+  p.innerHTML = '<b>' + esc(tr('Resumo')) + '</b><p style="margin:4px 0 0">' + esc(regraResumo(f)) + '</p>';
+  av.innerHTML = !f.proprio && !f.outros ? '<div role="alert">' + aviso(esc(tr('Com esta regra o líder não poderá auditar ninguém.'))) + '</div>' : '';
+}
+function lerRegraForm() {
+  const f = S.rgForm, marc = function (a) { return $$('#rgEd [' + a + ']:checked').map(function (i) { return i.getAttribute(a); }); };
+  $$('#rgEd [data-rg]').forEach(function (i) { f[i.dataset.rg] = i.checked; });
+  if (f.outros) f.times = marc('data-rg-t'); else f.times = [];
+  f.turnos = marc('data-rg-tu'); f.cores = marc('data-rg-c'); f.processos = marc('data-rg-p');
+  const vo = $('#rgEd [data-rg-vo]:checked'); if (vo) f.verOutros = vo.dataset.rgVo;
+}
+async function salvarRegraUI() {
+  if (S.busy || !S.rgEd) return;
+  lerRegraForm(); S.busy = true; const b = $('#rgSalvar'); if (b) b.disabled = true;
+  try {
+    const r = await rpc('salvarRegraLider', Object.assign({ email: S.rgEd }, S.rgForm));
+    if (!r.ok) { toast(r.msg || tr('O servidor recusou a regra.'), true); if (b) b.disabled = false; return; }
+    S.rg = r.dados; S.rgEd = null; toast(tr('Regra salva')); if (naAba('regras')) desenharRegras();
+  } catch (x) { if (b) b.disabled = false; } finally { S.busy = false; }
+}
+async function padraoRegraUI() {
+  if (S.busy || !S.rgEd) return;
+  if (!S.rgDel) { S.rgDel = true; $('#rgPadrao').textContent = tr('Confirmar volta ao padrão?'); setTimeout(function () { S.rgDel = false; const b = $('#rgPadrao'); if (b) b.textContent = tr('Voltar ao padrão'); }, 4000); return; }
+  S.busy = true;
+  try {
+    const r = await rpc('excluirRegraLider', S.rgEd);
+    if (!r.ok) { toast(r.msg || tr('O servidor recusou a regra.'), true); return; }
+    S.rg = r.dados; S.rgEd = null; S.rgDel = false; toast(tr('Regra removida: o líder voltou ao padrão')); if (naAba('regras')) desenharRegras();
+  } catch (x) { /* o aviso de erro já foi mostrado */ } finally { S.busy = false; }
+}
+function v9Eventos() {
+  document.addEventListener('change', function (e) { if (naAba('regras') && S.rgEd && e.target && e.target.closest && e.target.closest('#rgEd')) { const antes = S.rgForm.outros; lerRegraForm(); if (antes !== S.rgForm.outros) desenharEditorRegra(S.rg.lideres.find(function (l) { return l.email === S.rgEd; })); else prevRegra(); } });
+  document.addEventListener('click', function (e) {
+    const t = e.target && e.target.closest ? e.target.closest('button') : null; if (!t || !naAba('regras') || (S.busy && t.id !== 'rgSalvar')) return;
+    if (t.dataset.rgEd !== undefined) { const l = S.rg.lideres.find(function (x) { return x.email === t.dataset.rgEd; }); if (l) { S.rgEd = l.email; S.rgForm = regraCopia(l.regra.ok ? l.regra : S.rg.padrao); S.rgDel = false; desenharRegras(); const c = $('#rgEd'); if (c && c.scrollIntoView) c.scrollIntoView({ block: 'start' }); } }
+    else if (t.id === 'rgSalvar') salvarRegraUI();
+    else if (t.id === 'rgCancel') { S.rgEd = null; desenharRegras(); }
+    else if (t.id === 'rgPadrao') padraoRegraUI();
+  });
+}
+/* ---------- v10: programar auditorias por líder (Site Leader e Admin) ---------- */
+let pgSeq = 0;
+const pgNaTela = function () { return S.v === 'programacao'; };
+const pgMetas = function () { return pgNaTela() && (S.pgTab || 'metas') === 'metas'; };
+function escopoMeta(m) {
+  const p = [];
+  p.push(m.processos.length ? tpl(tr('Processos: {0}'), [lst(m.processos)]) : tr('Todos os processos'));
+  p.push(m.turnos.length ? tpl(tr('Turnos: {0}'), [lst(m.turnos)]) : tr('Todos os turnos'));
+  p.push(m.cores.length ? tpl(tr('Cores e símbolos: {0}'), [lst(m.cores)]) : tr('Todas as cores e símbolos'));
+  p.push(m.times.length ? tpl(tr('Times de: {0}'), [lst(m.times)]) : tr('Qualquer time'));
+  return p.join('. ') + '.';
+}
+const pgNAcao = function () { return S.fb ? (S.fb.fbAbertasHub || 0) + (S.fb.fbAtrasadosHub || 0) : 0; };
+function pgRotuloAba(id, txt, n) { return esc(txt) + (n ? '<span class="badge-n" aria-hidden="true">' + n + '</span><span class="sr-only"> (' + esc(tpl(tr('{0} precisam de ação'), [n])) + ')</span>' : ''); }
+function pgCasca() {
+  const el = $('#v-programacao'), t = S.pgTab || 'metas', af = document.activeElement, tinhaFoco = !!(af && af.dataset && af.dataset.pgtab && el.contains(af));
+  const aba = function (id, txt, n) { return '<button type="button" role="tab" id="pgTab-' + id + '" data-pgtab="' + id + '" aria-selected="' + (t === id) + '" tabindex="' + (t === id ? '0' : '-1') + '" aria-controls="pgPainel" class="' + (t === id ? 'on' : '') + '">' + pgRotuloAba(id, txt, n) + '</button>'; };
+  el.innerHTML = '<div class="tabs" role="tablist" aria-label="' + esc(tr('Programação')) + '">' + aba('metas', tr('Metas por líder')) + aba('feedbacks', tr('Feedbacks obrigatórios'), pgNAcao()) + '</div><div id="pgPainel" role="tabpanel" aria-labelledby="pgTab-' + t + '" tabindex="-1"></div>';
+  if (tinhaFoco) $('#pgTab-' + t).focus(); // o foco acompanha a aba escolhida, sem esperar o servidor
+  return $('#pgPainel');
+}
+async function loadProgramacao() {
+  const n = ++pgSeq, painel = pgCasca();
+  if ((S.pgTab || 'metas') === 'feedbacks') { loadFeedbacksSL(n); return; }
+  painel.innerHTML = '<div class="card">' + skel(5) + '</div>';
+  try { const r = await rpc('listarMetasLider'); if (n !== pgSeq) return; S.pg = r; } catch (e) { painel.innerHTML = '<div class="card">' + esc(tr('Não foi possível carregar a programação.')) + '</div>'; return; }
+  if (!pgNaTela()) return;
+  S.pgForm = S.pgForm || novoPgForm(); S.pgCancel = ''; desenharProgramacao();
+}
+function novoPgForm() {
+  const d = new Date(), f = new Date(); f.setDate(d.getDate() + 7);
+  const iso = function (x) { return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
+  return { email: '', qtd: 1, ini: iso(d), fim: iso(f), desc: '', times: [], turnos: [], cores: [], processos: [] };
+}
+function desenharProgramacao() {
+  const R = S.pg, f = S.pgForm, el = $('#pgPainel');
+  const opts = '<option value="">' + esc(tr('Escolha a pessoa')) + '</option>' + R.responsaveis.slice().sort(function (a, b) { return a.nome.localeCompare(b.nome); }).map(function (u) {
+    return '<option value="' + esc(u.email) + '"' + (f.email === u.email ? ' selected' : '') + '>' + esc(u.nome + ' (' + u.perfil + ')') + '</option>';
+  }).join('');
+  const grupo = function (attr, itens, marc, leg) {
+    return '<fieldset class="grp-f"><legend class="sect">' + esc(leg) + '</legend><div class="grid">' + itens.map(function (x) { return '<label class="perm"><input type="checkbox" ' + attr + '="' + esc(x) + '"' + (marc.indexOf(x) > -1 ? ' checked' : '') + '><span><b>' + esc(x) + '</b></span></label>'; }).join('') + '</div></fieldset>';
+  };
+  const ativas = R.metas.filter(function (m) { return !m.cancelada; }).sort(function (a, b) { return a.fim.localeCompare(b.fim); });
+  const canc = R.metas.filter(function (m) { return m.cancelada; }).sort(function (a, b) { return b.criadaEm.localeCompare(a.criadaEm); });
+  const linha = function (m) {
+    const p = Math.min(100, m.feito / m.qtd * 100), venc = !m.cancelada && m.status === 'nao_atingida';
+    return '<tr><td>' + esc(m.nome) + '<br><small class="muted">' + esc(m.email) + '</small></td><td>' + esc(m.qtd + ' ' + tr('auditoria(s)')) + '<br><small class="muted">' + esc(escopoMeta(m)) + (m.desc ? ' ' + esc(m.desc) : '') + '</small></td>' +
+      '<td>' + esc(fmtD(m.ini) + ' ' + tr('a') + ' ' + fmtD(m.fim)) + (venc ? '<br><small class="muted">' + esc(tr('Prazo vencido')) + '</small>' : '') + '</td>' +
+      '<td>' + (m.cancelada ? '—' : '<div class="meta-t"><span class="nm"><b>' + m.feito + '</b> ' + esc(tr('de')) + ' ' + m.qtd + '</span>' + meter(p, m.status) + '</div>') + '</td>' +
+      '<td>' + pill(m.cancelada ? 'inativa' : m.status, m.cancelada ? tr('Cancelada') : tr(TXT_META[m.status])) + (m.cancelada ? '' : (m.avisoPendente ? '<br><small class="muted">' + esc(tr('Aviso por e-mail pendente')) + '</small>' : '') + (m.visto ? '' : '<br><small class="muted">' + esc(tr('Ainda não aberta pelo líder')) + '</small>')) + '</td>' +
+      '<td>' + (m.cancelada ? '' : '<button type="button" class="btn sm" data-pg-cancel="' + esc(m.id) + '" data-pg-nome="' + esc(m.nome) + '" aria-label="' + esc(tpl(tr('Cancelar a meta de {0}'), [m.nome])) + '">' + esc(tr('Cancelar')) + '</button>') + '</td></tr>';
+  };
+  const tab = function (l) {
+    return '<div class="scroll" role="region" tabindex="0" aria-label="' + esc(tr('Metas programadas')) + '"><table><caption class="sr-only">' + esc(tr('Metas programadas')) + '</caption><thead><tr><th scope="col">' + esc(tr('Responsável')) + '</th><th scope="col">' + esc(tr('O que fazer')) + '</th><th scope="col">' + esc(tr('Prazo')) + '</th><th scope="col">' + esc(tr('Progresso')) + '</th><th scope="col">' + esc(tr('Situação')) + '</th><th scope="col"><span class="sr-only">' + esc(tr('Ações')) + '</span></th></tr></thead><tbody>' + l.map(linha).join('') + '</tbody></table></div>';
+  };
+  el.innerHTML = '<div class="card"><div class="hd"><b>' + esc(tr('Programar auditorias')) + '</b></div>' +
+    '<p class="muted" style="margin:6px 0 10px">' + esc(tr('Defina quantas auditorias a pessoa deve fazer e até quando. Ela recebe um aviso por e-mail e vê a meta em Minhas metas. A meta só conta auditorias que a regra de auditoria dela permite.')) + '</p>' +
+    '<div class="grid"><label class="fld"><span>' + esc(tr('Responsável')) + '</span><select id="pgEmail" required aria-required="true">' + opts + '</select></label>' +
+    '<label class="fld"><span>' + esc(tr('Quantidade de auditorias')) + '</span><input id="pgQtd" type="number" min="1" max="9999" step="1" required aria-required="true" value="' + esc(f.qtd) + '"></label>' +
+    '<label class="fld"><span>' + esc(tr('Início')) + '</span><input id="pgIni" type="date" value="' + esc(f.ini) + '"></label>' +
+    '<label class="fld"><span>' + esc(tr('Prazo final')) + '</span><input id="pgFim" type="date" value="' + esc(f.fim) + '"></label></div>' +
+    '<label class="fld"><span>' + esc(tr('Observação (opcional)')) + '</span><input id="pgDesc" type="text" maxlength="200" value="' + esc(f.desc) + '"></label>' +
+    '<details style="margin-top:8px"><summary>' + esc(tr('Limitar a processos, turnos, cores ou times (opcional)')) + '</summary>' +
+    grupo('data-pg-p', R.processos, f.processos, tr('Processos (nenhum marcado = todos)')) +
+    grupo('data-pg-tu', R.turnos, f.turnos, tr('Turnos (nenhum marcado = todos)')) +
+    grupo('data-pg-c', R.cores, f.cores, tr('Cores e símbolos das docas e clusters (nenhum marcado = todos)')) +
+    grupo('data-pg-t', R.times, f.times, tr('Quais times (nenhum marcado = todos)')) + '</details>' +
+    '<div id="pgPrev" class="resumo"></div><div id="pgErr" role="alert"></div><div id="pgLive" class="sr-only" role="status"></div>' +
+    '<div style="margin-top:12px"><button type="button" class="btn pri" id="pgSalvar">' + esc(tr('Programar meta')) + '</button></div></div>' +
+    '<div class="card"><div class="hd"><b>' + esc(tr('Metas programadas')) + '</b></div>' + (ativas.length ? tab(ativas) : vz(tr('Nenhuma meta ativa. Programe a primeira acima.'))) + '</div>' +
+    (canc.length ? '<div class="card"><div class="hd"><b>' + esc(tr('Metas canceladas')) + '</b></div>' + tab(canc) + '</div>' : '');
+  prevPg();
+}
+function prevPg() {
+  const f = S.pgForm, p = $('#pgPrev'); if (!p) return;
+  const u = S.pg.responsaveis.find(function (x) { return x.email === f.email; });
+  p.innerHTML = u ? '<b>' + esc(tr('Resumo')) + '</b><p style="margin:4px 0 0">' + esc(tpl(tr('{0} deve fazer {1} auditoria(s) de {2} a {3}.'), [u.nome, f.qtd, fmtD(f.ini), fmtD(f.fim)]) + ' ' + escopoMeta(f)) + '</p>' : '';
+}
+function lerPgForm() {
+  const f = S.pgForm, marc = function (a) { return $$('#v-programacao [' + a + ']:checked').map(function (i) { return i.getAttribute(a); }); };
+  f.email = $('#pgEmail').value; f.qtd = $('#pgQtd').value; f.ini = $('#pgIni').value; f.fim = $('#pgFim').value; f.desc = $('#pgDesc').value;
+  f.processos = marc('data-pg-p'); f.turnos = marc('data-pg-tu'); f.cores = marc('data-pg-c'); f.times = marc('data-pg-t');
+}
+async function salvarPgUI() {
+  if (S.busy) return;
+  lerPgForm(); S.busy = true; const b = $('#pgSalvar'); if (b) b.disabled = true; $('#pgErr').innerHTML = '';
+  try {
+    const r = await rpc('salvarMetaLider', S.pgForm);
+    if (!r.ok) {
+      const msgs = r.erros ? Object.keys(r.erros).map(function (k) { return r.erros[k]; }) : [r.msg || tr('O servidor recusou a meta.')];
+      $('#pgErr').innerHTML = aviso(msgs.map(esc).join(' ')); if (b) b.disabled = false;
+      const campo = r.erros && { email: '#pgEmail', qtd: '#pgQtd', ini: '#pgIni', fim: '#pgFim', desc: '#pgDesc' }[Object.keys(r.erros)[0]];
+      if (campo && $(campo)) { $(campo).setAttribute('aria-invalid', 'true'); $(campo).focus(); }
+      return;
+    }
+    S.pgForm = novoPgForm(); S.pgCancel = '';
+    if (r.recarregar) { toast(r.emailEnviado ? tr('Meta programada. O aviso foi enviado por e-mail.') : tr('Meta programada, mas o e-mail não foi enviado. O aviso será reenviado às 22h.'), !r.emailEnviado); await loadProgramacao(); return; }
+    S.pg = r;
+    toast(r.emailEnviado ? tr('Meta programada. O aviso foi enviado por e-mail.') : tr('Meta programada, mas o e-mail não foi enviado. O aviso será reenviado às 22h.'), !r.emailEnviado);
+    if (pgNaTela()) desenharProgramacao();
+  } catch (x) { if (b) b.disabled = false; } finally { S.busy = false; }
+}
+/** Confirmação em dois cliques sem redesenhar a tela: o foco fica no botão, o nome acessível acompanha o texto e a mudança é anunciada. */
+function rotuloCancelar(btn, confirmando) {
+  const nome = btn.dataset.pgNome || '';
+  btn.textContent = confirmando ? tr('Confirmar cancelamento?') : tr('Cancelar');
+  btn.setAttribute('aria-label', tpl(confirmando ? tr('Confirmar o cancelamento da meta de {0}') : tr('Cancelar a meta de {0}'), [nome]));
+}
+function zerarCancelar() {
+  if (!S.pgCancel) return;
+  S.pgCancel = ''; $$('#v-programacao [data-pg-cancel]').forEach(function (b) { rotuloCancelar(b, false); });
+}
+async function cancelarPgUI(id, btn) {
+  if (S.busy) return;
+  if (S.pgCancel !== id) { zerarCancelar(); S.pgCancel = id; rotuloCancelar(btn, true); const lv = $('#pgLive'); if (lv) lv.textContent = tr('Clique de novo para confirmar o cancelamento.'); return; }
+  S.busy = true;
+  try {
+    const r = await rpc('cancelarMetaLider', id);
+    S.pgCancel = '';
+    if (!r.ok) { toast(r.msg || tr('O servidor recusou o cancelamento.'), true); await loadProgramacao(); return; }
+    toast(tr('Meta cancelada'));
+    if (r.recarregar) await loadProgramacao(); else { S.pg = r; if (pgNaTela()) desenharProgramacao(); }
+  } catch (x) { S.pgCancel = ''; if (pgNaTela()) await loadProgramacao(); } finally { S.busy = false; }
+}
+function v10Eventos() {
+  document.addEventListener('change', function (e) { if (pgMetas() && e.target && e.target.closest && e.target.closest('#v-programacao')) { lerPgForm(); prevPg(); } });
+  document.addEventListener('input', function (e) { if (pgMetas() && e.target && e.target.closest && e.target.closest('#v-programacao')) { lerPgForm(); prevPg(); } });
+  document.addEventListener('click', function (e) {
+    const t = e.target && e.target.closest ? e.target.closest('button') : null; if (!t || !pgNaTela()) return;
+    if (t.dataset.pgtab) { if (t.dataset.pgtab !== (S.pgTab || 'metas')) { S.pgTab = t.dataset.pgtab; loadProgramacao(); } }
+    else if (t.id === 'pgSalvar') salvarPgUI();
+    else if (t.dataset.pgCancel !== undefined) cancelarPgUI(t.dataset.pgCancel, t);
+    else zerarCancelar();
+  });
+  document.addEventListener('focusout', function (e) { if (pgNaTela() && !S.busy && e.target && e.target.dataset && e.target.dataset.pgCancel !== undefined) zerarCancelar(); });
+  document.addEventListener('keydown', function (e) {
+    if (!pgNaTela()) return;
+    if (e.key === 'Escape') zerarCancelar();
+    const t = e.target && e.target.dataset && e.target.dataset.pgtab;
+    if (t && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) { e.preventDefault(); S.pgTab = t === 'metas' ? 'feedbacks' : 'metas'; loadProgramacao(); }
+  });
+  document.addEventListener('change', function (e) { if (pgNaTela() && e.target && e.target.dataset && e.target.dataset.fbSel !== undefined) avisoAuditorFb(e.target); });
+  fbEventos();
+}
+/* ---------- v10 fase 3: feedback obrigatório ---------- */
+const FB_MIN = 50;
+const FB_ST = { Aberta: ['em_risco', 'Aguardando designação'], Designada: ['no_ritmo', 'Designado'], Concluida: ['atingida', 'Concluído'] };
+const fbNaTela = function () { return S.v === 'feedbacks'; };
+const fbVazio = function () { return { fbMeus: 0, fbMeusNovos: 0, fbMeusAtrasados: 0, fbTotalMeus: 0, fbAtrasadosHub: 0, fbAbertasHub: 0 }; };
+/** A tela "Meus feedbacks" aparece pelos DADOS (há designação para a pessoa), não pelo perfil: o servidor decide o que ela vê. */
+function aplicarFb(fb, user) {
+  S.fb = Object.assign(fbVazio(), fb || {});
+  if (!user || !user.telas) return;
+  const i = user.telas.indexOf('feedbacks');
+  if (S.fb.fbTotalMeus > 0 && i < 0) user.telas.push('feedbacks');
+  else if (S.fb.fbTotalMeus === 0 && i > -1) user.telas.splice(i, 1);
+}
+function fbAuditorias(p) {
+  if (!p.auditorias.length) return '';
+  return '<details><summary>' + esc(tpl(tr('{0} auditoria(s) abaixo de {1}%'), [p.qtd, p.corte])) + '</summary><ul class="lista-fb">' + p.auditorias.map(function (x) { return '<li>' + esc(fmtD(x.data) + ' · ' + x.proc + ' · ' + pc(x.pct)) + '</li>'; }).join('') + '</ul></details>';
+}
+function fbTime(p) {
+  const mudou = p.timeAtual !== p.timeEpoca || p.turnoAtual !== p.turnoEpoca;
+  return '<small class="muted">' + esc(tpl(tr('Time na época: {0} ({1})'), [p.timeEpoca || '—', p.turnoEpoca || '—'])) + '</small>' + (mudou ? '<br><small class="muted">' + esc(tpl(tr('Hoje: {0} ({1})'), [p.timeAtual || '—', p.turnoAtual || '—'])) + '</small>' : '');
+}
+function fbSituacao(p) {
+  const k = p.atrasado ? ['nao_atingida', 'Atrasado'] : FB_ST[p.status];
+  return pill(k[0], tr(k[1])) + (p.status === 'Designada' ? '<br><small class="muted">' + esc(tpl(tr('Prazo {0}'), [fmtD(p.prazo)])) + '</small>' : '');
+}
+
+/* ---- Site Leader / Admin: aba Feedbacks em Programação ---- */
+async function loadFeedbacksSL(n) {
+  const painel = $('#pgPainel'); painel.innerHTML = '<div class="card">' + skel(5) + '</div>';
+  try { const r = await rpc('listarFeedbacks'); if (n !== pgSeq) return; S.fbl = r; } catch (e) { painel.innerHTML = '<div class="card">' + esc(tr('Não foi possível carregar os feedbacks.')) + '</div>'; return; }
+  if (!pgNaTela() || (S.pgTab || 'metas') !== 'feedbacks') return;
+  desenharFeedbacksSL();
+}
+function desenharFeedbacksSL() {
+  const R = S.fbl, el = $('#pgPainel'); if (!el) return;
+  const opts = function (p) {
+    return '<option value="">' + esc(tr('Escolha quem dará o feedback')) + '</option>' + R.responsaveis.slice().sort(function (a, b) { return a.nome.localeCompare(b.nome); }).map(function (u) {
+      return '<option value="' + esc(u.email) + '"' + (p.designadoEmail === u.email ? ' selected' : '') + '>' + esc(u.nome + ' (' + u.perfil + ')') + '</option>';
+    }).join('');
+  };
+  const linha = function (p) {
+    const acao = p.status === 'Concluida'
+      ? (p.registro ? '<details><summary>' + esc(tr('Ver feedback registrado')) + '</summary><p style="margin:6px 0 2px;white-space:pre-wrap">' + esc(p.registro.texto) + '</p><small class="muted">' + esc(tpl(tr('Registrado por {0} em {1}'), [p.registro.autor, fmtDt(p.registro.registradoEm)])) + '</small></details>' : '')
+      : '<label class="fld" style="margin:0"><span class="sr-only">' + esc(tpl(tr('Quem dará o feedback a {0}'), [p.colaborador])) + '</span><select data-fb-sel="' + esc(p.id) + '">' + opts(p) + '</select></label>' +
+        '<button type="button" class="btn sm pri" style="margin-top:6px" data-fb-des="' + esc(p.id) + '" aria-label="' + esc(tpl(tr(p.status === 'Designada' ? 'Reatribuir o feedback de {0}' : 'Designar o feedback de {0}'), [p.colaborador])) + '">' + esc(tr(p.status === 'Designada' ? 'Reatribuir' : 'Designar')) + '</button><div class="muted" role="status" data-fb-av="' + esc(p.id) + '"></div>';
+    return '<tr><td>' + esc(p.colaborador) + '<br>' + fbTime(p) + '</td><td>' + fbAuditorias(p) + '</td><td>' + fbSituacao(p) + (p.status !== 'Aberta' && p.designadoNome ? '<br><small class="muted">' + esc(p.designadoNome) + '</small>' : '') + (p.status === 'Designada' && p.avisoPendente ? '<br><small class="muted">' + esc(tr('Aviso por e-mail pendente')) + '</small>' : '') + '</td><td>' + acao + '</td></tr>';
+  };
+  const ord = R.pendencias.slice().sort(function (a, b) { const k = { Aberta: 0, Designada: 1, Concluida: 2 }; return k[a.status] - k[b.status] || String(a.prazo).localeCompare(String(b.prazo)); });
+  el.innerHTML = '<div class="card"><div class="hd"><b>' + esc(tr('Feedbacks obrigatórios')) + '</b></div>' +
+    '<p class="muted" style="margin:6px 0 10px">' + esc(tpl(tr('Quando um colaborador tem {0} ou mais auditorias abaixo da nota média em {1} dias, o feedback passa a ser obrigatório. Escolha quem vai conversar com ele: o líder tem {2} dias para registrar o que foi falado (mínimo de {3} caracteres).'), [R.minimo, R.janela, R.prazoDias, FB_MIN])) + '</p>' +
+    '<div id="fbErr" role="alert"></div>' +
+    (ord.length ? '<div class="scroll" role="region" tabindex="0" aria-label="' + esc(tr('Feedbacks obrigatórios')) + '"><table><caption class="sr-only">' + esc(tr('Feedbacks obrigatórios')) + '</caption><thead><tr><th scope="col">' + esc(tr('Colaborador')) + '</th><th scope="col">' + esc(tr('Auditorias')) + '</th><th scope="col">' + esc(tr('Situação')) + '</th><th scope="col">' + esc(tr('Quem dá o feedback')) + '</th></tr></thead><tbody>' + ord.map(linha).join('') + '</tbody></table></div>' : vz(tr('Nenhum feedback obrigatório no momento.'))) + '</div>';
+}
+/** Aviso (não bloqueio): a pessoa escolhida fez alguma das auditorias que geraram o feedback. */
+function avisoAuditorFb(sel) {
+  const p = S.fbl && S.fbl.pendencias.find(function (x) { return x.id === sel.dataset.fbSel; }), av = $('#pgPainel [data-fb-av="' + sel.dataset.fbSel + '"]'); if (!p || !av) return;
+  av.textContent = sel.value && p.auditores.indexOf(sel.value) > -1 ? tr('Atenção: esta pessoa fez uma ou mais das auditorias que geraram o feedback. Você pode designá-la mesmo assim.') : '';
+}
+async function designarFbUI(id) {
+  if (S.busy) return;
+  const sel = $('#pgPainel [data-fb-sel="' + id + '"]'), err = $('#fbErr'); if (!sel) return;
+  err.innerHTML = '';
+  if (!sel.value) { err.innerHTML = aviso(esc(tr('Escolha quem dará o feedback.'))); sel.focus(); return; }
+  S.busy = true;
+  try {
+    const r = await rpc('designarFeedback', id, sel.value);
+    if (!r.ok) { err.innerHTML = aviso(esc(r.msg ? tr(r.msg) : tr('O servidor recusou a designação.'))); return; }
+    toast(r.emailEnviado ? tr('Feedback designado. O aviso foi enviado por e-mail.') : tr('Feedback designado, mas o e-mail não foi enviado. O aviso será reenviado às 22h.'), !r.emailEnviado);
+    if (r.recarregar) await loadProgramacao(); else { S.fbl = r; if (pgNaTela() && (S.pgTab || 'metas') === 'feedbacks') desenharFeedbacksSL(); }
+    sondarFb();
+  } catch (x) { /* o aviso de erro já foi exibido */ } finally { S.busy = false; }
+}
+
+/* ---- quem foi designado: tela Meus feedbacks ---- */
+let fbSeq = 0;
+const fbRascunhos = function () { const m = {}; $$('#v-feedbacks [data-fb-txt]').forEach(function (t) { if (t.value) m[t.dataset.fbTxt] = t.value; }); return m; };
+async function loadFeedbacksMeus() {
+  const el = $('#v-feedbacks'), n = ++fbSeq;
+  if (!Object.keys(fbRascunhos()).length) el.innerHTML = '<div class="card">' + skel(4) + '</div>'; // com texto em digitação, a tela não é apagada: o texto volta ao redesenhar
+  try { const r = await rpc('meusFeedbacks'); if (n !== fbSeq) return; S.fbm = r; } catch (e) { el.innerHTML = '<div class="card">' + esc(tr('Não foi possível carregar os feedbacks.')) + '</div>'; return; }
+  if (!fbNaTela()) return;
+  desenharFeedbacksMeus();
+  if (S.fbm.some(function (p) { return p.status === 'Designada' && !p.visto; })) rpc('marcarFeedbacksVistos').then(function () { S.fb.fbMeusNovos = 0; renderNav(); }).catch(function () { /* o selo volta no próximo ciclo */ });
+}
+function desenharFeedbacksMeus() {
+  const L = S.fbm, el = $('#v-feedbacks'); if (!el) return;
+  const rasc = fbRascunhos();
+  const feitos = L.filter(function (p) { return p.status === 'Concluida'; }), abertos = L.filter(function (p) { return p.status === 'Designada'; }).sort(function (a, b) { return String(a.prazo).localeCompare(String(b.prazo)); });
+  const card = function (p) {
+    const c = '<div class="card"><div class="hd"><b role="heading" aria-level="3">' + esc(p.colaborador) + '</b>' + fbSituacao(p) + '</div><p style="margin:4px 0">' + fbTime(p) + '</p>' + fbAuditorias(p);
+    if (p.status === 'Concluida') return c + (p.registro ? '<p style="margin:10px 0 2px;white-space:pre-wrap">' + esc(p.registro.texto) + '</p><small class="muted">' + esc(tpl(tr('Registrado em {0}'), [fmtDt(p.registro.registradoEm)])) + '</small>' : '') + '</div>';
+    return c + '<label class="fld" style="margin-top:10px"><span>' + esc(tr('O que foi conversado com o colaborador')) + '<span class="sr-only"> — ' + esc(p.colaborador) + '</span></span><textarea data-fb-txt="' + esc(p.id) + '" rows="5" maxlength="2000" aria-describedby="fbc-' + esc(p.id) + '" required aria-required="true"></textarea></label>' +
+      '<div class="muted" id="fbc-' + esc(p.id) + '" data-fb-cont="' + esc(p.id) + '">' + esc(tpl(tr('0 de {0} caracteres no mínimo'), [FB_MIN])) + '</div><div class="sr-only" role="status" data-fb-live="' + esc(p.id) + '"></div>' +
+      '<div data-fb-err="' + esc(p.id) + '" role="alert"></div>' +
+      '<div style="margin-top:10px"><button type="button" class="btn pri" data-fb-reg="' + esc(p.id) + '" disabled aria-label="' + esc(tpl(tr('Registrar feedback de {0}'), [p.colaborador])) + '">' + esc(tr('Registrar feedback')) + '</button></div></div>';
+  };
+  el.innerHTML = '<div class="sr-only" id="fbLive" role="status"></div><div class="card"><p class="muted" id="fbIntro" tabindex="-1" style="margin:0">' + esc(tpl(tr('Você foi designado(a) para dar estes feedbacks. Registre o que foi conversado, com pelo menos {0} caracteres. O texto fica visível para você, para o Site Leader do Hub e para o Admin, e é guardado por 12 meses.'), [FB_MIN])) + '</p></div>' +
+    (abertos.length ? abertos.map(card).join('') : '<div class="card">' + vz(tr('Nenhum feedback a registrar.')) + '</div>') +
+    (feitos.length ? '<div class="card"><div class="hd"><b>' + esc(tr('Registrados recentemente')) + '</b></div></div>' + feitos.map(card).join('') : '');
+  Object.keys(rasc).forEach(function (id) { const t = $('[data-fb-txt="' + id + '"]'); if (t) { t.value = rasc[id]; contarFbTxt(t); } });
+}
+function contarFbTxt(ta) {
+  const id = ta.dataset.fbTxt, n = ta.value.replace(/\s+/g, ' ').trim().length, c = $('[data-fb-cont="' + id + '"]'), b = $('[data-fb-reg="' + id + '"]'), lv = $('[data-fb-live="' + id + '"]');
+  const pronto = n >= FB_MIN;
+  if (c) c.textContent = pronto ? tpl(tr('{0} caracteres'), [n]) : tpl(tr('{0} de {1} caracteres no mínimo'), [n, FB_MIN]);
+  if (b) b.disabled = !pronto;
+  if (lv && ta.dataset.fbOk !== String(pronto)) { ta.dataset.fbOk = String(pronto); lv.textContent = pronto ? tr('Tamanho mínimo atingido.') : ''; }
+}
+async function registrarFbUI(id) {
+  if (S.busy) return;
+  const ta = $('[data-fb-txt="' + id + '"]'), err = $('[data-fb-err="' + id + '"]'), b = $('[data-fb-reg="' + id + '"]'); if (!ta) return;
+  err.innerHTML = ''; S.busy = true; b.disabled = true;
+  try {
+    const r = await rpc('registrarFeedback', id, ta.value);
+    if (!r.ok) { err.innerHTML = aviso(esc(r.msg ? tr(r.msg) : tr('O servidor recusou o feedback.'))); b.disabled = false; ta.focus(); return; }
+    toast(tr('Feedback registrado'));
+    if (r.recarregar) { await loadFeedbacksMeus(); await sondarFb(); const lv = $('#fbLive'); if (lv) lv.textContent = tr('Feedback registrado'); return; }
+    S.fbm = r.feedbacks; await sondarFb();
+    if (fbNaTela()) { desenharFeedbacksMeus(); const lv = $('#fbLive'), ip = $('#fbIntro'); if (lv) lv.textContent = tr('Feedback registrado'); if (ip) ip.focus(); }
+  } catch (x) { b.disabled = false; } finally { S.busy = false; }
+}
+
+/* ---- contadores (selos do menu) ---- */
+function sondarFb() {
+  if (!S.u || document.hidden) return Promise.resolve();
+  return new Promise(function (ok) {
+    google.script.run.withSuccessHandler(function (fb) {
+      if (fb && JSON.stringify(fb) !== JSON.stringify(S.fb)) {
+        aplicarFb(fb, S.u); renderNav();
+        const ab = $('#pgTab-feedbacks'); if (ab && pgNaTela()) ab.innerHTML = pgRotuloAba('feedbacks', tr('Feedbacks obrigatórios'), pgNAcao());
+        if (!tela('feedbacks') && fbNaTela()) nav(['matriz', 'form', 'minhas', 'geral'].filter(tela)[0] || S.u.telas[0]);
+        else if (fbNaTela() && !S.busy && $('#modal').classList.contains('hidden') && !$$('#v-feedbacks textarea').some(function (t) { return t.value; })) loadFeedbacksMeus(); // nunca apaga um texto em digitação
+      }
+      ok();
+    }).withFailureHandler(function () { ok(); }).contarFeedbacks();
+  });
+}
+function fbEventos() {
+  document.addEventListener('input', function (e) { const t = e.target; if (fbNaTela() && t && t.dataset && t.dataset.fbTxt !== undefined) contarFbTxt(t); });
+  document.addEventListener('click', function (e) {
+    const t = e.target && e.target.closest ? e.target.closest('button') : null; if (!t || !fbNaTela()) return;
+    if (t.dataset.fbReg !== undefined) registrarFbUI(t.dataset.fbReg);
+  });
+  document.addEventListener('click', function (e) {
+    const t = e.target && e.target.closest ? e.target.closest('button') : null; if (t && pgNaTela() && t.dataset.fbDes !== undefined) designarFbUI(t.dataset.fbDes);
   });
 }
 </script>

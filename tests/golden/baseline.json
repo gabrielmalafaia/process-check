@@ -1,5 +1,6 @@
 {
  "owner|bootstrap": {
+  "appUrl": "https://script.google.com/a/macros/x.com/s/ABC/exec",
   "auditores": [
    {
     "ativo": false,
@@ -828,6 +829,15 @@
     }
    ]
   },
+  "fb": {
+   "fbAbertasHub": 0,
+   "fbAtrasadosHub": 0,
+   "fbMeus": 0,
+   "fbMeusAtrasados": 0,
+   "fbMeusNovos": 0,
+   "fbTotalMeus": 0
+  },
+  "metasNovas": 0,
   "pendentes": 0,
   "processos": [
    "Recebimento",
@@ -878,6 +888,8 @@
     "autorizar",
     "ver_log",
     "ver_online",
+    "regras_lider",
+    "obrigacoes",
     "hubs"
    ],
    "telas": [
@@ -887,6 +899,7 @@
     "geral",
     "auditorias",
     "auditores",
+    "programacao",
     "proc",
     "doca",
     "colab",
@@ -3145,7 +3158,9 @@
      "email_rel",
      "autorizar",
      "ver_log",
-     "ver_online"
+     "ver_online",
+     "regras_lider",
+     "obrigacoes"
     ],
     "protegido": false,
     "sistema": true,
@@ -3156,6 +3171,7 @@
      "geral",
      "auditorias",
      "auditores",
+     "programacao",
      "proc",
      "doca",
      "colab",
@@ -3234,6 +3250,8 @@
      "autorizar",
      "ver_log",
      "ver_online",
+     "regras_lider",
+     "obrigacoes",
      "hubs"
     ],
     "protegido": true,
@@ -3245,6 +3263,7 @@
      "geral",
      "auditorias",
      "auditores",
+     "programacao",
      "proc",
      "doca",
      "colab",
@@ -3289,7 +3308,9 @@
    "config": "cfg",
    "email_rel": "cfg",
    "exportar": "export",
+   "obrigacoes": "programacao",
    "perfis": "acessos",
+   "regras_lider": "acessos",
    "usuarios": "acessos",
    "ver_log": "log"
   },
@@ -3337,6 +3358,12 @@
     "nome": "Criar e editar perfis"
    },
    {
+    "desc": "Definir quais auditorias cada líder deve fazer e até quando, e designar quem dá o feedback obrigatório. Só Site Leader e Admin; cada Site Leader atua no próprio Hub.",
+    "grupo": "Auditorias",
+    "id": "obrigacoes",
+    "nome": "Programar auditorias e feedbacks dos líderes"
+   },
+   {
     "desc": "Escolher quem recebe o relatório por e-mail e a frequência. Cada pessoa recebe só os dados do próprio perfil.",
     "grupo": "Sistema",
     "id": "email_rel",
@@ -3347,6 +3374,12 @@
     "grupo": "Dados",
     "id": "exportar",
     "nome": "Baixar dados em CSV"
+   },
+   {
+    "desc": "Para cada líder: se audita o próprio time e outros times, e por turno, cor e símbolo, time e processo. Ninguém edita a própria regra.",
+    "grupo": "Acessos",
+    "id": "regras_lider",
+    "nome": "Definir quem cada líder pode auditar"
    },
    {
     "desc": "Preencher, salvar rascunho e finalizar auditorias.",
@@ -3387,6 +3420,7 @@
   ],
   "pode": {
    "perfis": true,
+   "regras": true,
    "usuarios": true
   },
   "processos": [
@@ -3400,7 +3434,8 @@
   "reqTela": {
    "acessos": [
     "usuarios",
-    "perfis"
+    "perfis",
+    "regras_lider"
    ],
    "autorizar": [
     "autorizar"
@@ -3425,6 +3460,9 @@
    ],
    "minhas": [
     "auditar"
+   ],
+   "programacao": [
+    "obrigacoes"
    ]
   },
   "seguranca": [
@@ -3501,6 +3539,10 @@
    {
     "id": "proc",
     "nome": "Por processo"
+   },
+   {
+    "id": "programacao",
+    "nome": "Programação"
    },
    {
     "id": "tend",
@@ -3619,6 +3661,7 @@
   }
  ],
  "ana|bootstrap": {
+  "appUrl": "https://script.google.com/a/macros/x.com/s/ABC/exec",
   "auditores": [
    {
     "ativo": false,
@@ -4447,6 +4490,15 @@
     }
    ]
   },
+  "fb": {
+   "fbAbertasHub": 0,
+   "fbAtrasadosHub": 0,
+   "fbMeus": 0,
+   "fbMeusAtrasados": 0,
+   "fbMeusNovos": 0,
+   "fbTotalMeus": 0
+  },
+  "metasNovas": 0,
   "pendentes": 0,
   "processos": [
    "Recebimento",
@@ -6765,7 +6817,9 @@
      "email_rel",
      "autorizar",
      "ver_log",
-     "ver_online"
+     "ver_online",
+     "regras_lider",
+     "obrigacoes"
     ],
     "protegido": false,
     "sistema": true,
@@ -6776,6 +6830,7 @@
      "geral",
      "auditorias",
      "auditores",
+     "programacao",
      "proc",
      "doca",
      "colab",
@@ -6813,6 +6868,8 @@
      "autorizar",
      "ver_log",
      "ver_online",
+     "regras_lider",
+     "obrigacoes",
      "hubs"
     ],
     "protegido": true,
@@ -6824,6 +6881,7 @@
      "geral",
      "auditorias",
      "auditores",
+     "programacao",
      "proc",
      "doca",
      "colab",
@@ -6909,7 +6967,9 @@
    "config": "cfg",
    "email_rel": "cfg",
    "exportar": "export",
+   "obrigacoes": "programacao",
    "perfis": "acessos",
+   "regras_lider": "acessos",
    "usuarios": "acessos",
    "ver_log": "log"
   },
@@ -6957,6 +7017,12 @@
     "nome": "Criar e editar perfis"
    },
    {
+    "desc": "Definir quais auditorias cada líder deve fazer e até quando, e designar quem dá o feedback obrigatório. Só Site Leader e Admin; cada Site Leader atua no próprio Hub.",
+    "grupo": "Auditorias",
+    "id": "obrigacoes",
+    "nome": "Programar auditorias e feedbacks dos líderes"
+   },
+   {
     "desc": "Escolher quem recebe o relatório por e-mail e a frequência. Cada pessoa recebe só os dados do próprio perfil.",
     "grupo": "Sistema",
     "id": "email_rel",
@@ -6967,6 +7033,12 @@
     "grupo": "Dados",
     "id": "exportar",
     "nome": "Baixar dados em CSV"
+   },
+   {
+    "desc": "Para cada líder: se audita o próprio time e outros times, e por turno, cor e símbolo, time e processo. Ninguém edita a própria regra.",
+    "grupo": "Acessos",
+    "id": "regras_lider",
+    "nome": "Definir quem cada líder pode auditar"
    },
    {
     "desc": "Preencher, salvar rascunho e finalizar auditorias.",
@@ -7007,6 +7079,7 @@
   ],
   "pode": {
    "perfis": false,
+   "regras": false,
    "usuarios": true
   },
   "processos": [
@@ -7020,7 +7093,8 @@
   "reqTela": {
    "acessos": [
     "usuarios",
-    "perfis"
+    "perfis",
+    "regras_lider"
    ],
    "autorizar": [
     "autorizar"
@@ -7045,6 +7119,9 @@
    ],
    "minhas": [
     "auditar"
+   ],
+   "programacao": [
+    "obrigacoes"
    ]
   },
   "telas": [
@@ -7107,6 +7184,10 @@
    {
     "id": "proc",
     "nome": "Por processo"
+   },
+   {
+    "id": "programacao",
+    "nome": "Programação"
    },
    {
     "id": "tend",
@@ -7225,6 +7306,7 @@
   }
  ],
  "sl|bootstrap": {
+  "appUrl": "https://script.google.com/a/macros/x.com/s/ABC/exec",
   "auditores": [
    {
     "ativo": false,
@@ -8053,6 +8135,15 @@
     }
    ]
   },
+  "fb": {
+   "fbAbertasHub": 0,
+   "fbAtrasadosHub": 0,
+   "fbMeus": 0,
+   "fbMeusAtrasados": 0,
+   "fbMeusNovos": 0,
+   "fbTotalMeus": 0
+  },
+  "metasNovas": 0,
   "pendentes": 0,
   "processos": [
    "Recebimento",
@@ -8101,7 +8192,9 @@
     "email_rel",
     "autorizar",
     "ver_log",
-    "ver_online"
+    "ver_online",
+    "regras_lider",
+    "obrigacoes"
    ],
    "telas": [
     "matriz",
@@ -8110,6 +8203,7 @@
     "geral",
     "auditorias",
     "auditores",
+    "programacao",
     "proc",
     "doca",
     "colab",
@@ -10386,6 +10480,8 @@
      "autorizar",
      "ver_log",
      "ver_online",
+     "regras_lider",
+     "obrigacoes",
      "hubs"
     ],
     "protegido": true,
@@ -10397,6 +10493,7 @@
      "geral",
      "auditorias",
      "auditores",
+     "programacao",
      "proc",
      "doca",
      "colab",
@@ -10432,7 +10529,9 @@
      "email_rel",
      "autorizar",
      "ver_log",
-     "ver_online"
+     "ver_online",
+     "regras_lider",
+     "obrigacoes"
     ],
     "protegido": false,
     "sistema": true,
@@ -10443,6 +10542,7 @@
      "geral",
      "auditorias",
      "auditores",
+     "programacao",
      "proc",
      "doca",
      "colab",
@@ -10528,7 +10628,9 @@
    "config": "cfg",
    "email_rel": "cfg",
    "exportar": "export",
+   "obrigacoes": "programacao",
    "perfis": "acessos",
+   "regras_lider": "acessos",
    "usuarios": "acessos",
    "ver_log": "log"
   },
@@ -10576,6 +10678,12 @@
     "nome": "Criar e editar perfis"
    },
    {
+    "desc": "Definir quais auditorias cada líder deve fazer e até quando, e designar quem dá o feedback obrigatório. Só Site Leader e Admin; cada Site Leader atua no próprio Hub.",
+    "grupo": "Auditorias",
+    "id": "obrigacoes",
+    "nome": "Programar auditorias e feedbacks dos líderes"
+   },
+   {
     "desc": "Escolher quem recebe o relatório por e-mail e a frequência. Cada pessoa recebe só os dados do próprio perfil.",
     "grupo": "Sistema",
     "id": "email_rel",
@@ -10586,6 +10694,12 @@
     "grupo": "Dados",
     "id": "exportar",
     "nome": "Baixar dados em CSV"
+   },
+   {
+    "desc": "Para cada líder: se audita o próprio time e outros times, e por turno, cor e símbolo, time e processo. Ninguém edita a própria regra.",
+    "grupo": "Acessos",
+    "id": "regras_lider",
+    "nome": "Definir quem cada líder pode auditar"
    },
    {
     "desc": "Preencher, salvar rascunho e finalizar auditorias.",
@@ -10626,6 +10740,7 @@
   ],
   "pode": {
    "perfis": false,
+   "regras": true,
    "usuarios": true
   },
   "processos": [
@@ -10639,7 +10754,8 @@
   "reqTela": {
    "acessos": [
     "usuarios",
-    "perfis"
+    "perfis",
+    "regras_lider"
    ],
    "autorizar": [
     "autorizar"
@@ -10664,6 +10780,9 @@
    ],
    "minhas": [
     "auditar"
+   ],
+   "programacao": [
+    "obrigacoes"
    ]
   },
   "telas": [
@@ -10726,6 +10845,10 @@
    {
     "id": "proc",
     "nome": "Por processo"
+   },
+   {
+    "id": "programacao",
+    "nome": "Programação"
    },
    {
     "id": "tend",
@@ -10844,6 +10967,7 @@
   }
  ],
  "aud1|bootstrap": {
+  "appUrl": "https://script.google.com/a/macros/x.com/s/ABC/exec",
   "aviso": {
    "aceito": true,
    "desligado": true,
@@ -11640,6 +11764,15 @@
     }
    ]
   },
+  "fb": {
+   "fbAbertasHub": 0,
+   "fbAtrasadosHub": 0,
+   "fbMeus": 0,
+   "fbMeusAtrasados": 0,
+   "fbMeusNovos": 0,
+   "fbTotalMeus": 0
+  },
+  "metasNovas": 0,
   "pendentes": 0,
   "processos": [
    "Recebimento",

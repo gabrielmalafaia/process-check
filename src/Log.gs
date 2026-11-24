@@ -14,7 +14,7 @@ const AVISO_LOG = {
   es: 'El sistema registra las acciones de escritura realizadas por cada usuario (quién, cuándo y qué) con fines de auditoría y seguridad. El registro solo está disponible para quien tiene permiso, se conserva hasta 1 año y no incluye contraseñas ni el contenido de los correos.'
 };
 function avisoVersao_() { return hash_(JSON.stringify([AVISO_LOG.pt, AVISO_LOG.en, AVISO_LOG.es])); }
-function avisoLigado_() { try { return PropertiesService.getScriptProperties().getProperty('ACEITE_ATIVO') === 'Sim'; } catch (e) { return false; } }
+function avisoLigado_() { return flagScript_('ACEITE_ATIVO'); }
 /** O usuário já aceitou a versão atual do aviso? (cache de 6 h; o aceite é gravado em Log_Aceites, só de acréscimo) */
 function aceiteOk_(a) {
   if (!avisoLigado_()) return true;
@@ -40,12 +40,14 @@ function aceitarAviso(versao) {
 }
 function avisoResumo_(a) { return avisoLigado_() ? { versao: avisoVersao_(), texto: AVISO_LOG, aceito: aceiteOk_(a) } : { versao: '', texto: AVISO_LOG, aceito: true, desligado: true }; }
 /** Registra uma ação de escrita. Nunca derruba a operação principal. */
-function logAtiv_(a, acao, alvo, detalhe) {
+/** Conta as falhas de gravação do log para a tela de Log avisar (nada fica mudo). */
+function contarFalhaLog_() { try { const p = PropertiesService.getScriptProperties(); p.setProperty('LOG_FALHAS', String(Number(p.getProperty('LOG_FALHAS') || 0) + 1)); } catch (e) { /* sem propriedades */ } }
+function logAtiv_(a, acao, alvo, detalhe, hubLog) {
   try {
     comLock_(function () {
-      anexar_('Log_Atividade', [agora_(), limpar_(a.hub || ''), limpar_(a.email || ''), limpar_(a.nome || ''), limpar_(a.perfil || ''), limpar_(String(acao).slice(0, 120)), limpar_(String(alvo == null ? '' : alvo).slice(0, 200)), limpar_(String(detalhe == null ? '' : detalhe).slice(0, 600))]);
+      anexar_('Log_Atividade', [agora_(), limpar_(hubLog !== undefined ? hubLog : (a.hub || '')), limpar_(a.email || ''), limpar_(a.nome || ''), limpar_(a.perfil || ''), limpar_(String(acao).slice(0, 120)), limpar_(String(alvo == null ? '' : alvo).slice(0, 200)), limpar_(String(detalhe == null ? '' : detalhe).slice(0, 600))]);
     });
-  } catch (e) { /* o log não pode impedir a ação já concluída */ }
+  } catch (e) { console.error('Falha ao gravar o log de atividade (' + acao + '): ' + e.message); contarFalhaLog_(); /* o log não pode impedir a ação já concluída */ }
 }
 /** Consulta paginada do log vivo (mais recente primeiro). Site Leader e demais: só o próprio Hub. */
 function consultarLog(f) {
@@ -71,7 +73,7 @@ function consultarLog(f) {
   const pagina = Math.max(1, Math.floor(Number(f.pagina)) || 1);
   const hubs = {};
   lerAba_('Cad_Hubs').forEach(function (h) { hubs[String(h.ID_Hub)] = String(h.Nome); });
-  return { total: linhas.length, pagina: pagina, porPagina: LOG_PAGINA, linhas: linhas.slice((pagina - 1) * LOG_PAGINA, pagina * LOG_PAGINA).map(function (r) { r.hubNome = hubs[r.hub] || (r.hub === HUB_GLOBAL ? '' : r.hub); return r; }), truncado: total > LOG_LEITURA_MAX, vivoDias: LOG_VIVO_DIAS, anoDias: LOG_ANO_DIAS, global: !!a.hubGlobal };
+  return { total: linhas.length, pagina: pagina, porPagina: LOG_PAGINA, linhas: linhas.slice((pagina - 1) * LOG_PAGINA, pagina * LOG_PAGINA).map(function (r) { r.hubNome = hubs[r.hub] || (r.hub === HUB_GLOBAL ? '' : r.hub); return r; }), truncado: total > LOG_LEITURA_MAX, falhasLog: Number(PropertiesService.getScriptProperties().getProperty('LOG_FALHAS') || 0), vivoDias: LOG_VIVO_DIAS, anoDias: LOG_ANO_DIAS, global: !!a.hubGlobal };
 }
 /* ---------- arquivo em planilha separada ---------- */
 function arquivoLog_() {
@@ -97,15 +99,33 @@ function arquivarLogCore_() {
       let dest = arq.getSheetByName('Log_Atividade');
       if (!dest) { dest = arq.insertSheet('Log_Atividade'); dest.appendRow(ABAS.Log_Atividade); }
       const antes = dest.getLastRow(), v = s.getRange(2, 1, k, cab).getValues();
+      if (antes + k > dest.getMaxRows()) dest.insertRowsAfter(dest.getMaxRows(), antes + k - dest.getMaxRows()); // a aba nova só tem 1000 linhas
       dest.getRange(antes + 1, 1, k, cab).setNumberFormat('@').setValues(v);
       if (dest.getLastRow() - antes !== k) { rel.erro = 'A cópia não bateu com o original; nada foi apagado.'; return rel; }
       s.deleteRows(2, k);
       rel.movidos = k;
     }
+    // rascunhos vencidos nunca eram apagados e a Matriz lê a aba inteira
+    try {
+      const rs = aba_('Auditorias_Rascunho'), lim = Date.now() - (RASCUNHO_DIAS + 1) * 864e5;
+      lerBruto_('Auditorias_Rascunho').filter(function (x) { return d_(x.Timestamp_Inicio).getTime() < lim; }).map(function (x) { return x._row; }).sort(function (p, q) { return q - p; }).forEach(function (r) { rs.deleteRow(r); });
+    } catch (e) { /* a limpeza de rascunhos não pode atrapalhar o arquivamento */ }
+    // retenção prometida no aviso de transparência: o arquivo guarda no máximo LOG_ANO_DIAS dias
+    try {
+      const arq2 = arquivoLog_(), d2 = arq2.getSheetByName('Log_Atividade');
+      if (d2 && d2.getLastRow() > 1) {
+        const corteAno = fmt_(new Date(Date.now() - LOG_ANO_DIAS * 864e5)), t2 = d2.getRange(2, 1, d2.getLastRow() - 1, 1).getValues();
+        let velhos = 0; while (velhos < t2.length && t2[velhos][0] !== '' && tsStr_(t2[velhos][0]) < corteAno) velhos++;
+        if (velhos > 0) { d2.deleteRows(2, velhos); rel.apagadosArquivo = velhos; }
+      }
+    } catch (e) { if (!rel.erro) rel.erro = 'Não foi possível limpar o arquivo antigo: ' + String(e.message).slice(0, 160); }
     return rel;
   });
 }
 function arquivarLog() {
+  // só o dono ou o gatilho diário (sem identidade): impede que qualquer conta do domínio dispare a rotina pelo navegador
+  const ativo = (Session.getActiveUser().getEmail() || '').trim().toLowerCase(), dono = (Session.getEffectiveUser().getEmail() || '').trim().toLowerCase();
+  if (ativo && ativo !== dono) throw new Error('Acesso negado.');
   const rel = arquivarLogCore_();
   if (rel.erro) { try { registrar_({ nome: 'Sistema', email: 'sistema' }, 'Falha ao arquivar o log', 'Log_Atividade', rel.erro); } catch (e) { /* segue */ } }
   return rel;
@@ -121,6 +141,6 @@ function agendarArquivoLog() {
 /** Liga o aviso de transparência com aceite (rodar no editor, depois de publicar a versão com a tela de aceite). */
 function ativarAvisoLog() {
   manutencao_();
-  PropertiesService.getScriptProperties().setProperty('ACEITE_ATIVO', 'Sim');
+  PropertiesService.getScriptProperties().setProperty('ACEITE_ATIVO', 'Sim'); limparFlag_('ACEITE_ATIVO');
   return 'Aviso de transparência ligado: cada usuário precisa aceitar a versão atual.';
 }

@@ -16,6 +16,108 @@ function doisHubs() {
   return A;
 }
 
+T('Hub digitado na planilha: aparece após Atualizar; linha sem ID_Hub é ignorada', () => {
+  const A = doisHubs(); A.as('owner@x.com'); const n = () => A.call('bootstrap', false).user.hub.lista.length;
+  eq(n(), 2);
+  A.sheets.Cad_Hubs.appendRow(['H3', 'Hub Tres', 'Op C', 'Sim']); A.sheets.Cad_Hubs.appendRow(['', 'Sem id', 'Op D', 'Sim']);
+  eq(A.call('bootstrap', true).user.hub.lista.map(h => h.id), ['H1', 'H2', 'H3']);
+});
+T('Trocar para um Hub digitado na planilha funciona na hora (sem cache velho)', () => {
+  const A = doisHubs(); A.as('owner@x.com'); A.call('bootstrap', false);
+  A.sheets.Cad_Hubs.appendRow(['H3', 'Hub Tres', 'Op C', 'Sim']);
+  eq(A.call('definirHubAtivo', 'H3').ok, true);
+  const b = A.call('bootstrap', false); eq(b.user.hub.id, 'H3'); eq(b.user.hub.nome, 'Hub Tres');
+  nega(() => A.call('definirHubAtivo', 'HX'), 'inexistente');
+});
+T('Revisão de segurança: cluster com espaço no Tipo continua exigindo Admin global', () => {
+  const A = doisHubs(); A.as('sl2@x.com');
+  const o = { Tipo: ' Cluster', Identificador: 'Z9', Cor_Simbolo: 'Azul/Triângulo', Lider_Padrao: '', Turno_Padrao: 'T1' };
+  nega(() => A.call('salvarCadastro', 'Cad_Estrutura', o, null), 'Admin global');
+  eq(raw(A, 'Cad_Estrutura').filter(x => x.Identificador === 'Z9').length, 0);
+});
+T('Revisão de segurança: perfis só o Admin global edita; arquivarLog só dono/gatilho; manutenção só Admin global', () => {
+  const A = doisHubs(); novoUsuario(A, 'adm2@x.com', 'Admin Dois', 'Admin', 'H2');
+  A.as('owner@x.com'); A.ctx.anexar_('Cad_Perfis', A.ctx.serializarPerfil_({ nome: 'Chefe', desc: 'x', perms: ['perfis'], telas: ['acessos'], escopo: { modo: 'todos', processos: [], turnos: [] } })); A.run('limparCache_()');
+  novoUsuario(A, 'chefe@x.com', 'Chefe', 'Chefe', 'H2');
+  A.as('chefe@x.com'); nega(() => A.call('salvarPerfil', { nome: 'Novo', desc: 'x', perms: [], telas: [], escopo: { modo: 'todos', processos: [], turnos: [] } }, true), 'Admin global');
+  A.as('sl2@x.com'); nega(() => A.call('arquivarLog'), 'negado');
+  A.as('adm2@x.com'); nega(() => A.call('desativarHubs'), 'negado');
+  A.as('owner@x.com'); ok(A.call('desativarHubs')); A.call('ativarHubs');
+});
+T('Revisão de segurança: Hub escolhido sobrevive à expiração do cache', () => {
+  const A = doisHubs(); A.as('owner@x.com'); eq(A.call('definirHubAtivo', 'H2').ok, true);
+  A.cache.clear();
+  eq(A.call('bootstrap', false).user.hub.id, 'H2', 'voltou ao primeiro Hub depois de o cache expirar');
+});
+T('Revisão de segurança: chave de cache de relatório é SHA-256 (hex de 64) e separa Hubs', () => {
+  const A = doisHubs(); A.as('owner@x.com'); const h = A.run("sha_('a')"); eq(h.length, 64); ok(/^[0-9a-f]+$/.test(h));
+  eq(h, require('crypto').createHash('sha256').update('a').digest('hex'));
+});
+T('Revisão 2: migração exige Hub ativo com ID; Hub em uso não desativa; log com falha não derruba a ação; pulso informa o Hub', () => {
+  const B = cenario(); B.as('owner@x.com'); B.ctx.anexar_('Cad_Hubs', ['', 'Sem id', 'Op', 'Sim']); nega(() => B.call('migrarV8'), 'Nenhum Hub ativo');
+  const C = cenario(); C.as('owner@x.com'); C.ctx.anexar_('Cad_Hubs', ['H0', 'Inativo', 'Op', 'Não']); C.ctx.anexar_('Cad_Hubs', ['H1', 'Ativo', 'Op', 'Sim']); eq(C.call('migrarV8').hubPadrao, 'H1');
+  const A = doisHubs(); A.as('owner@x.com'); const h1 = A.call('listarHubs').hubs.find(h => h.id === 'H1');
+  const r = A.call('salvarHub', { nome: h1.nome, operacao: h1.operacao, ativo: false, _row: h1._row }, h1); eq(r.ok, false); ok(/outro Hub/.test(r.msg), r.msg);
+  eq(A.call('pulso').hub, 'H1');
+  A.run("const __r = registrar_; registrar_ = function () { throw new Error('falha no log'); };");
+  A.as('owner@x.com'); const csv = 'Nome\tCargo\tTurno\tStatus_Ativo\tLider\nPessoa Log\tLíder\tT1\tSim\t';
+  eq(A.call('importarConfirmar', 'pessoas', csv).ok, true, 'a carga foi gravada; o log falhou e não pode virar erro');
+  ok(Number(A.run("PropertiesService.getScriptProperties().getProperty('LOG_FALHAS')")) >= 1, 'a falha do log fica contada');
+  eq(A.call('consultarLog', {}).falhasLog >= 1, true);
+});
+T('Revisão 3: arquivo do log aceita mais de 1000 linhas e apaga o que passou de 1 ano', () => {
+  const A = doisHubs(); A.as('owner@x.com'); const lg = A.sheets.Log_Atividade; if (lg.getLastRow() > 1) lg.deleteRows(2, lg.getLastRow() - 1);
+  for (let i = 0; i < 1200; i++) lg.appendRow(['2026-05-01 10:00:00', 'H1', 'a@x.com', 'A', 'Admin', 'Acao', 'x', '']);
+  const r = A.call('arquivarLog'); eq(r.erro, '', r.erro); eq(r.movidos, 1200);
+  const arq = Object.values(A.planilhasExtra)[0].sheets.Log_Atividade; eq(arq.getLastRow(), 1201, 'copiou tudo, passando de 1000 linhas');
+  for (let i = 2; i <= 6; i++) arq.getRange(i, 1).setValue('2025-01-02 10:00:00'); // 5 registros com mais de 1 ano
+  lg.appendRow(['2026-05-02 10:00:00', 'H1', 'a@x.com', 'A', 'Admin', 'Acao', 'x', '']);
+  const r2 = A.call('arquivarLog'); eq(r2.apagadosArquivo, 5, JSON.stringify(r2)); eq(arq.getLastRow(), 1201 - 5 + 1);
+});
+T('Revisão 3: trocar Doca por Cluster (e vice-versa) corrige o dono da linha', () => {
+  const A = doisHubs(); A.as('owner@x.com'); const ls = () => raw(A, 'Cad_Estrutura');
+  A.call('salvarCadastro', 'Cad_Estrutura', { Tipo: 'Doca', Identificador: 'D77', Cor_Simbolo: 'Azul/Triângulo', Lider_Padrao: '', Turno_Padrao: 'T1' }, null);
+  const l = ls().find(x => x.Identificador === 'D77'); ok(l, 'criada');
+  A.call('salvarCadastro', 'Cad_Estrutura', Object.assign({}, l, { Tipo: 'Cluster', Identificador: 'Z77' }), l);
+  eq(ls().find(x => x.Identificador === 'Z77').Hub, '*');
+  const l2 = ls().find(x => x.Identificador === 'Z77'); A.call('salvarCadastro', 'Cad_Estrutura', Object.assign({}, l2, { Tipo: 'Doca', Identificador: 'D78' }), l2);
+  eq(ls().find(x => x.Identificador === 'D78').Hub, 'H1');
+});
+T('Revisão 3: falha ao ler as chaves do script NÃO desliga o isolamento (falha fechada) e a leitura é cacheada', () => {
+  const A = doisHubs(); A.as('sl2@x.com'); A.call('bootstrap', false);
+  A.run("var __gp = PropertiesService.getScriptProperties; globalThis.__cnt = 0; PropertiesService.getScriptProperties = function () { const p = __gp(); return { getProperty: function (k) { globalThis.__cnt++; return p.getProperty(k); }, setProperty: p.setProperty, deleteProperty: p.deleteProperty }; };");
+  A.call('bootstrap', false); A.call('bootstrap', false); eq(A.run('globalThis.__cnt'), 0, 'flags vêm do cache, sem tocar em Properties');
+  A.cache.clear();
+  A.run("PropertiesService.getScriptProperties = function () { return { getProperty: function () { throw new Error('Serviço indisponível'); } }; };");
+  nega(() => A.call('bootstrap', false), 'Serviço indisponível');
+});
+T('Revisão 3: o arquivamento diário apaga rascunhos vencidos', () => {
+  const A = doisHubs(); A.as('owner@x.com'); const rs = A.sheets.Auditorias_Rascunho;
+  rs.appendRow(['R1', '2020-01-01 10:00:00', 'velho@x.com', 'Recebimento', '01', '{}', 'H1']);
+  const antes = rs.getLastRow(); A.call('arquivarLog'); ok(rs.getLastRow() < antes, 'rascunho vencido removido');
+});
+T('Revisão 4: gravação sem Hub ativo é recusada; carga só com cabeçalho; objeto vira vazio; meta com data inexistente; rascunho corrompido', () => {
+  const A = doisHubs(); A.as('owner@x.com');
+  const cab = 'Nome\tCargo\tTurno\tStatus_Ativo\tLider';
+  const r = A.call('importarPrevia', 'pessoas', cab); eq(r.ok, false); ok(/Nenhuma linha/.test(r.erros[0].msg));
+  eq(A.call('importarConfirmar', 'pessoas', cab).ok, false);
+  const m = A.call('salvarMeta', { Tipo_Alvo: 'Todos', Alvo: '', Quantidade: 5, ini: '2026-02-30', fim: '2026-03-10', Processos: [] }, null);
+  ok(m.ok === false, JSON.stringify(m).slice(0, 120));
+  A.run("globalThis.__t = limpar_({ a: 1 }) + '|' + limpar_(['x']) + '|' + limpar_('Ma\\u0000ria') + '|' + (limpar_(new Date(0)) instanceof Date)");
+  eq(A.run('globalThis.__t'), '||Maria|true');
+  A.as('sl2@x.com'); const cl = A.call('listarAcessos'); ok(cl.hubs === undefined, 'Site Leader não recebe a lista de Hubs');
+});
+T('Revisão 4: cluster global não leva líder/turno de um Hub; ação sobre usuário de outro Hub é logada no Hub do alvo', () => {
+  const A = doisHubs(); A.as('owner@x.com');
+  A.call('salvarCadastro', 'Cad_Estrutura', { Tipo: 'Cluster', Identificador: 'Z8', Cor_Simbolo: 'Azul/Triângulo', Lider_Padrao: 'Carlos Lider', Turno_Padrao: 'T1' }, null);
+  const z = raw(A, 'Cad_Estrutura').find(x => x.Identificador === 'Z8'); eq(z.Lider_Padrao, ''); eq(z.Hub, '*');
+  A.call('definirHubAtivo', 'H1'); A.call('salvarUsuario', { Email_Google: 'novo2@x.com', Nome: 'Novo Dois', Perfil: 'Auditor', Status_Ativo: 'Sim', Hub: 'H2', _row: 0 }, null);
+  const lg = A.sheets.Log_Atividade; const ultimo = lg.getRange(lg.getLastRow(), 1, 1, 8).getValues()[0]; eq(ultimo[1], 'H2', 'o log vai para o Hub do usuário afetado');
+});
+T('Revisão 4: manutenção sem usuários cadastrados só para o dono', () => {
+  const A = cenario(); A.as('qualquer@x.com'); A.sheets.Cad_Usuarios.deleteRows(2, A.sheets.Cad_Usuarios.getLastRow() - 1);
+  nega(() => A.call('desativarHubs'), 'negado'); A.as('owner@x.com'); A.run("Session.getEffectiveUser = function () { return { getEmail: function () { return 'owner@x.com'; } }; };"); ok(A.call('desativarHubs'));
+});
 /* ---------- 0b: desempenho ---------- */
 T('0b: fila de pendentes em cache, invalidada ao solicitar e ao recusar', () => {
   const A = novo(); A.as('owner@x.com');
@@ -187,6 +289,7 @@ T('hub: solicitação de cadastro por Hub; aprovação por Site Leader do própr
   const p = raw(A, 'Cad_Pessoas').find(x => x.Nome === 'Lia Nova'); eq([p.Cargo, p.Turno, p.Hub, p.Status_Ativo], ['Líder', 'T2', 'H2', 'Sim']);
   eq(raw(A, 'Cad_Usuarios').find(u => u.Email_Google === 'lid@x.com').Hub, 'H2');
   A.as('lid@x.com'); eq(A.call('bootstrap').user.hub.id, 'H2');
+  const hl = raw(A, 'Pessoas_Historico').filter(x => x.Colaborador === 'Lia Nova'); eq(hl.length, 1); eq([hl[0].Evento, hl[0].Turno_Depois, hl[0].Hub], ['Criado', 'T2', 'H2']);
 });
 T('hub: com o isolamento desligado tudo continua visível (chave liga/desliga)', () => {
   const A = doisHubs(); A.as('owner@x.com'); A.call('desativarHubs');

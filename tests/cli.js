@@ -43,7 +43,7 @@ async function abrir(A, email, opts) {
   } });
   win.google = { script: { run: build() } };
   const urls = []; win.URL.createObjectURL = b => { urls.push(b); return 'blob:x'; };
-  const clk = win.HTMLElement.prototype.click; win.HTMLAnchorElement.prototype.click = function () { if (this.download) { win.__download = this.download; return; } return clk.call(this); };
+  const clk = win.HTMLElement.prototype.click; win.HTMLAnchorElement.prototype.click = function () { if (this.download) { win.__download = this.download; return; } if (this.target === '_top') { t.aberto = [this.href, '_top']; return; } return clk.call(this); };
   // executa o script do app (inclui boot)
   const doc = win.document;
   const t = { win, doc, A, email, erros, chamadas, graficos, urls, st };
@@ -65,7 +65,7 @@ async function abrir(A, email, opts) {
   // roda o script do cliente dentro da janela
   const m = fs.readFileSync(OUT + 'JS_Client.html', 'utf8');
   const js = m.replace(/^<script>/, '').replace(/<\/script>\s*$/, '');
-  win.PC_MIN_LOAD = opts.minLoad != null ? opts.minLoad : 0; win.PC_FADE = 0; win.PC_LANG = opts.lang || process.env.PC_LANG || 'pt'; if (opts.poll) win.PC_POLL = opts.poll;
+  win.PC_GATE = !!opts.gate; if (opts.sess) { try { win.localStorage.setItem('pc_sess', opts.sess); } catch (e) { win.__pcMem = { pc_sess: opts.sess }; } } win.PC_MIN_LOAD = opts.minLoad != null ? opts.minLoad : 0; win.PC_FADE = 0; win.PC_LANG = opts.lang || process.env.PC_LANG || 'pt'; if (opts.poll) win.PC_POLL = opts.poll;
   win.open = (u, alvo) => { t.aberto = [u, alvo]; return null; };
   if (opts.antes) opts.antes(win);
   win.eval(js + '\n;window.__S = S;');

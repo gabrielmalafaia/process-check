@@ -27,13 +27,14 @@ function impLinhas_(texto) {
   return ls;
 }
 /** Valida a carga inteira sem gravar. Devolve { erros:[{linha,coluna,msg}], linhas:[objetos], resumo }. */
-function impValidar_(tipo, texto) {
+function impValidar_(tipo, texto, ator) {
   const t = impTipo_(tipo), ls = impLinhas_(texto), erros = [], out = [];
   if (!ls.length) return { erros: [{ linha: 0, coluna: '', msg: 'Cole a tabela do Excel na caixa.' }], linhas: [], resumo: {} };
   const cab = ls[0].c.map(function (x) { return String(x).trim(); });
   const temCab = cab.length >= 1 && cab[0].toLowerCase() === t.cols[0].toLowerCase();
   if (temCab && cab.join('|').toLowerCase().indexOf(t.cols.slice(0, cab.length).join('|').toLowerCase()) !== 0) erros.push({ linha: ls[0].n, coluna: '', msg: 'Cabeçalho diferente do modelo: ' + t.cols.join(', ') + '.' });
   const dados = temCab ? ls.slice(1) : ls;
+  if (!dados.length) return { erros: [{ linha: ls[0].n, coluna: '', msg: 'Nenhuma linha de dados abaixo do cabeçalho.' }], linhas: [], resumo: {} };
   const existentes = lerDireto_(t.aba);
   const lideresExist = lerDireto_('Cad_Pessoas').filter(function (p) { return p.Cargo === 'Líder' && ativo_(p); }).map(function (p) { return p.Nome; });
   const lideresLote = [];
@@ -58,6 +59,8 @@ function impValidar_(tipo, texto) {
       if (v && (/[|;=<>]/.test(v) && c !== 'Cor_Simbolo' || /^[+\-@]/.test(v))) erros.push({ linha: o._n, coluna: c, msg: 'Não use os caracteres | ; = < > nem iniciar com + - @.' });
     });
     const e = validarCadastro_(t.aba, o, { todos: aceitos, lideres: lideres });
+    // líder só inclui colaboradores do próprio time: mover pessoas entre times é com o Site Leader ou o Admin
+    if (ator && tipo === 'pessoas' && ator.escopo.modo === 'time' && (o.Cargo !== 'Colaborador' || semAcento_(o.Lider) !== semAcento_(ator.nome))) e.Lider = 'Seu perfil só inclui colaboradores do seu próprio time.';
     Object.keys(e).forEach(function (c) { erros.push({ linha: o._n, coluna: c, msg: e[c] }); });
     if (!Object.keys(e).length) aceitos.push(o);
   });
@@ -67,18 +70,19 @@ function impValidar_(tipo, texto) {
 function importarPrevia(tipo, texto) {
   const t = impTipo_(String(tipo)), a = exigirPerm_(t.perm);
   if (a.hubOn && !a.hub) throw new Error('Nenhum Hub ativo. Cadastre um Hub antes da carga.');
-  const r = impValidar_(String(tipo), texto);
+  const r = impValidar_(String(tipo), texto, a);
   return { ok: !r.erros.length, erros: r.erros.slice(0, 100), totalErros: r.erros.length, resumo: r.resumo, hub: a.hubNome || '', previa: r.linhas.slice(0, 20).map(function (o) { return r.cols.map(function (c) { return o[c]; }); }), cols: r.cols };
 }
 function importarConfirmar(tipo, texto) {
   const t = impTipo_(String(tipo)), a = exigirPerm_(t.perm);
   if (a.hubOn && !a.hub) throw new Error('Nenhum Hub ativo. Cadastre um Hub antes da carga.');
   return comLock_(function () {
-    const r = impValidar_(String(tipo), texto);
+    const r = impValidar_(String(tipo), texto, a);
     if (r.erros.length) return { ok: false, erros: r.erros.slice(0, 100), totalErros: r.erros.length, msg: 'Nada foi gravado. Corrija os erros indicados.' };
     const linhas = r.linhas.map(function (o) { return t.cols.map(function (c) { return limpar_(o[c]); }); });
-    anexarLinhas_(t.aba, linhas);
-    registrar_(a, 'Carga em massa', t.aba, linhas.length + ' linhas' + (a.hubNome ? ' no Hub ' + a.hubNome : ''));
+    const hl = tipo === 'pessoas' ? histLote_(a, r.linhas) : 0;
+    try { anexarLinhas_(t.aba, linhas); } catch (e) { histRevertido_(a, hl, e); throw e; }
+    regSeguro_(a, 'Carga em massa', t.aba, linhas.length + ' linhas' + (a.hubNome ? ' no Hub ' + a.hubNome : ''));
     limparCache_();
     return { ok: true, gravados: linhas.length };
   });

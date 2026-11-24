@@ -73,7 +73,7 @@ Desenvolvimento iniciado em 2026. Versão atual: 7.0.
 - Permissão **Ver nomes de colaboradores nos relatórios**: sem ela, o servidor não devolve nomes (listas, detalhe, itens e CSV).
 
 **Relatório por e-mail** (Configurações > Relatório por e-mail, permissão "Gerir o relatório por e-mail")
-- Escolha de destinatários, frequência (diário, semanal, mensal) e idioma; "Enviar agora" e envio agendado diário às 7h.
+- Escolha de destinatários, frequência (diário, semanal, mensal) e idioma; "Enviar agora" e envio agendado diário às 22h.
 - Cada pessoa recebe **somente o que o próprio perfil autoriza** (líder: só o time; Site Leader: tudo), com nota média, meta, situação, itens críticos, processos e principais ofensores.
 - Falha de um envio não derruba os demais; cota diária respeitada; tudo registrado no histórico de alterações.
 
@@ -110,7 +110,7 @@ Desenvolvimento iniciado em 2026. Versão atual: 7.0.
 Revisão feita com os agentes de segurança, falhas silenciosas e fluxos de clique. Nenhuma migração é necessária: basta substituir `Code.gs`, `JS_Client.html` e publicar uma nova versão.
 
 Servidor:
-- Relatório por e-mail: se o e-mail sai e só a gravação da data falha, o envio conta como feito (antes era reenviado em duplicidade). Falhas do envio agendado das 7h passam a aparecer no log como "Agendamento com falhas".
+- Relatório por e-mail: se o e-mail sai e só a gravação da data falha, o envio conta como feito (antes era reenviado em duplicidade). Falhas do envio agendado das 22h passam a aparecer no log como "Agendamento com falhas".
 - Exportação CSV registrada no log mesmo quando o primeiro lote não é o de início (antes, pular o primeiro lote escapava do registro).
 - `bootstrap(true)` só limpa o cache de quem tem acesso (antes, qualquer conta da organização podia limpar o cache de todos).
 - Auditoria sem colaborador: o líder informado precisa existir no cadastro. O turno é checado contra o escopo do perfil na gravação.

@@ -69,6 +69,16 @@ function sondar() {
   }).withFailureHandler(function () { /* silencioso: tenta de novo no próximo ciclo */ }).contarPendentes();
 }
 
+/** Consulta silenciosa de metas novas (a cada 2 minutos, só com a aba visível). */
+function sondarMetas() {
+  if (!S.u || !tela('minhas') || document.hidden) return;
+  google.script.run.withSuccessHandler(function (n) {
+    if (typeof n !== 'number' || n === S.metasNovas) return;
+    S.metasNovas = n; renderNav();
+    if (S.v === 'minhas' && !S.busy && $('#modal').classList.contains('hidden')) loadMinhas(); // quem já está na tela vê a meta nova na hora
+  }).withFailureHandler(function () { /* silencioso: tenta de novo no próximo ciclo */ }).contarMetasNovas();
+}
+
 /* ---------- temas: automático, claro, escuro e laranja ---------- */
 const TEMAS = ['auto', 'light', 'dark', 'orange'];
 function temaSalvo() { try { const t = localStorage.getItem('pcTema'); return TEMAS.indexOf(t) > -1 ? t : 'light'; } catch (e) { return 'light'; } }
@@ -168,7 +178,11 @@ function mostrarLogin(b) {
 }
 function irEscolherConta() {
   const url = 'https://accounts.google.com/AccountChooser' + (S.appUrl ? '?continue=' + encodeURIComponent(S.appUrl) : '');
-  try { window.open(url, '_top'); } catch (e) { toast('Não foi possível abrir o seletor de contas do Google.', true); }
+  /* O app roda num iframe protegido: window.open é bloqueado, mas um link com target="_top" acionado pelo clique do usuário navega a página inteira. */
+  try {
+    const a = document.createElement('a'); a.href = url; a.target = '_top'; a.rel = 'noopener'; a.style.display = 'none';
+    document.body.appendChild(a); a.click(); a.remove();
+  } catch (e) { toast('Não foi possível abrir o seletor de contas do Google.', true); }
 }
 async function entrarGoogle() {
   if (!S.bl.email) { irEscolherConta(); return; }
@@ -231,7 +245,7 @@ function bindGlobais() {
     else if (q('#lgOutra')) irEscolherConta();
     else if (q('#cdEnviar')) enviarCadastro();
     else if (q('#cdVoltar') || q('#lgOkVoltar')) painelLogin('lgEntrar');
-    else if (q('#plRetry')) window.location.reload();
+    else if (q('#plRetry')) tentarDeNovo();
     else if (q('#srOk')) recusarSolicitacaoUI();
     else if ((x = q('[data-sa]'))) aprovarSolicitacao(Number(x.dataset.sa));
     else if ((x = q('[data-sr]'))) pedirRecusa(Number(x.dataset.sr));
@@ -255,8 +269,21 @@ function bindGlobais() {
 
 /* ---------- inicialização ---------- */
 let appIniciado = false;
+/* Sessão do navegador: lembra que ESTA conta já confirmou o login, em todas as abas, por 8 h sem uso (renovada a cada pulso enquanto a aba está visível).
+   Guarda só o e-mail e a hora; quem muda de conta Google ou fica 8 h parado vê a tela de login de novo. */
+const SESSAO_MIN = 480;
+function pcLer() { try { return localStorage.getItem('pc_sess'); } catch (e) { return (window.__pcMem || {}).pc_sess || null; } }
+function pcGravar(v) { try { localStorage.setItem('pc_sess', v); } catch (e) { (window.__pcMem = window.__pcMem || {}).pc_sess = v; } }
+function sessaoAtiva(email) {
+  try { const s = JSON.parse(pcLer() || 'null'); return !!(s && email && s.e === String(email).toLowerCase() && Date.now() - s.t < SESSAO_MIN * 60000 && s.t <= Date.now() + 60000); } catch (e) { return false; }
+}
+function marcarSessao(email) { if (email) pcGravar(JSON.stringify({ e: String(email).toLowerCase(), t: Date.now() })); }
 function iniciarApp(b) {
-  if (appIniciado) return;
+  if (appIniciado) {
+    if (S.reentrar) { S.reentrar = false; S.u = b.user; aplicarBase(b); $('#app').classList.remove('hidden'); v8Cabecalho(); renderNav(); nav(S.v || S.u.telas[0]); }
+    return;
+  }
+  marcarSessao(b.user && b.user.email);
   appIniciado = true;
   aplicarBase(b); S.u = b.user;
   $('#whoN').textContent = S.u.nome; $('#whoP').textContent = S.u.perfil;
@@ -278,11 +305,20 @@ function iniciarApp(b) {
   nav(['matriz', 'form', 'minhas', 'geral'].filter(tela)[0] || S.u.telas[0]);
   setInterval(relUpd, 30000);
   if (pode('autorizar')) setInterval(sondar, window.PC_POLL || 120000);
+  if (tela('minhas')) setInterval(sondarMetas, window.PC_POLL || 120000);
+  setInterval(sondarFb, window.PC_POLL || 120000);
+}
+let bootLigado = false;
+function tentarDeNovo() {
+  $('#carregando').classList.remove('pl-erro'); $('#plTxt').textContent = 'Carregando o sistema'; $('#carregando .pl-d').classList.remove('hidden'); $('#plRetry').classList.add('hidden');
+  boot();
 }
 async function boot() {
-  iniciarIdioma(); aplicarTema(temaSalvo(), false); icones(document);
-  $$('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === idiomaAtual())); });
-  bindGlobais(); v8Eventos();
+  if (!bootLigado) {
+    iniciarIdioma(); aplicarTema(temaSalvo(), false); icones(document);
+    $$('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === idiomaAtual())); });
+    bindGlobais(); v8Eventos(); v9Eventos(); v10Eventos(); bootLigado = true;
+  }
   const ini = Date.now(), min = window.PC_MIN_LOAD != null ? window.PC_MIN_LOAD : 700;
   let b, fim = false;
   const vigia = setTimeout(function () { if (!fim) falhaCarga('o servidor não respondeu em 60 s'); }, 60000);
@@ -290,7 +326,8 @@ async function boot() {
   const resto = min - (Date.now() - ini);
   if (resto > 0) await new Promise(function (r) { setTimeout(r, resto); });
   try {
-    if (b.user.ok) { if (!entrarApp(b)) { fim = true; clearTimeout(vigia); sair($('#carregando')); return; } } else { mostrarLogin(b); }
+    if (b.user.ok && window.PC_GATE !== false && !sessaoAtiva(b.user.email)) { mostrarLogin(b); }
+    else if (b.user.ok) { if (!entrarApp(b)) { fim = true; clearTimeout(vigia); sair($('#carregando')); return; } } else { mostrarLogin(b); }
   } catch (e) { fim = true; clearTimeout(vigia); falhaCarga(e && e.message); return; }
   fim = true; clearTimeout(vigia);
   sair($('#carregando'));

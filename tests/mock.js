@@ -62,7 +62,8 @@ function criarAmbiente(codePath) {
       create: (nome) => { const id = 'ARQ' + (A.planilhasExtra = A.planilhasExtra || {}, Object.keys(A.planilhasExtra).length + 1); if (A.arquivoFalha) throw new Error('Sem autorização do Google'); A.planilhasExtra[id] = { sheets: {}, getId: () => id, getSheetByName: n => A.planilhasExtra[id].sheets[n] || null, insertSheet: n => (A.planilhasExtra[id].sheets[n] = criarSheet(n)) }; return A.planilhasExtra[id]; },
       openById: (id) => { if (!A.planilhasExtra || !A.planilhasExtra[id]) throw new Error('Planilha não encontrada'); return A.planilhasExtra[id]; } },
     PropertiesService: { getScriptProperties: () => ({ getProperty: k => (A.props = A.props || {})[k] || null, setProperty: (k, v) => { (A.props = A.props || {})[k] = v; }, deleteProperty: k => { delete (A.props = A.props || {})[k]; } }) },
-    Utilities: { formatDate: (d, tz, p) => fmtData(d, p) },
+    Utilities: { formatDate: (d, tz, p) => fmtData(d, p), DigestAlgorithm: { SHA_256: 'SHA_256' }, Charset: { UTF_8: 'UTF_8' },
+      computeDigest: (alg, s) => Array.from(require('crypto').createHash('sha256').update(String(s), 'utf8').digest()).map(b => (b > 127 ? b - 256 : b)) },
     Session: { getActiveUser: () => ({ getEmail: () => A.email }), getEffectiveUser: () => ({ getEmail: () => A.efetivo }), getScriptTimeZone: () => 'UTC' },
     CacheService: { getScriptCache: () => ({
       get: k => (A.cache.has(k) ? A.cache.get(k) : null),
@@ -76,7 +77,7 @@ function criarAmbiente(codePath) {
     ScriptApp: { getService: () => ({ getUrl: () => 'https://script.google.com/a/macros/x.com/s/ABC/exec' }),
       getProjectTriggers: () => (A.triggers = A.triggers || []).slice(),
       deleteTrigger: t => { A.triggers = (A.triggers || []).filter(x => x !== t); },
-      newTrigger: fn => ({ timeBased() { return this; }, everyDays() { return this; }, atHour() { return this; }, create() { const t = { getHandlerFunction: () => fn }; (A.triggers = A.triggers || []).push(t); return t; } }) },
+      newTrigger: fn => ({ timeBased() { return this; }, everyDays() { return this; }, atHour(h) { this.h = h; return this; }, create() { const t = { getHandlerFunction: () => fn, hora: this.h }; (A.triggers = A.triggers || []).push(t); return t; } }) },
     DriveApp: { getFileById: () => ({
       getOwner: () => ({ getEmail: () => 'owner@x.com' }),
       getEditors: () => A.compart.editors.map(e => ({ getEmail: () => e })),

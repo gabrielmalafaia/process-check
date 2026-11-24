@@ -28,13 +28,13 @@ Novas abas (criadas sozinhas): `Cad_Hubs`, `Log_Atividade`, `Log_Aceites`. Nova 
 
 1. Copie para o projeto Apps Script: `Code.gs`, `Hubs.gs`, `Log.gs`, `Online.gs`, `Import.gs`, `Index.html`, `Styles.html`, `JS_Client.html`, `appsscript.json`.
 2. Nova implantação (nova versão do mesmo web app).
-3. Abra a aba `Cad_Hubs` e preencha a primeira linha: `ID_Hub` (pode deixar a função gerar depois, ou use `H1`), `Nome` (ex.: o nome do seu Hub), `Operacao`, `Ativo = Sim`.
+3. Abra a aba `Cad_Hubs` e preencha a primeira linha: `ID_Hub` (obrigatório, por exemplo `H1`; a migração recusa linha sem ID ou inativa), `Nome` (ex.: o nome do seu Hub), `Operacao`, `Ativo = Sim`.
 4. No editor, execute `ativarHubs()` (roda `migrarV8()` e liga `HUBS_ATIVO`). A migração é idempotente: preenche o Hub dos dados existentes, marca os Admins como "*", normaliza os clusters A a X e acrescenta as permissões novas ao perfil Site Leader.
 5. Execute `agendarArquivoLog()` (gatilho diário às 3h que arquiva o log antigo).
 6. Depois de publicar o cliente novo, execute `ativarAvisoLog()` para exigir o aceite.
 7. Entre como Admin, abra Acessos > Hubs e cadastre os demais Hubs; atribua cada usuário ao seu Hub.
 
-Reversão: `desativarHubs()` desliga o isolamento (os dados e as colunas permanecem).
+Reversão: `desativarHubs()` desliga o isolamento (os dados e as colunas permanecem). Atenção: o que for gravado com o isolamento desligado fica sem Hub, e uma nova `ativarHubs()` atribui essas linhas ao Hub padrão (o primeiro ativo). Use a reversão só como emergência e, se tiver mais de um Hub com dados, corrija o Hub dessas linhas à mão depois.
 
 ## Verificação
 
@@ -47,3 +47,12 @@ Reversão: `desativarHubs()` desliga o isolamento (os dados e as colunas permane
 - Mais de 5 Hubs: o limite de células da planilha ainda precisa de análise.
 - A divisão do `Code.gs` em vários arquivos foi adiada; o código novo já está em arquivos separados.
 - `ativarAvisoLog` e `agendarArquivoLog` são executados manualmente no editor.
+
+## Revisões feitas antes da entrega
+
+Cinco revisões independentes (segurança, falhas silenciosas, compatibilidade com o Apps Script, desempenho e teste adversarial de fluxos) geraram correções com testes. Limites que permanecem conhecidos:
+
+- **Duas abas do Admin global em Hubs diferentes:** o Hub ativo é por usuário no servidor. A tela confere o Hub ao voltar para a aba e a cada pulso (2 min), mas uma gravação feita nos primeiros instantes pode cair no Hub novo.
+- **Desempenho com muito volume:** cada auditoria salva invalida os caches de Matriz e relatórios; a aba de Pessoas passa de 100 KB de cache com cerca de 640 linhas no total. Medir no app real antes de otimizar.
+- **Mensagens de erro entre Hubs:** "E-mail já cadastrado" ainda confirma que um e-mail existe em outro Hub.
+- **Limite de rascunhos por usuário:** ainda não existe.

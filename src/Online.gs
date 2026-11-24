@@ -12,7 +12,7 @@ function pulso() {
   let idx = [];
   try { idx = JSON.parse(c.get('on:idx') || '[]'); } catch (e) { idx = []; }
   if (idx.indexOf(a.email) < 0 && idx.length < ONLINE_MAX) { idx.push(a.email); c.put('on:idx', JSON.stringify(idx), 21600); }
-  return { ok: true };
+  return { ok: true, hub: a.hubGlobal ? a.hub : (a.hub || '') };
 }
 function listarOnline() {
   const a = exigirPerm_('ver_online'), c = CacheService.getScriptCache(), agora = Date.now();
@@ -21,9 +21,11 @@ function listarOnline() {
   const hubs = {};
   lerAba_('Cad_Hubs').forEach(function (h) { hubs[String(h.ID_Hub)] = String(h.Nome); });
   const vivos = [], mantem = [];
+  const brutos = {};
+  for (let i = 0; i < idx.length; i += 100) Object.assign(brutos, c.getAll(idx.slice(i, i + 100).map(function (e) { return 'on:' + e; })));
   idx.forEach(function (em) {
     let o = null;
-    try { o = JSON.parse(c.get('on:' + em) || 'null'); } catch (e) { o = null; }
+    try { o = JSON.parse(brutos['on:' + em] || 'null'); } catch (e) { o = null; }
     if (!o || agora - o.t > ONLINE_JANELA_S * 1000) return;
     mantem.push(em);
     if (a.hubOn && !a.hubGlobal && o.h !== a.hub) return;

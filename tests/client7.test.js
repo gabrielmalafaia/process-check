@@ -67,6 +67,76 @@ const dois = () => {
     ok(!t.$('#cdHubW').classList.contains('hidden')); ok(t.$('#cdTurnoW').classList.contains('hidden'));
     t.set('#cdCargo', 'Líder'); ok(!t.$('#cdTurnoW').classList.contains('hidden')); eq(t.erros, []);
   });
+  await TA('Login sempre aparece na primeira visita da sessão e só entra depois de Entrar com Google', async () => {
+    const A = dois(); const t = await abrir(A, 'owner@x.com', { gate: true });
+    ok(!t.$('#login').classList.contains('hidden'), 'tela de login'); ok(t.$('#app').classList.contains('hidden'), 'app oculto');
+    ok(t.$('#lgEmail').textContent === 'owner@x.com');
+    await t.click('#lgGoogle'); ok(!t.$('#app').classList.contains('hidden'), 'entrou'); eq(t.erros, []);
+  });
+  await TA('Login: e-mail não cadastrado vê o aviso de acesso, sem entrar', async () => {
+    const A = dois(); const t = await abrir(A, 'fora@outra.com', { gate: true });
+    ok(!t.$('#login').classList.contains('hidden')); ok(t.$('#app').classList.contains('hidden')); ok(/Login não encontrado/.test(t.$('#modal').textContent)); eq(t.erros, []);
+  });
+  await TA('Usar outra conta Google: abre o seletor de contas da página inteira (target _top)', async () => {
+    const A = dois(); const t = await abrir(A, 'owner@x.com', { gate: true });
+    const vistos = []; t.win.HTMLAnchorElement.prototype.click = function () { vistos.push([this.href, this.target]); };
+    await t.click('#lgOutra');
+    eq(vistos.length, 1, 'nada aconteceu ao clicar'); ok(vistos[0][0].indexOf('https://accounts.google.com/AccountChooser?continue=') === 0, vistos[0][0]); eq(vistos[0][1], '_top');
+    ok(decodeURIComponent(vistos[0][0]).indexOf('/exec') > 0, 'continua para o endereço do app'); eq(t.erros, []);
+  });
+  await TA('Trocar de Hub: sem recarregar, mostra o novo Hub e os dados dele; Atualizar enxerga Hub novo', async () => {
+    const A = dois(); const t = await abrir(A, 'owner@x.com'); let recarregou = false;
+    t.win.__S.u.hub; const l0 = t.$$('#hubSel option').length; eq(l0, 2);
+    t.set('#hubSel', 'H2'); await t.idle();
+    ok(t.$('#hubChip').textContent.includes('Operação B'), t.$('#hubChip').textContent); eq(t.$('#hubSel').value, 'H2'); ok(!t.$('#hubSel').disabled);
+    ok(!t.$('#app').classList.contains('hidden'), 'tela não pode ficar em branco'); ok(t.$('.view:not(.hidden)'), 'há uma tela visível');
+    ok(t.chamadas.some(c => c[0] === 'definirHubAtivo' && c[1][0] === 'H2'));
+    A.sheets.Cad_Hubs.appendRow(['H3', 'Hub Tres', 'Operação C', 'Sim']);
+    await t.click('#refresh'); eq(t.$$('#hubSel option').length, 3, 'Atualizar deve trazer o Hub novo'); eq(t.$('#hubSel').value, 'H2'); eq(t.erros, []);
+  });
+  await TA('Revisão 2: Atualizar com aviso pendente ou usuário desativado não corrompe o estado; ao aceitar, volta ao app', async () => {
+    const A = dois(); const t = await abrir(A, 'sl2@x.com'); ok(t.win.__S.procs.length > 0);
+    A.as('owner@x.com'); A.call('ativarAvisoLog'); A.run('limparCache_()');
+    await t.click('#refresh'); ok(t.$('#avisoTela'), 'aviso aparece no meio da sessão'); ok(t.win.__S.procs.length > 0, 'estado do cliente intacto');
+    await t.click('#avAceitar'); ok(!t.$('#avisoTela')); ok(!t.$('#app').classList.contains('hidden')); eq(t.erros, []);
+  });
+  await TA('Revisão 2: chamada que falha por aceite pendente leva à tela de aceite', async () => {
+    const A = dois(); const t = await abrir(A, 'sl2@x.com'); A.as('owner@x.com'); A.call('ativarAvisoLog'); A.run('limparCache_()');
+    await t.nav('log'); await t.idle(); await t.idle(); ok(t.$('#avisoTela'), 'tela de aceite'); eq(t.erros, []);
+  });
+  await TA('Revisão 2: trocar de Hub com falha no servidor desfaz a troca e avisa; seletor volta ao Hub real', async () => {
+    const A = dois(); const t = await abrir(A, 'owner@x.com'); const orig = A.ctx.bootstrap; let n = 0;
+    A.ctx.bootstrap = function (f) { if (++n === 1) throw new Error('tempo esgotado'); return orig(f); };
+    t.set('#hubSel', 'H2'); await t.idle(); await t.idle();
+    eq(t.$('#hubSel').value, 'H1', 'seletor deve voltar ao Hub real'); ok(/não foi trocado/i.test(t.$('#toast') ? t.$('#toast').textContent : t.doc.body.textContent));
+    A.as('owner@x.com'); eq(A.call('bootstrap', false).user.hub.id, 'H1', 'o servidor foi revertido'); eq(t.erros, []);
+  });
+  await TA('Revisão 2: Gravar da carga em massa some ao editar o texto validado', async () => {
+    const A = dois(); const t = await abrir(A, 'sl2@x.com'); await t.nav('cad'); await t.click('#v-cad [data-t="Cad_Pessoas"]'); await t.click('#btnCarga');
+    t.$('#cgTexto').value = 'Nome\tCargo\tTurno\tStatus_Ativo\tLider\nLider Dois\tLíder\tT1\tSim\t'; await t.click('#cgValidar'); ok(!t.$('#cgGravar').classList.contains('hidden'));
+    t.$('#cgTexto').value += ' x'; t.ev(t.$('#cgTexto'), 'input'); ok(t.$('#cgGravar').classList.contains('hidden'), 'Gravar deve esconder'); eq(t.erros, []);
+  });
+  await TA('Revisão 2: Tentar novamente refaz o carregamento sem recarregar a página', async () => {
+    const A = dois(); let falhas = 1; const orig = A.ctx.bootstrap; A.ctx.bootstrap = function (f) { if (falhas-- > 0) throw new Error('indisponível'); return orig(f); };
+    const t = await abrir(A, 'owner@x.com'); ok(!t.$('#plRetry').classList.contains('hidden'), 'botão de nova tentativa');
+    await t.click('#plRetry'); await t.idle(); ok(!t.$('#app').classList.contains('hidden'), 'app abre depois de tentar de novo'); eq(t.$$('#hubSel').length, 1);
+  });
+  await TA('Sessão: depois de entrar, uma aba nova da mesma conta entra direto; outra conta ou sessão vencida pede o login', async () => {
+    const A = dois(); const t1 = await abrir(A, 'owner@x.com', { gate: true }); await t1.click('#lgGoogle');
+    const guardado = t1.win.localStorage ? t1.win.localStorage.getItem('pc_sess') : (t1.win.__pcMem || {}).pc_sess; ok(guardado, 'sessão gravada');
+    ok(JSON.parse(guardado).e === 'owner@x.com');
+    const semanaVelha = JSON.stringify({ e: 'owner@x.com', t: Date.now() - 9 * 3600000 }), outra = JSON.stringify({ e: 'outro@x.com', t: Date.now() });
+    const t2 = await abrir(A, 'owner@x.com', { gate: true, sess: guardado }); ok(!t2.$('#app').classList.contains('hidden'), 'aba nova da mesma conta entra direto'); ok(t2.$('#login').classList.contains('hidden'));
+    const t3 = await abrir(A, 'owner@x.com', { gate: true, sess: outra }); ok(!t3.$('#login').classList.contains('hidden'), 'outra conta pede login');
+    const t4 = await abrir(A, 'owner@x.com', { gate: true, sess: semanaVelha }); ok(!t4.$('#login').classList.contains('hidden'), 'sessão vencida pede login'); eq(t2.erros, []);
+  });
+  await TA('Revisão 4: sessão com relógio adiantado não vale; Hub trocado em outra aba limpa o estado do formulário', async () => {
+    const A = dois(); const futuro = JSON.stringify({ e: 'owner@x.com', t: Date.now() + 30 * 86400000 });
+    const t = await abrir(A, 'owner@x.com', { gate: true, sess: futuro }); ok(!t.$('#login').classList.contains('hidden'), 'sessão do futuro pede login');
+    const u = await abrir(A, 'owner@x.com'); u.win.__S.F = { lider: 'Carlos Lider' }; u.win.__S.flt.lider = 'Carlos Lider';
+    A.as('owner@x.com'); A.call('definirHubAtivo', 'H2'); await u.click('#refresh'); await u.idle();
+    ok(u.win.__S.F === null, 'formulário do Hub anterior descartado'); eq(u.win.__S.flt.lider, ''); eq(u.$('#hubSel').value, 'H2'); eq(u.erros, []);
+  });
   console.log('Cliente v8 (Hub, online, log, carga, aceite): ' + R.ok + ' passaram, ' + R.f.length + ' falharam');
   R.f.forEach(x => console.log('  FALHA: ' + x)); process.exit(R.f.length ? 1 : 0);
 })();

@@ -41,19 +41,20 @@ function abasAc() {
   if (pode('autorizar') && tela('autorizar')) a.push('autorizar');
   if (S.ac.pode.usuarios) a.push('usuarios');
   if (S.ac.pode.perfis) a.push('perfis');
+  if (S.ac.pode.regras) a.push('regras');
   a.push('log');
   if (S.ac.pode.perfis) a.push('seg');
   if (hubsAba()) a.push('hubs');
   return a;
 }
-const AC_NOME = { autorizar: 'Autorizações', usuarios: 'Usuários', perfis: 'Perfis', log: 'Histórico de alterações', seg: 'Segurança', hubs: 'Hubs' };
+const AC_NOME = { autorizar: 'Autorizações', usuarios: 'Usuários', perfis: 'Perfis', regras: 'Regras de auditoria', log: 'Histórico de alterações', seg: 'Segurança', hubs: 'Hubs' };
 function renderAcessos() {
   const el = $('#v-acessos'), abas = abasAc();
   const tabs = '<div class="tabs">' + abas.map(function (k) { return '<button type="button" class="' + (k === S.acTab ? 'on' : '') + '" data-at="' + k + '">' + AC_NOME[k] + (k === 'autorizar' && S.pend > 0 ? '<span class="badge-n">' + S.pend + '</span>' : '') + '</button>'; }).join('') + '</div>';
   el.innerHTML = tabs + '<div id="acBody"></div>';
   if (S.acTab === 'usuarios' && S.acSol) drawUsuarios({ vals: { Email_Google: S.acSol.email, Nome: S.acSol.nome, Status_Ativo: 'Sim', Hub: S.acSol.hub || '' }, edit: null, erros: {} });
   else if (S.acTab === 'autorizar') drawAutorizar('#acBody');
-  else ({ usuarios: drawUsuarios, perfis: drawPerfis, log: drawLog, seg: drawSeg, hubs: drawHubs })[S.acTab]();
+  else ({ usuarios: drawUsuarios, perfis: drawPerfis, regras: drawRegras, log: drawLog, seg: drawSeg, hubs: drawHubs })[S.acTab]();
 }
 /** Atualiza só o número de pendentes na aba Autorizar, sem redesenhar a tela. */
 function atualizarSeloAcessos() {

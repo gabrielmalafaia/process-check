@@ -22,7 +22,7 @@ const TELAS_ADM = TELAS_ALL.concat('autorizar');
   [['vis@x.com', 'Vis', 'Visualizador'], ['ges@x.com', 'Gestora', 'Gestor'], ['cad@x.com', 'Cadastrista', 'Cadastrista'], ['res@x.com', 'Restrito', 'Restrito'], ['tim@x.com', 'Time', 'Meu time']].forEach(u => A.ctx.anexar_('Cad_Usuarios', [u[0], u[1], u[2], 'Sim']));
 
   const esperado = {
-    'owner@x.com': TELAS_ALL.concat('log'), 'ana@x.com': TELAS_ALL, 'sl@x.com': TELAS_ALL.concat('log'),
+    'owner@x.com': TELAS_ALL.concat('log', 'programacao'), 'ana@x.com': TELAS_ALL, 'sl@x.com': TELAS_ALL.concat('log', 'programacao'),
     'aud1@x.com': ['matriz', 'form', 'minhas'],
     'vis@x.com': ['geral', 'proc', 'doca', 'tend'],
     'ges@x.com': ['matriz', 'geral', 'auditorias', 'auditores', 'colab', 'export'],
@@ -364,7 +364,7 @@ const TELAS_ADM = TELAS_ALL.concat('autorizar');
   /* ===== 6. acessos ===== */
   await TA('Acessos: Admin vê Usuários, Perfis, Histórico e Segurança; Analista não vê Perfis/Segurança', async () => {
     const t = await abrir(A, 'owner@x.com'); await t.nav('acessos');
-    eq(t.$$('#v-acessos .tabs button').map(b => b.textContent.replace(/\d+$/, '')), ['Autorizações', 'Usuários', 'Perfis', 'Histórico de alterações', 'Segurança']);
+    eq(t.$$('#v-acessos .tabs button').map(b => b.textContent.replace(/\d+$/, '')), ['Autorizações', 'Usuários', 'Perfis', 'Regras de auditoria', 'Histórico de alterações', 'Segurança']);
     const a = await abrir(A, 'ana@x.com'); await a.nav('acessos');
     eq(a.$$('#v-acessos .tabs button').map(b => b.textContent), ['Usuários', 'Histórico de alterações']);
   });

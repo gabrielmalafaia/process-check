@@ -46,6 +46,7 @@ const ICON = {
   'settings': '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
   'shield': '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
   'lock': '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  'calendar': '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/>',
   'target': '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
   'alert': '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
   'info': '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
@@ -77,11 +78,11 @@ function icones(raiz) {
 }
 
 /* ---------- constantes de exibição ---------- */
-const TIT = { matriz: 'Matriz de Processos', form: 'Formulário de Auditoria', minhas: 'Minhas metas', geral: 'Visão Geral', auditorias: 'Auditorias realizadas', auditores: 'Auditores e metas', proc: 'Por processo', doca: 'Por doca e cluster', colab: 'Por colaborador e equipe', tend: 'Tendência', export: 'Exportar', cad: 'Cadastros', cfg: 'Configurações', acessos: 'Acessos', autorizar: 'Autorizações', log: 'Log de atividade' };
+const TIT = { matriz: 'Matriz de Processos', form: 'Formulário de Auditoria', minhas: 'Minhas metas', feedbacks: 'Meus feedbacks', programacao: 'Programação', geral: 'Visão Geral', auditorias: 'Auditorias realizadas', auditores: 'Auditores e metas', proc: 'Por processo', doca: 'Por doca e cluster', colab: 'Por colaborador e equipe', tend: 'Tendência', export: 'Exportar', cad: 'Cadastros', cfg: 'Configurações', acessos: 'Acessos', autorizar: 'Autorizações', log: 'Log de atividade' };
 const NAV = [
-  { sec: 'Operação', itens: [{ id: 'matriz', ic: 'layout-grid' }, { id: 'form', ic: 'clipboard-check' }, { id: 'minhas', ic: 'target' }] },
+  { sec: 'Operação', itens: [{ id: 'matriz', ic: 'layout-grid' }, { id: 'form', ic: 'clipboard-check' }, { id: 'minhas', ic: 'target' }, { id: 'feedbacks', ic: 'pencil' }] },
   { sec: 'Análise', itens: [{ id: 'rel', ic: 'bar-chart', t: 'Relatórios', kids: ['geral', 'auditorias', 'auditores', 'proc', 'doca', 'colab', 'tend', 'export'] }] },
-  { sec: 'Administração', itens: [{ id: 'cad', ic: 'database' }, { id: 'cfg', ic: 'settings' }, { id: 'acessos', ic: 'shield' }, { id: 'autorizar', ic: 'user-check' }, { id: 'log', ic: 'list' }] }
+  { sec: 'Administração', itens: [{ id: 'programacao', ic: 'calendar' }, { id: 'cad', ic: 'database' }, { id: 'cfg', ic: 'settings' }, { id: 'acessos', ic: 'shield' }, { id: 'autorizar', ic: 'user-check' }, { id: 'log', ic: 'list' }] }
 ];
 const NAV_ITENS = NAV.reduce(function (a, s) { return a.concat(s.itens); }, []);
 const KID_IC = { geral: 'layout-dashboard', auditorias: 'list', auditores: 'users', proc: 'layers', doca: 'package', colab: 'user', tend: 'trending-up', export: 'download' };
@@ -89,8 +90,8 @@ const REL = ['geral', 'auditorias', 'auditores', 'proc', 'doca', 'colab', 'tend'
 const TXT_FAIXA = { vermelho: 'Em Inconformidade', observacao: 'Em Observação', verde: 'Completo e em Conformidade' };
 const TXT_FAIXA_C = { vermelho: 'Inconforme', observacao: 'Em observação', verde: 'Conforme' };
 const COR = { verde: '#1E9E5A', observacao: '#F2B100', vermelho: '#D93025' };
-const TXT_META = { no_ritmo: 'No ritmo', em_risco: 'Em risco', atingida: 'Atingida', nao_atingida: 'Não atingida', futura: 'Não iniciada', inativa: 'Inativa' };
-const LEIT = ['bootstrap', 'getMatriz', 'relatorio', 'minhasMetas', 'listarAcessos'];
+const TXT_META = { no_ritmo: 'No ritmo', em_risco: 'Em risco', atingida: 'Atingida', nao_atingida: 'Não atingida', futura: 'Não iniciada', inativa: 'Inativa', cancelada: 'Cancelada' };
+const LEIT = ['bootstrap', 'getMatriz', 'relatorio', 'minhasMetas', 'minhasMetasLider', 'listarMetasLider', 'listarFeedbacks', 'meusFeedbacks', 'contarFeedbacks', 'listarAcessos'];
 const pode = function (p) { return !!S.u && S.u.perms.indexOf(p) > -1; };
 const tela = function (t) { return !!S.u && S.u.telas.indexOf(t) > -1; };
 /** Faixa da nota: abaixo do corte = vermelho; do corte até a média = observação (amarelo); média ou mais = verde. */
@@ -140,7 +141,7 @@ function rpc(fn) {
   return new Promise(function (ok, er) {
     const r = google.script.run
       .withSuccessHandler(function (x) { esperaFim(); if (LEIT.indexOf(fn) > -1) marcar(); ok(x); })
-      .withFailureHandler(function (e) { esperaFim(); toast((e && e.message) || String(e), true); er(e); });
+      .withFailureHandler(function (e) { esperaFim(); toast((e && e.message) || String(e), true); if (fn !== 'bootstrap' && /^Leia e aceite o aviso/.test((e && e.message) || '')) reavisar(); er(e); });
     r[fn].apply(r, a);
   });
 }
@@ -206,15 +207,16 @@ function chipEst(proc, id) {
 /* ---------- carga, menu e navegação ---------- */
 function aplicarBase(b) {
   S.cfg = b.config; S.procs = b.processos; S.tipos = b.tipos; S.db = b.db; S.visual = b.visual || { cores: [], simbolos: [] };
-  S.turnos = b.turnos || S.turnos; S.auditores = b.auditores || []; S.pend = b.pendentes || 0;
+  S.turnos = b.turnos || S.turnos; S.auditores = b.auditores || []; S.pend = b.pendentes || 0; S.metasNovas = b.metasNovas || 0; aplicarFb(b.fb, b.user);
   if (!S.mp || S.procs.indexOf(S.mp) < 0) S.mp = S.procs[0] || '';
 }
 /** O item "Autorizações" só aparece sozinho quando a pessoa não tem a tela Acessos (nela, vira uma aba). */
 const autorizarSolo = function () { return tela('autorizar') && !tela('acessos'); };
 function renderNav() {
   const btn = function (id, t, cls) {
-    const al = (id === 'acessos' || id === 'autorizar') && pode('autorizar') && S.pend > 0;
-    return '<button type="button" data-v="' + id + '" class="' + (cls || '') + (al ? ' alerta' : '') + '"' + (S.v === id ? ' aria-current="page"' : '') + (al ? ' aria-label="' + esc(t) + ': ' + S.pend + ' pendente(s)"' : '') + '>' + ic(KID_IC[id] || (NAV_ITENS.find(function (n) { return n.id === id; }) || {}).ic, 18) + '<span class="t">' + esc(t) + '</span>' + (al ? '<span class="badge-n">' + S.pend + '</span>' : '') + '</button>';
+    const al = (id === 'acessos' || id === 'autorizar') && pode('autorizar') && S.pend > 0, nm = id === 'minhas' && S.metasNovas > 0, fb = S.fb || {}, nf = id === 'feedbacks' && fb.fbMeus > 0, np = id === 'programacao' && pode('obrigacoes') && ((fb.fbAbertasHub | 0) + (fb.fbAtrasadosHub | 0)) > 0;
+    const n = nm ? S.metasNovas : nf ? fb.fbMeus : np ? (fb.fbAbertasHub | 0) + (fb.fbAtrasadosHub | 0) : S.pend, tot = al || nm || nf || np, rot = nm ? '{0}: {1} nova(s)' : nf ? '{0}: {1} a registrar' : np ? '{0}: {1} precisam de ação' : '{0}: {1} pendente(s)';
+    return '<button type="button" data-v="' + id + '" class="' + (cls || '') + (tot ? ' alerta' : '') + '"' + (S.v === id ? ' aria-current="page"' : '') + (tot ? ' aria-label="' + esc(tpl(tr(rot), [t, n])) + '"' : '') + '>' + ic(KID_IC[id] || (NAV_ITENS.find(function (x) { return x.id === id; }) || {}).ic, 18) + '<span class="t">' + esc(t) + '</span>' + (tot ? '<span class="badge-n">' + n + '</span>' : '') + '</button>';
   };
   let h = '';
   NAV.forEach(function (sec) {
@@ -233,7 +235,7 @@ function renderNav() {
   $$('#nav button[data-v]').forEach(function (b) { b.classList.toggle('on', b.dataset.v === S.v || (b.dataset.v === 'acessos' && S.v === 'acessos')); });
 }
 const LOAD = {
-  matriz: function () { return loadMatriz(); }, form: function () { if (!S.F) novoForm(); renderForm(); }, minhas: function () { return loadMinhas(); },
+  matriz: function () { return loadMatriz(); }, form: function () { if (!S.F) novoForm(); renderForm(); }, minhas: function () { return loadMinhas(); }, programacao: function () { return loadProgramacao(); }, feedbacks: function () { return loadFeedbacksMeus(); },
   cad: function () { renderCad(); }, cfg: function () { loadCfg(); }, acessos: function () { return loadAcessos(); }, autorizar: function () { return loadAutorizar(); }, log: function () { return loadLog(); }
 };
 function nav(v) {
@@ -252,7 +254,7 @@ function nav(v) {
 }
 async function atualizar() {
   const b = $('#refresh'), t = $('#refresh .t'); b.disabled = true; t.textContent = 'Atualizando…';
-  try { aplicarBase(await rpc('bootstrap', true)); S.mx = {}; S.edit = null; S.delIdx = -1; S.ac = null; fbarFill(); nav(S.v); } catch (e) { /* o aviso já foi exibido */ } finally { b.disabled = false; t.textContent = 'Atualizar'; }
+  try { const nb = await rpc('bootstrap', true); if (!aplicarBootstrap(nb)) return; S.mx = {}; S.edit = null; S.delIdx = -1; S.ac = null; fbarFill(); nav(S.v); } catch (e) { /* o aviso já foi exibido */ } finally { b.disabled = false; t.textContent = 'Atualizar'; }
 }
 
 /* ---------- filtros globais dos relatórios ---------- */

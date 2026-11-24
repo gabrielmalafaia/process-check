@@ -52,14 +52,21 @@ async function bannerMetas() {
 }
 async function loadMinhas() {
   const el = $('#v-minhas'); el.innerHTML = '<div class="card">' + skel(5) + '</div>';
-  let ms; try { ms = await rpc('minhasMetas'); } catch (e) { el.innerHTML = '<div class="card">Não foi possível carregar suas metas.</div>'; return; }
+  let ms, pg; try { const r = await Promise.all([rpc('minhasMetas'), rpc('minhasMetasLider')]); ms = r[0]; pg = r[1]; } catch (e) { el.innerHTML = '<div class="card">Não foi possível carregar suas metas.</div>'; return; }
   if (S.v !== 'minhas') return;
   ms.sort(function (a, b) { return b.ini.localeCompare(a.ini); });
-  el.innerHTML = ms.map(function (m) {
+  const prog = pg.slice().sort(function (a, b) { return a.fim.localeCompare(b.fim); }).map(function (m) {
+    const p = Math.min(100, m.feito / m.qtd * 100), venc = m.status === 'nao_atingida';
+    return '<div class="card"><div class="hd"><div><b>' + esc(m.qtd + ' ' + tr('auditoria(s)')) + '</b>' + (m.nova ? ' <span class="tag-t">' + esc(tr('Nova')) + '</span>' : '') + '<br><small class="muted">' + esc(fmtD(m.ini) + ' ' + tr('a') + ' ' + fmtD(m.fim)) + (venc ? ' · ' + esc(tr('Prazo vencido')) : '') + (m.desc ? ' · ' + esc(m.desc) : '') + '</small><br><small class="muted">' + esc(escopoMeta(m)) + '</small></div>' + pill(m.status, tr(TXT_META[m.status])) + '</div>' +
+      '<div class="meta-t"><span class="nm"><b>' + m.feito + '</b> ' + esc(tr('de')) + ' ' + m.qtd + '</span>' + meter(p, m.status) + '<span class="num">' + Math.round(p) + '%</span></div></div>';
+  }).join('');
+  const antes = prog ? '<div class="sect">' + esc(tr('Programadas pela liderança')) + '</div>' + prog : '';
+  if (S.metasNovas > 0 || pg.some(function (m) { return m.nova; })) { rpc('marcarMetasVistas').then(function () { S.metasNovas = 0; renderNav(); }).catch(function () { /* o contador volta no próximo ciclo */ }); }
+  el.innerHTML = antes + (prog && ms.length ? '<div class="sect">' + esc(tr('Metas individuais')) + '</div>' : '') + ms.map(function (m) {
     const p = Math.min(100, m.feito / m.qtd * 100);
     return '<div class="card"><div class="hd"><div><b>' + m.qtd + ' auditoria(s)' + (m.processos.length ? ' em ' + esc(m.processos.join(', ')) : ' em qualquer processo') + '</b><br><small class="muted">' + fmtD(m.ini) + ' a ' + fmtD(m.fim) + (m.desc ? ' · ' + esc(m.desc) : '') + '</small></div>' + pill(m.status, TXT_META[m.status]) + '</div>' +
       '<div class="meta-t"><span class="nm"><b>' + m.feito + '</b> de ' + m.qtd + '</span>' + meter(p, m.status) + '<span class="num">' + Math.round(p) + '%</span></div></div>';
-  }).join('') || '<div class="card">' + vz('Você não tem metas ativas no momento.') + '</div>';
+  }).join('') || (prog ? '' : '<div class="card">' + vz('Você não tem metas ativas no momento.') + '</div>');
 }
 
 /* ---------- formulário de auditoria (1 a N colaboradores) ---------- */

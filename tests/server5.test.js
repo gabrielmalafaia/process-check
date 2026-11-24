@@ -113,7 +113,7 @@ T('Líder audita doca de outro líder com colaborador do time dele: aceita e apa
 });
 T('Líder não consegue auditar colaborador de outro time (validado no servidor)', () => {
   const r = A.audit('carlosa@x.com', 'Expedição', { conf: 10, f: { doca: '01', colaboradores: ['Carla Dias'] } });
-  eq(r.ok, false); ok(/seu time/.test(r.erros.colaborador), JSON.stringify(r));
+  eq(r.ok, false); ok(/regra de auditoria/.test(r.erros.colaborador) && !/Carla|Dora/.test(r.erros.colaborador), JSON.stringify(r));
 });
 T('Líder audita processo de doca sem colaborador: fica no nome dele', () => {
   const r = A.audit('carlosa@x.com', 'Recebimento', { conf: 10, f: { doca: '07', lider: 'Dora Lider', turno: 'T2' } }); eq(r.ok, true, JSON.stringify(r));

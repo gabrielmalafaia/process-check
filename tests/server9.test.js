@@ -3,6 +3,9 @@
 // só possam mudar o resultado de forma deliberada. Para aceitar uma mudança intencional: GOLDEN_ATUALIZAR=1 node tests/server9.test.js
 const fs = require('fs'), path = require('path');
 const { T, eq, ok, fim } = require('./lib.js');
+// Data fixa: o resultado depende do dia da semana (blocos semanais) e das datas do período; sem isso o teste mudava a cada dia.
+const FIXA = Date.parse('2026-11-19T12:00:00Z'), DataReal = Date;
+global.Date = class extends DataReal { constructor(...a) { if (a.length) super(...a); else super(FIXA); } static now() { return FIXA; } };
 const { cenario } = require('./seed.js');
 const A = cenario();
 const hoje = A.hojeStr, DIA = 864e5;
@@ -49,7 +52,7 @@ Object.keys(base).forEach((k) => T('golden: ' + k, () => eq(atual[k], base[k])))
 T('golden: negações também são congeladas (ex.: Auditor sem relatório)', () => { ok(atual['aud1|rel:geral'].__erro, 'Auditor deveria continuar sem acesso ao relatório geral'); });
 
 // Inventário: toda função pública do servidor é conhecida e exercitada por algum teste.
-const INVENTARIO = ['migrarV8', 'ativarHubs', 'desativarHubs', 'definirHubAtivo', 'listarHubs', 'salvarHub', 'aceitarAviso', 'consultarLog', 'arquivarLog', 'agendarArquivoLog', 'ativarAvisoLog', 'pulso', 'listarOnline', 'importarModelo', 'importarPrevia', 'importarConfirmar', 'doGet', 'include', 'setupPlanilha', 'migrarV6', 'migrarV7', 'migrarV4', 'migrarV3', 'migrarV2', 'bootstrap', 'solicitarCadastro', 'listarSolicitacoes', 'contarPendentes', 'recusarSolicitacao', 'getRascunho', 'getRascunhoLider', 'salvarRascunho', 'descartarRascunho', 'salvarAuditoria', 'getMatriz', 'relatorio', 'minhasMetas', 'salvarMeta', 'excluirMeta', 'listarCadastro', 'salvarCadastro', 'excluirCadastro', 'moverCadastro', 'restaurarCadastro', 'salvarConfigs', 'listarEmailRel', 'salvarEmailRel', 'excluirEmailRel', 'alternarAgendamentoRel', 'enviarRelatorioAgora', 'enviarRelatoriosAgendados', 'listarAcessos', 'salvarUsuario', 'excluirUsuario', 'salvarPerfil', 'excluirPerfil', 'diagnostico'];
+const INVENTARIO = ['migrarV10', 'listarMetasLider', 'salvarMetaLider', 'cancelarMetaLider', 'contarMetasNovas', 'minhasMetasLider', 'marcarMetasVistas', 'listarFeedbacks', 'designarFeedback', 'registrarFeedback', 'meusFeedbacks', 'marcarFeedbacksVistos', 'contarFeedbacks', 'verificarProvaFeedback', 'migrarV9', 'listarRegrasLider', 'salvarRegraLider', 'excluirRegraLider', 'migrarV8', 'ativarHubs', 'desativarHubs', 'definirHubAtivo', 'listarHubs', 'salvarHub', 'aceitarAviso', 'consultarLog', 'arquivarLog', 'agendarArquivoLog', 'ativarAvisoLog', 'pulso', 'listarOnline', 'importarModelo', 'importarPrevia', 'importarConfirmar', 'doGet', 'include', 'setupPlanilha', 'migrarV6', 'migrarV7', 'migrarV4', 'migrarV3', 'migrarV2', 'bootstrap', 'solicitarCadastro', 'listarSolicitacoes', 'contarPendentes', 'recusarSolicitacao', 'getRascunho', 'getRascunhoLider', 'salvarRascunho', 'descartarRascunho', 'salvarAuditoria', 'getMatriz', 'relatorio', 'minhasMetas', 'salvarMeta', 'excluirMeta', 'listarCadastro', 'salvarCadastro', 'excluirCadastro', 'moverCadastro', 'restaurarCadastro', 'salvarConfigs', 'listarEmailRel', 'salvarEmailRel', 'excluirEmailRel', 'alternarAgendamentoRel', 'enviarRelatorioAgora', 'enviarRelatoriosAgendados', 'listarAcessos', 'salvarUsuario', 'excluirUsuario', 'salvarPerfil', 'excluirPerfil', 'diagnostico'];
 const dirSrc = path.join(__dirname, '..', 'src');
 const codigo = fs.readdirSync(dirSrc).filter((f) => /\.gs$/.test(f)).map((f) => fs.readFileSync(path.join(dirSrc, f), 'utf8')).join('\n');
 const publicas = (codigo.match(/^function [A-Za-z0-9]+\(/gm) || []).map((s) => s.replace(/^function |\($/g, ''));

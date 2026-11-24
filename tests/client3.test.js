@@ -115,7 +115,7 @@ const usuario = (A, email, nome, p) => A.ctx.anexar_('Cad_Usuarios', [email, nom
     ok(t.$('#emailRel tr[data-em="lid@x.com"]'), 'adicionado'); ok(/Destinatário adicionado/.test(t.toast()));
     eq(t.$('#emailRel tr[data-em="lid@x.com"] [data-ef="idioma"]').value, 'en');
     t.set('#emailRel tr[data-em="lid@x.com"] [data-ef="freq"]', 'Mensal', 'change'); await t.idle(); eq(A.call('listarEmailRel').linhas.find(l => l.email === 'lid@x.com').freq, 'Mensal');
-    await t.click('#erAgenda'); await t.idle(); ok(/Desligar envio agendado/.test(t.$('#erAgenda').textContent)); ok(/todo dia às 7h/.test(t.$('#emailRel').textContent));
+    await t.click('#erAgenda'); await t.idle(); ok(/Desligar envio agendado/.test(t.$('#erAgenda').textContent)); ok(/todo dia às 22h/.test(t.$('#emailRel').textContent));
     A.emails.length = 0; await t.click('[data-eagora="lid@x.com"]'); await t.idle(); eq(A.emails.length, 1); eq(A.emails[0].to, 'lid@x.com'); ok(/Relatórios enviados: 1/.test(t.toast()), t.toast());
     ok(/Team of Carlos Lider/.test(A.emails[0].htmlBody));
     await t.click('[data-ex="lid@x.com"]'); await t.idle(); ok(!t.$('#emailRel tr[data-em="lid@x.com"]'));

@@ -11,7 +11,8 @@ T('e-mail: se só a gravação da data do envio falhar, o envio conta como feito
   A.ctx.MailApp.sendEmail = (m) => { envio(m); quebra = true; };
   A.ctx.aba_ = (n) => { if (quebra && n === 'Cad_Relatorio_Email') { quebra = false; throw new Error('Planilha cheia'); } return abaOrig(n); };
   A.emails.length = 0;
-  try { const r = A.call('enviarRelatorioAgora', 'sl@x.com'); eq([r.enviados, r.falhas.length], [1, 0]); }
+  A.sheets.Cad_Relatorio_Email.d.forEach((l, i) => { if (i) l[4] = ''; }); A.run('limparCache_()');
+  try { const r = A.call('enviarRelatoriosAgendados'); eq([r.enviados, r.falhas.length], [1, 0]); }
   finally { A.ctx.MailApp.sendEmail = envio; A.ctx.aba_ = abaOrig; }
   eq(A.emails.length, 1);
   ok(log().some(l => /data do envio não gravada/.test(l.Acao) && l.Alvo === 'sl@x.com'), 'falha da data sem registro');

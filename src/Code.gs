@@ -44,7 +44,12 @@ const ABAS = {
   Cad_Relatorio_Email: ['Email', 'Frequencia', 'Idioma', 'Ativo', 'Ultimo_Envio'],
   Cad_Hubs: ['ID_Hub', 'Nome', 'Operacao', 'Ativo'],
   Log_Atividade: ['Timestamp', 'Hub', 'Email', 'Nome', 'Perfil', 'Acao', 'Alvo', 'Detalhe'],
-  Log_Aceites: ['Timestamp', 'Email', 'Nome', 'Versao_Texto', 'Hub']
+  Log_Aceites: ['Timestamp', 'Email', 'Nome', 'Versao_Texto', 'Hub'],
+  Cad_Regras_Lider: ['Email', 'Proprio_Time', 'Outros_Times', 'Times', 'Turnos', 'Cores', 'Processos', 'Ver_Proprio', 'Ver_Outros', 'Atualizado_Por', 'Atualizado_Em'],
+  Pessoas_Historico: ['Timestamp', 'Colaborador', 'Evento', 'Lider_Antes', 'Lider_Depois', 'Turno_Antes', 'Turno_Depois', 'Alterado_Por', 'Hub'],
+  Metas_Lider: ['ID_Meta', 'Lider_Email', 'Lider_Nome', 'Times', 'Turnos', 'Cores', 'Processos', 'Quantidade', 'Inicio', 'Fim', 'Descricao', 'Criada_Por', 'Criada_Em', 'Status', 'Cancelada_Por', 'Cancelada_Em', 'Visto_Em', 'Aviso_Em', 'Hub'],
+  Feedback_Pendencias: ['ID_Pend', 'Chave', 'Colaborador', 'Time_Snap', 'Turno_Snap', 'Janela_Ini', 'Janela_Fim', 'Qtd', 'IDs_Auditorias', 'Nota_Corte', 'Gerada_Em', 'Status', 'Designado_Email', 'Designado_Nome', 'Designado_Por', 'Designado_Em', 'Prazo', 'Visto_Em', 'Aviso_Em', 'Hub'],
+  Feedback_Registros: ['ID_Reg', 'ID_Pend', 'Colaborador', 'Time_Snap', 'Turno_Snap', 'Autor_Email', 'Autor_Nome', 'Designado_Por', 'Designado_Em', 'Texto', 'Registrado_Em', 'Hash_Anterior', 'Hash', 'Hub']
 };
 /** Abas existentes que ganharam colunas ao final na v6.2/v7: o cabeçalho é completado sem tocar nos dados. */
 const COLS_NOVAS = { Cad_Solicitacoes: 1, Cad_Processos_Perguntas: 1, Cad_Usuarios: 1, Cad_Estrutura: 1, Cad_Pessoas: 1, Auditorias_Historico: 1, Auditorias_Rascunho: 1, Auditorias_Colaboradores: 1, Metas: 1 };
@@ -52,15 +57,20 @@ const FREQS = ['Diario', 'Semanal', 'Mensal'];
 /** Colunas (1 = primeira) que são sempre TEXTO. Sem isso o Sheets converte "36" em número e "01" em 1 (perde o zero). */
 const TEXTO_COLS = {
   Cad_Usuarios: [1, 2, 3, 4, 5], Cad_Perfis: [1, 2, 3, 4, 5, 6], Cad_Estrutura: [1, 2, 3, 4, 5, 6], Cad_Pessoas: [1, 2, 3, 4, 5, 6], Cad_Processos_Perguntas: [1, 2, 3, 4, 5, 6, 7, 8],
-  Auditorias_Historico: [4, 5, 6, 7, 13, 14, 15, 16], Auditorias_Rascunho: [3, 4, 5, 7], Auditorias_Colaboradores: [1, 2, 3, 4, 5],
+  Auditorias_Historico: [2, 4, 5, 6, 7, 11, 13, 14, 15, 16], Auditorias_Rascunho: [2, 3, 4, 5, 7], Auditorias_Colaboradores: [1, 2, 3, 4, 5],
   Metas: [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12], Log_Permissoes: [1, 2, 3, 4, 5], Cad_Solicitacoes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], Cad_Relatorio_Email: [1, 2, 3, 4, 5],
-  Cad_Hubs: [1, 2, 3, 4], Log_Atividade: [1, 2, 3, 4, 5, 6, 7, 8], Log_Aceites: [1, 2, 3, 4, 5]
+  Cad_Hubs: [1, 2, 3, 4], Log_Atividade: [1, 2, 3, 4, 5, 6, 7, 8], Log_Aceites: [1, 2, 3, 4, 5],
+  Cad_Regras_Lider: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+  Pessoas_Historico: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+  Metas_Lider: [1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+  Feedback_Pendencias: [1, 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+  Feedback_Registros: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
 };
 const COLUNAS_NUMERICAS = { Pontuacao_Pct: 1, Valor: 1, Quantidade: 1 };
 const STATUS_TXT = { vermelho: 'Em Inconformidade', observacao: 'Em Observação', verde: 'Completo e em Conformidade' };
 const CADASTROS = ['Cad_Estrutura', 'Cad_Pessoas', 'Cad_Processos_Perguntas'];
 const PERM_CAD = { Cad_Estrutura: 'cad_estrutura', Cad_Pessoas: 'cad_pessoas', Cad_Processos_Perguntas: 'cad_perguntas' };
-const CACHE_ABAS = ['Cad_Usuarios', 'Cad_Perfis', 'Cad_Estrutura', 'Cad_Pessoas', 'Cad_Processos_Perguntas', 'Configuracoes', 'Cad_Solicitacoes', 'Cad_Hubs'];
+const CACHE_ABAS = ['Cad_Usuarios', 'Cad_Perfis', 'Cad_Estrutura', 'Cad_Pessoas', 'Cad_Processos_Perguntas', 'Configuracoes', 'Cad_Solicitacoes', 'Cad_Hubs', 'Cad_Regras_Lider'];
 const OBRIG = {
   Cad_Estrutura: ['Tipo', 'Identificador', 'Cor_Simbolo'],
   Cad_Pessoas: ['Nome', 'Cargo', 'Turno', 'Status_Ativo'],
@@ -75,7 +85,7 @@ const MAXLEN = { Descricao_Item: 300, ID_Subprocesso: 120, Descricao_EN: 300, De
 /* ---------- catálogo de telas, permissões e perfis ---------- */
 const TELAS = [
   { id: 'matriz', nome: 'Matriz de Processos' }, { id: 'form', nome: 'Formulário de Auditoria' }, { id: 'minhas', nome: 'Minhas metas' },
-  { id: 'geral', nome: 'Visão Geral' }, { id: 'auditorias', nome: 'Auditorias realizadas' }, { id: 'auditores', nome: 'Auditores e metas' },
+  { id: 'geral', nome: 'Visão Geral' }, { id: 'auditorias', nome: 'Auditorias realizadas' }, { id: 'auditores', nome: 'Auditores e metas' }, { id: 'programacao', nome: 'Programação' },
   { id: 'proc', nome: 'Por processo' }, { id: 'doca', nome: 'Por doca e cluster' }, { id: 'colab', nome: 'Por colaborador e equipe' },
   { id: 'tend', nome: 'Tendência' }, { id: 'export', nome: 'Exportar' }, { id: 'cad', nome: 'Cadastros' }, { id: 'cfg', nome: 'Configurações' }, { id: 'acessos', nome: 'Acessos' }, { id: 'autorizar', nome: 'Autorizações' }, { id: 'log', nome: 'Log de atividade' }
 ];
@@ -94,25 +104,27 @@ const PERMS = [
   { id: 'autorizar', grupo: 'Acessos', nome: 'Autorizar novos cadastros', desc: 'Ver e recusar solicitações de cadastro; aprovar leva ao cadastro de usuário.' },
   { id: 'ver_log', grupo: 'Acessos', nome: 'Ver o log de atividade', desc: 'Consultar o que cada usuário gravou ou alterou no sistema. O Site Leader vê só o próprio Hub.' },
   { id: 'ver_online', grupo: 'Acessos', nome: 'Ver usuários online', desc: 'Ver quem está com o sistema aberto neste momento. O Site Leader vê só o próprio Hub.' },
+  { id: 'regras_lider', grupo: 'Acessos', nome: 'Definir quem cada líder pode auditar', desc: 'Para cada líder: se audita o próprio time e outros times, e por turno, cor e símbolo, time e processo. Ninguém edita a própria regra.' },
+  { id: 'obrigacoes', grupo: 'Auditorias', nome: 'Programar auditorias e feedbacks dos líderes', desc: 'Definir quais auditorias cada líder deve fazer e até quando, e designar quem dá o feedback obrigatório. Só Site Leader e Admin; cada Site Leader atua no próprio Hub.' },
   { id: 'hubs', grupo: 'Sistema', nome: 'Gerir Hubs e carga em massa', desc: 'Cadastrar Hubs, atribuir usuários a Hubs e importar pessoas e docas. Só vale para o Admin global.' }
 ];
 const PERM_IDS = PERMS.map(function (p) { return p.id; });
 const TELA_IDS = TELAS.map(function (t) { return t.id; });
 /** Tela só funciona com pelo menos uma destas permissões. */
-const REQ_TELA = { form: ['auditar'], minhas: ['auditar'], export: ['exportar'], cfg: ['config', 'email_rel'], cad: ['cad_estrutura', 'cad_pessoas', 'cad_perguntas'], acessos: ['usuarios', 'perfis'], autorizar: ['autorizar'], log: ['ver_log'] };
+const REQ_TELA = { form: ['auditar'], minhas: ['auditar'], export: ['exportar'], cfg: ['config', 'email_rel'], cad: ['cad_estrutura', 'cad_pessoas', 'cad_perguntas'], acessos: ['usuarios', 'perfis', 'regras_lider'], autorizar: ['autorizar'], log: ['ver_log'], programacao: ['obrigacoes'] };
 /** Permissão que obriga a tela correspondente (adicionada automaticamente ao salvar um perfil). */
-const PERM_TELA = { auditar: 'form', exportar: 'export', config: 'cfg', email_rel: 'cfg', cad_estrutura: 'cad', cad_pessoas: 'cad', cad_perguntas: 'cad', usuarios: 'acessos', perfis: 'acessos', autorizar: 'autorizar', ver_log: 'log' };
+const PERM_TELA = { auditar: 'form', exportar: 'export', config: 'cfg', email_rel: 'cfg', cad_estrutura: 'cad', cad_pessoas: 'cad', cad_perguntas: 'cad', usuarios: 'acessos', perfis: 'acessos', regras_lider: 'acessos', autorizar: 'autorizar', ver_log: 'log', obrigacoes: 'programacao' };
 const MODOS = ['todos', 'time', 'proprias'];
 const REL_TELA = { geral: 'geral', auditorias: 'auditorias', auditores: 'auditores', proc: 'proc', doca: 'doca', colab: 'colab', tend: 'tend', export: 'export' };
 
 function perfisBase_() {
   const todos = { modo: 'todos', processos: [], turnos: [] };
-  const semPerfis = PERM_IDS.filter(function (p) { return p !== 'perfis' && p !== 'autorizar' && p !== 'ver_log' && p !== 'ver_online' && p !== 'hubs'; });
-  const telasSem = TELA_IDS.filter(function (t) { return t !== 'autorizar' && t !== 'log'; });
+  const semPerfis = PERM_IDS.filter(function (p) { return p !== 'perfis' && p !== 'autorizar' && p !== 'ver_log' && p !== 'ver_online' && p !== 'hubs' && p !== 'regras_lider' && p !== 'obrigacoes'; });
+  const telasSem = TELA_IDS.filter(function (t) { return t !== 'autorizar' && t !== 'log' && t !== 'programacao'; });
   return {
     'Admin': { nome: 'Admin', desc: 'Acesso total. Perfil protegido: não pode ser editado nem excluído.', perms: PERM_IDS.slice(), telas: TELA_IDS.slice(), escopo: todos, sistema: true },
     'Analista': { nome: 'Analista', desc: 'Acesso total, exceto criar e editar perfis.', perms: semPerfis.slice(), telas: telasSem.slice(), escopo: todos, sistema: true },
-    'Site Leader': { nome: 'Site Leader', desc: 'Acesso total do seu Hub, exceto criar e editar perfis.', perms: semPerfis.concat(['autorizar', 'ver_log', 'ver_online']), telas: telasSem.concat(['autorizar', 'log']), escopo: todos, sistema: true },
+    'Site Leader': { nome: 'Site Leader', desc: 'Acesso total do seu Hub, exceto criar e editar perfis.', perms: semPerfis.concat(['autorizar', 'ver_log', 'ver_online', 'regras_lider', 'obrigacoes']), telas: telasSem.concat(['autorizar', 'log', 'programacao']), escopo: todos, sistema: true },
     'Auditor': { nome: 'Auditor', desc: 'Realiza auditorias, vê a Matriz e as próprias metas.', perms: ['auditar'], telas: ['matriz', 'form', 'minhas'], escopo: todos, sistema: true }
   };
 }
@@ -131,9 +143,13 @@ function include(nome) {
 /** Só roda no editor pelo dono quando a planilha ainda não tem usuários, ou por um Admin. Evita que o navegador dispare rotinas de manutenção. */
 function manutencao_() {
   const ss = SpreadsheetApp.getActive(), us = ss.getSheetByName('Cad_Usuarios');
-  if (!us || us.getLastRow() < 2) return true;
+  if (!us || us.getLastRow() < 2) {
+    const ativo = (Session.getActiveUser().getEmail() || '').trim().toLowerCase(), dono = (Session.getEffectiveUser().getEmail() || '').trim().toLowerCase();
+    if (ativo && ativo !== dono) throw new Error('Acesso negado.'); // sem usuários cadastrados, só o dono roda a manutenção
+    return true;
+  }
   const a = acesso_();
-  if (!(a.ok && a.perfil === 'Admin')) throw new Error('Acesso negado.');
+  if (!(a.ok && a.perfil === 'Admin' && (!a.hubOn || a.hubGlobal))) throw new Error('Acesso negado.');
   return true;
 }
 /** Execute UMA vez no editor: cria as abas, parâmetros padrão, perfis padrão e o dono como Admin. Pode ser executado de novo sem perda. */
@@ -322,8 +338,9 @@ function vazio_(v) { return v === undefined || v === null || String(v).trim() ==
 function ativo_(x) { return String(x.Status_Ativo) !== 'Não'; }
 /** Neutraliza injeção de fórmula: texto iniciado por = + - @ recebe um espaço na frente. */
 function limpar_(v) {
+  if (v !== null && v !== undefined && typeof v === 'object' && !(v instanceof Date)) return ''; // objeto/array vindo do navegador nunca vira "[object Object]" na célula
   if (typeof v !== 'string') return v;
-  v = v.trim();
+  v = v.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '').trim();
   return /^[=+\-@\t\r]/.test(v) ? ' ' + v : v;
 }
 var LOCK_COM_ = false;
@@ -336,6 +353,7 @@ function comLock_(fn) {
 }
 /** Anexa linhas formatando como texto as colunas de identificação (evita 36 virar número e 01 virar 1). */
 function anexarLinhas_(aba, linhas) {
+  if (!linhas || !linhas.length) return;
   linhas = hubCarimba_(aba, linhas);
   const s = aba_(aba), r = s.getLastRow() + 1, n = linhas.length, w = linhas[0].length;
   if (r + n - 1 > s.getMaxRows()) s.insertRowsAfter(s.getMaxRows(), r + n - 1 - s.getMaxRows());
@@ -377,6 +395,10 @@ function limparCache_() {
 function limparSol_() { CacheService.getScriptCache().remove('aba:Cad_Solicitacoes'); }
 function hv_() { const c = CacheService.getScriptCache(); let v = c.get('hv'); if (!v) { v = String(Date.now()); c.put('hv', v, 21600); } return v; }
 function bumpHv_() { CacheService.getScriptCache().put('hv', String(Date.now()) + String(Math.floor(Math.random() * 1000)), 21600); }
+/** Resumo SHA-256 (hex) para chaves de cache de relatórios: não dá para forjar colisão entre usuários ou Hubs. */
+function sha_(s) {
+  return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, s, Utilities.Charset.UTF_8).map(function (b) { return ('0' + (b < 0 ? b + 256 : b).toString(16)).slice(-2); }).join('');
+}
 function hash_(s) {
   let h1 = 5381, h2 = 0;
   for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); h1 = ((h1 << 5) + h1 + c) | 0; h2 = (c + (h2 << 6) + (h2 << 16) - h2) | 0; }
@@ -384,7 +406,7 @@ function hash_(s) {
 }
 /** Resultado de relatório em cache (chave = versão do histórico + usuário/escopo + filtros). */
 function comCache_(a, chaveObj, fn) {
-  const c = CacheService.getScriptCache(), k = 'rel:' + hv_() + ':' + hash_(JSON.stringify([a.email, a.escopo, a.perms, a.telas, a.hub || '', chaveObj]));
+  const c = CacheService.getScriptCache(), k = 'rel:' + hv_() + ':' + sha_(JSON.stringify([a.email, a.escopo, a.perms, a.telas, a.hub || '', a.escopo.modo === 'time' ? regraDe_(a.email) : '', chaveObj]));
   const x = c.get(k);
   if (x) return JSON.parse(x);
   const r = fn();
@@ -544,9 +566,9 @@ function pessoaNoEscopo_(a, p) {
 }
 function procPermitido_(a, p) { const l = a.escopo.processos; return !l.length || l.indexOf(p) > -1; }
 function resumoUsuario_(a) { return { email: a.email, ok: true, nome: a.nome, perfil: a.perfil, perms: a.perms, telas: a.telas, escopo: a.escopo, hub: hubResumo_(a) }; }
-function registrar_(a, acao, alvo, detalhe) {
-  anexar_('Log_Permissoes', [agora_(), limpar_(a.nome + ' <' + a.email + '>'), acao, limpar_(String(alvo)), limpar_(String(detalhe).slice(0, 900))]);
-  logAtiv_(a, acao, alvo, detalhe);
+function registrar_(a, acao, alvo, detalhe, hubLog) {
+  comLock_(function () { anexar_('Log_Permissoes', [agora_(), limpar_(a.nome + ' <' + a.email + '>'), acao, limpar_(String(alvo)), limpar_(String(detalhe).slice(0, 900))]); });
+  logAtiv_(a, acao, alvo, detalhe, hubLog);
 }
 
 /* ---------- carga inicial ---------- */
@@ -556,6 +578,12 @@ function podeForcar_() {
   if (c.get('forcado')) return false;
   c.put('forcado', '1', 30);
   return true;
+}
+/** Pessoas que o cliente recebe: líder que audita só recebe quem a regra dele permite auditar; os demais seguem o escopo do perfil. */
+function pessoasDoFormulario_(a) {
+  const todas = lerAba_('Cad_Pessoas');
+  if (a.escopo.modo === 'time' && tem_(a, 'auditar') && !tem_(a, 'cad_pessoas')) return pessoasAuditaveis_(a, todas);
+  return todas.filter(function (p) { return (a.escopo.modo !== 'time' && tem_(a, 'auditar')) || tem_(a, 'cad_pessoas') || pessoaNoEscopo_(a, p); });
 }
 function bootstrap(forcar) {
   let a = acesso_(true);
@@ -570,9 +598,11 @@ function bootstrap(forcar) {
   const aviso = avisoResumo_(a);
   if (!aviso.aceito) return { user: resumoUsuario_(a), aviso: aviso, appUrl: urlApp_(), bloqueado: true };
   const r = {
-    aviso: aviso, user: resumoUsuario_(a), config: config_(), processos: procs, tipos: TIPO_PROC, visual: { cores: CORES, simbolos: SIMBOLOS }, turnos: TURNOS,
+    aviso: aviso, appUrl: urlApp_(), user: resumoUsuario_(a), config: config_(), processos: procs, tipos: TIPO_PROC, visual: { cores: CORES, simbolos: SIMBOLOS }, turnos: TURNOS,
     pendentes: tem_(a, 'autorizar') ? pendentes_().length : 0,
-    db: { Cad_Estrutura: lerAba_('Cad_Estrutura'), Cad_Pessoas: lerAba_('Cad_Pessoas').filter(function (p) { return (a.escopo.modo !== 'time' && tem_(a, 'auditar')) || tem_(a, 'cad_pessoas') || pessoaNoEscopo_(a, p); }), Cad_Processos_Perguntas: lerAba_('Cad_Processos_Perguntas') }
+    metasNovas: a.telas.indexOf('minhas') > -1 ? contarMetasNovas_(a) : 0,
+    fb: resumoFbSeguro_(a),
+    db: { Cad_Estrutura: lerAba_('Cad_Estrutura'), Cad_Pessoas: pessoasDoFormulario_(a), Cad_Processos_Perguntas: lerAba_('Cad_Processos_Perguntas') }
   };
   if (a.telas.indexOf('auditores') > -1 || temRel) {
     const pf = perfis_();
@@ -699,15 +729,18 @@ function getRascunho(processo, chave) {
   const r = lerDireto_('Auditorias_Rascunho').find(function (x) {
     return String(x.Auditor_Email).toLowerCase() === u.email && x.Processo === processo && x.Doca_Cluster === chave && rascunhoValido_(x);
   });
-  return r ? JSON.parse(r.Json_Respostas_Parciais) : null;
+  return r ? jsonSeguro_(r.Json_Respostas_Parciais) : null;
 }
+/** Rascunho com JSON corrompido vira "sem rascunho" em vez de erro técnico. */
+function jsonSeguro_(t) { try { return JSON.parse(t); } catch (e) { return null; } }
 function getRascunhoLider(lider) {
   const u = exigirPerm_('auditar');
   if (!procPermitido_(u, 'Indução')) return null;
   const r = lerDireto_('Auditorias_Rascunho').filter(function (x) {
     return String(x.Auditor_Email).toLowerCase() === u.email && x.Processo === 'Indução' && rascunhoValido_(x) && liderDoRascunho_(x) === lider;
   }).sort(function (x, y) { return String(y.Timestamp_Inicio).localeCompare(String(x.Timestamp_Inicio)); })[0];
-  return r ? { chave: r.Doca_Cluster, estado: JSON.parse(r.Json_Respostas_Parciais) } : null;
+  const est = r ? jsonSeguro_(r.Json_Respostas_Parciais) : null;
+  return est ? { chave: r.Doca_Cluster, estado: est } : null;
 }
 function salvarRascunho(p) {
   const u = exigirPerm_('auditar');
@@ -749,13 +782,18 @@ function salvarAuditoria(p) {
   if (!p || PROCESSOS.indexOf(p.processo) < 0) return { ok: false, erros: { processo: 'Selecione o processo.' } };
   if (!procPermitido_(u, p.processo)) return { ok: false, erros: { processo: 'Seu perfil não pode auditar este processo.' } };
   const tipo = TIPO_PROC[p.processo], multi = !!cfg.MULTI[p.processo];
+  let docaCS = '';
   let doca = String(p.doca || '').trim(), lider = String(p.lider || '').trim(), turno = String(p.turno || '').trim();
   let nomes = Array.isArray(p.colaboradores) ? p.colaboradores : (vazio_(p.colaborador) ? [] : [p.colaborador]);
   nomes = nomes.map(function (x) { return String(x == null ? '' : x).trim(); }).filter(Boolean);
   const pessoas = lerAba_('Cad_Pessoas').filter(ativo_);
   if (tipo) {
     if (!doca) erros.doca = 'Selecione ' + (tipo === 'Doca' ? 'a doca' : 'o cluster') + '.';
-    else if (!lerAba_('Cad_Estrutura').some(function (e) { return e.Tipo === tipo && String(e.Identificador) === doca; })) erros.doca = (tipo === 'Doca' ? 'Doca não cadastrada.' : 'Cluster não cadastrado.');
+    else {
+      const est = lerAba_('Cad_Estrutura').find(function (e) { return e.Tipo === tipo && String(e.Identificador) === doca; });
+      if (!est) erros.doca = (tipo === 'Doca' ? 'Doca não cadastrada.' : 'Cluster não cadastrado.');
+      else docaCS = canonCS_(est.Cor_Simbolo);
+    }
   } else doca = '';
   const unicos = nomes.filter(function (n, i) { return nomes.indexOf(n) === i; });
   if (unicos.length !== nomes.length) erros.colaborador = 'Colaborador repetido na lista.';
@@ -770,9 +808,8 @@ function salvarAuditoria(p) {
     });
   }
   if (u.escopo.modo === 'time') {
-    // líder audita qualquer doca/cluster, mas só colaboradores do próprio time; a auditoria sempre fica no nome dele
-    const eu = semAcento_(u.nome), fora = linhasColab.filter(function (c) { return semAcento_(c.l) !== eu; });
-    if (!erros.colaborador && fora.length) erros.colaborador = 'Seu perfil só pode auditar colaboradores do seu time: ' + fora.map(function (c) { return c.n; }).join(', ') + '.';
+    // sem colaborador (doca/cluster), a auditoria fica no nome do líder; quem ele pode auditar é decidido pela regra dele (negarAuditoria_, mais abaixo)
+    const eu = semAcento_(u.nome);
     if (!linhasColab.length) { const ld = pessoas.find(function (x) { return x.Cargo === 'Líder' && semAcento_(x.Nome) === eu; }); lider = ld ? ld.Nome : u.nome; }
   }
   if (!linhasColab.length && lider && !erros.lider) {
@@ -790,6 +827,12 @@ function salvarAuditoria(p) {
   if (!tipo && !erros.colaborador && !lider) erros.lider = 'Líder não identificado. Cadastre o líder deste colaborador.';
   if (!erros.turno && TURNOS.indexOf(turno) < 0) erros.turno = 'Selecione o turno.';
   if (!erros.turno && u.escopo.turnos.length && u.escopo.turnos.indexOf(turno) < 0) erros.turno = 'Seu perfil só pode auditar o(s) turno(s): ' + u.escopo.turnos.join(', ') + '.';
+  const homonimo = pessoas.filter(function (x) { return x.Cargo === 'Líder' && semAcento_(x.Nome) === semAcento_(u.nome); }).length > 1;
+  const alvoRegra = { processo: p.processo, turno: turno, cs: docaCS, doca: !!doca, homonimo: homonimo, colabs: linhasColab.map(function (c) { return { n: c.n, l: c.l, t: c.t }; }) };
+  if (u.escopo.modo === 'time' && !erros.colaborador && !erros.turno && !erros.doca) {
+    const neg = negarAuditoria_(u, regraDe_(u.email, true), alvoRegra);
+    if (neg) erros[neg.campo] = neg.msg;
+  }
   const obs = String(p.observacoes || '').trim();
   if (obs.length > 500) erros.obs = 'Máximo de 500 caracteres.';
   const perg = lerAba_('Cad_Processos_Perguntas').filter(function (x) { return x.Processo === p.processo; });
@@ -810,7 +853,11 @@ function salvarAuditoria(p) {
   let id = novoId();
   const nc = av.filter(function (r) { return !r.ok; }).map(function (r) { return String(r.id).replace(/\|/g, '/'); }).join('|');
   const resumoColab = linhasColab.map(function (c) { return c.n; }).join('; ');
+  let negadoNoLock = null;
   comLock_(function () {
+    // a regra pode ter mudado entre a validação e a gravação: confere de novo, já com a trava
+    negadoNoLock = u.escopo.modo === 'time' ? negarAuditoria_(u, regraDe_(u.email, true), alvoRegra) : null;
+    if (negadoNoLock) return;
     prepararHist_();
     // garante ID único: confere as últimas linhas (mesmo segundo) antes de gravar
     const sh = aba_('Auditorias_Historico'), nh = sh.getLastRow() - 1;
@@ -823,6 +870,7 @@ function salvarAuditoria(p) {
     bumpHv_();
     logAtiv_(u, 'Auditoria registrada', id, p.processo + (doca ? ' ' + doca : '') + ' - ' + pct + '%');
   });
+  if (negadoNoLock) { const er = {}; er[negadoNoLock.campo] = negadoNoLock.msg; return { ok: false, erros: er, faltam: [] }; }
   return { ok: true, id: id, pct: pct, status: status };
 }
 
@@ -929,17 +977,15 @@ function filtros_(f) {
 function auditorias_(a, f, comNC) {
   const cfg = config_(), esc = a.escopo, colabs = lerColabs_(f.de, f.ate);
   const users = usuariosVisiveis_(a, lerAba_('Cad_Usuarios')), nomeDoFiltro = f.auditor ? semAcento_((users.find(function (u) { return String(u.Email_Google).trim().toLowerCase() === f.auditor; }) || {}).Nome) : '';
-  const meuNome = semAcento_(a.nome), soTime = esc.modo === 'time', meu = function (l) { return semAcento_(l) === meuNome; };
+  const meuNome = semAcento_(a.nome), soTime = esc.modo === 'time', regraV = soTime ? regraVisao_(a) : null;
   return lerHist_(f.de, f.ate, comNC).map(function (r) {
     r.colabs = colabs[r.id] || (r.colab ? [{ n: r.colab, l: r.lider, t: r.turno }] : []);
     const ls = r.colabs.map(function (c) { return c.l; }).concat(String(r.lider).split(';').map(function (x) { return x.trim(); })).filter(function (x, i, arr) { return x && arr.indexOf(x) === i; });
     r.lids = ls;
-    // escopo "time": a auditoria pode envolver outra equipe, mas o líder só enxerga o que é do time dele (colaboradores e líderes de fora são recortados aqui, antes de qualquer relatório)
-    if (soTime && ls.some(meu)) {
-      r.colabs = r.colabs.filter(function (c) { return meu(c.l); });
-      r.colab = r.colabs.map(function (c) { return c.n; }).join('; ');
-      r.lids = ls.filter(meu);
-      r.lider = r.lids.join('; ');
+    // escopo "time": o líder só enxerga o que a regra dele permite (time próprio, auditorias que ele fez em outros times e, se liberado, o histórico dos times que ele audita); o resto é recortado aqui, antes de qualquer relatório
+    if (soTime) {
+      const v = visaoLider_(a, regraV, r, ls);
+      r.colabs = v.colabs; r.colab = v.colabs.map(function (c) { return c.n; }).join('; '); r.lids = v.lids; r.lider = v.lids.join('; '); r.oculta = !v.lids.length;
     }
     r.faixa = faixa_(r.pct, cfg);
     return r;
@@ -947,7 +993,7 @@ function auditorias_(a, f, comNC) {
     if (esc.processos.length && esc.processos.indexOf(r.proc) < 0) return false;
     if (esc.turnos.length && esc.turnos.indexOf(r.turno) < 0) return false;
     if (esc.modo === 'proprias' && !(r.email ? r.email === a.email : semAcento_(r.resp) === meuNome)) return false;
-    if (soTime && !r.lids.some(meu)) return false;
+    if (soTime && r.oculta) return false;
     if (f.processo && r.proc !== f.processo) return false;
     if (f.doca && r.doca !== f.doca) return false;
     if (f.turno && r.turno !== f.turno) return false;
@@ -1349,8 +1395,9 @@ function salvarMeta(obj) {
   else if (tipo === 'Perfil' && !(pf[alvo] && pf[alvo].perms.indexOf('auditar') > -1)) erros.alvo = 'Perfil inexistente ou sem permissão de auditar.';
   if (vazio_(o.qtd) || isNaN(qtd) || qtd < 1 || qtd > 9999 || Math.floor(qtd) !== qtd) erros.qtd = 'Informe um número inteiro entre 1 e 9999.';
   const re = /^\d{4}-\d{2}-\d{2}$/;
-  if (!re.test(String(o.ini))) erros.ini = 'Informe a data inicial.';
-  if (!re.test(String(o.fim))) erros.fim = 'Informe a data final.';
+  const dataOk = function (x) { if (!re.test(String(x))) return false; const d = new Date(x + 'T00:00:00Z'); return !isNaN(d) && d.toISOString().slice(0, 10) === x; };
+  if (!dataOk(o.ini)) erros.ini = 'Informe a data inicial.';
+  if (!dataOk(o.fim)) erros.fim = 'Informe a data final.';
   if (!erros.ini && !erros.fim && String(o.ini) > String(o.fim)) erros.fim = 'A data final deve ser igual ou posterior à inicial.';
   const procs = (Array.isArray(o.processos) ? o.processos : []).map(String);
   if (procs.some(function (p) { return PROCESSOS.indexOf(p) < 0; })) erros.processos = 'Processo inválido.';
@@ -1394,7 +1441,7 @@ function validarCadastro_(aba, o, extra) {
   ['Identificador', 'Nome', 'ID_Subprocesso'].forEach(function (c) { if (!e[c] && /^(__proto__|constructor|prototype)$/i.test(String(o[c] == null ? '' : o[c]).trim())) e[c] = 'Nome reservado pelo sistema.'; });
   const todos = (extra && extra.todos ? extra.todos : lerDireto_(aba)).filter(function (x) { return x._row !== o._row; });
   const lideres = extra && extra.lideres ? extra.lideres : lerDireto_('Cad_Pessoas').filter(function (p) { return p.Cargo === 'Líder' && ativo_(p); }).map(function (p) { return p.Nome; });
-  const igual = function (x, y) { return String(x).trim().toLowerCase() === String(y).trim().toLowerCase(); };
+  const igual = function (x, y) { return semAcento_(String(x).trim()).replace(/\s+/g, ' ') === semAcento_(String(y).trim()).replace(/\s+/g, ' '); }; // sem acento, caixa nem espaço duplo: é como o sistema liga líder e time
   if (aba === 'Cad_Estrutura') {
     if (!e.Cor_Simbolo) {
       const cs = canonCS_(o.Cor_Simbolo);
@@ -1432,7 +1479,7 @@ function confere_(aba, row, orig) {
 function exigirGlobal_(a, o) {
   if (a.hubOn && !a.hubGlobal) throw new Error('Este cadastro é padrão para todos os Hubs e só o Admin global pode alterá-lo.' + (o ? ' ' + o : ''));
 }
-function ehCluster_(aba, o) { return aba === 'Cad_Estrutura' && o && o.Tipo === 'Cluster'; }
+function ehCluster_(aba, o) { return aba === 'Cad_Estrutura' && !!o && String(o.Tipo == null ? '' : o.Tipo).trim() === 'Cluster'; }
 function renomearRef_(aba, coluna, de, para) {
   const s = aba_(aba);
   if (s.getLastRow() < 2) return;
@@ -1456,24 +1503,40 @@ function salvarCadastro(aba, obj, orig) {
   const o = { _row: obj._row ? Number(obj._row) : 0 };
   colsDados_(aba).forEach(function (c) { o[c] = obj[c] === undefined || obj[c] === null ? '' : (typeof obj[c] === 'string' ? obj[c].trim() : obj[c]); });
   if (aba === 'Cad_Pessoas' && o.Cargo === 'Líder') o.Lider = '';
+  if (aba === 'Cad_Pessoas') { const m = travaLiderPessoas_(ag, o._row ? orig : null, o); if (m) return { ok: false, erros: { Lider: m } }; }
+  if (hubsAtivos_() && ehCluster_(aba, o)) { o.Lider_Padrao = ''; o.Turno_Padrao = ''; } // cluster é global: não carrega o líder ou turno de um Hub
   return comLock_(function () {
     const erros = validarCadastro_(aba, o);
     if (Object.keys(erros).length) return { ok: false, erros: erros };
     if (o._row && !confere_(aba, o._row, orig)) return { ok: false, msg: 'Este registro foi alterado ou removido por outra pessoa. Clique em Atualizar e tente de novo.' };
     const linha = colsDados_(aba).map(function (c) { return limpar_(o[c]); });
     const s = aba_(aba);
+    const hl = aba === 'Cad_Pessoas' ? histCadastro_(ag, o._row ? 'Alterado' : 'Criado', o._row ? orig : null, o, o._row && orig.Cargo === 'Líder' && orig.Nome !== linha[0] ? orig.Nome : '') : 0;
+    try {
     if (o._row) {
       (TEXTO_COLS[aba] || []).forEach(function (c) { s.getRange(o._row, c).setNumberFormat('@'); });
       s.getRange(o._row, 1, 1, linha.length).setValues([linha]);
+      // trocar o Tipo (Doca/Cluster) muda o dono da linha: cluster é global, doca é do Hub atual
+      if (HUB_ABAS[aba] && hubsAtivos_()) s.getRange(o._row, HUB_ABAS[aba]).setNumberFormat('@').setValue(ehCluster_(aba, o) ? HUB_GLOBAL : hubAtual_());
       if (aba === 'Cad_Pessoas' && orig.Cargo === 'Líder' && orig.Nome !== linha[0]) {
         renomearRef_('Cad_Pessoas', 5, orig.Nome, linha[0]);
         renomearRef_('Cad_Estrutura', 4, orig.Nome, linha[0]);
+        renomearTimeRegras_(orig.Nome, linha[0]);
       }
     } else anexar_(aba, linha);
+    } catch (e) { histRevertido_(ag, hl, e); throw e; }
     logAtiv_(ag, o._row ? 'Cadastro alterado' : 'Cadastro criado', aba, String(linha[0]) + ' ' + String(linha[1] === undefined ? '' : linha[1]));
     limparCache_();
     return { ok: true, linhas: lerDireto_(aba) };
   });
+}
+/** Líder com permissão de cadastro só mexe em colaboradores do próprio time e nunca muda time, turno nem cargo (isso é do Site Leader/Admin). Vale para salvar, restaurar e excluir. */
+function travaLiderPessoas_(ag, orig, novo) {
+  if (ag.escopo.modo !== 'time') return '';
+  const eu = semAcento_(ag.nome), MSG = 'Seu perfil só altera colaboradores do seu próprio time e não muda time, turno nem cargo. Fale com o Site Leader.';
+  const proprio = function (x) { return x.Cargo === 'Colaborador' && semAcento_(x.Lider) === eu; };
+  if ((orig && !proprio(orig)) || (novo && !proprio(novo)) || (orig && novo && orig.Turno !== novo.Turno)) return MSG;
+  return '';
 }
 function excluirCadastro(aba, row, orig) {
   if (CADASTROS.indexOf(aba) < 0) throw new Error('Aba inválida.');
@@ -1481,11 +1544,13 @@ function excluirCadastro(aba, row, orig) {
   if (aba === 'Cad_Processos_Perguntas' || ehCluster_(aba, orig)) exigirGlobal_(ag);
   return comLock_(function () {
     if (!confere_(aba, Number(row), orig)) return { ok: false, msg: 'Este registro foi alterado ou removido por outra pessoa. Clique em Atualizar e tente de novo.' };
+    if (aba === 'Cad_Pessoas') { const m = travaLiderPessoas_(ag, orig, null); if (m) return { ok: false, msg: m }; }
     if (aba === 'Cad_Pessoas' && orig.Cargo === 'Líder') {
       const n = lerDireto_('Cad_Pessoas').filter(function (p) { return p.Lider === orig.Nome; }).length;
       if (n) return { ok: false, msg: 'Não é possível excluir: ' + n + ' colaborador(es) vinculado(s) a este líder. Reatribua-os antes.' };
     }
-    aba_(aba).deleteRow(Number(row));
+    const hl = aba === 'Cad_Pessoas' ? histCadastro_(ag, 'Excluído', orig, null, '') : 0;
+    try { aba_(aba).deleteRow(Number(row)); } catch (e) { histRevertido_(ag, hl, e); throw e; }
     logAtiv_(ag, 'Cadastro excluído', aba, String(orig[ABAS[aba][0]]) + ' ' + String(orig[ABAS[aba][1]] === undefined ? '' : orig[ABAS[aba][1]]));
     limparCache_();
     return { ok: true, linhas: lerDireto_(aba) };
@@ -1515,16 +1580,20 @@ function restaurarCadastro(aba, obj, pos) {
   if (aba === 'Cad_Processos_Perguntas' || ehCluster_(aba, obj)) exigirGlobal_(ar);
   const o = { _row: 0 };
   colsDados_(aba).forEach(function (c) { o[c] = obj && obj[c] !== undefined && obj[c] !== null ? (typeof obj[c] === 'string' ? obj[c].trim() : obj[c]) : ''; });
+  if (aba === 'Cad_Pessoas') { const m = travaLiderPessoas_(ar, null, o); if (m) return { ok: false, msg: m }; }
   return comLock_(function () {
     const erros = validarCadastro_(aba, o);
     if (Object.keys(erros).length) return { ok: false, erros: erros, msg: 'Não foi possível desfazer: o item já existe ou os dados mudaram.' };
     const s = aba_(aba), linha = colsDados_(aba).map(function (c) { return limpar_(o[c]); }), p = Number(pos);
+    const hl = aba === 'Cad_Pessoas' ? histCadastro_(ar, 'Restaurado', null, o, '') : 0;
+    try {
     if (p >= 2 && p <= s.getLastRow()) {
       s.insertRowBefore(p);
       (TEXTO_COLS[aba] || []).forEach(function (c) { s.getRange(p, c).setNumberFormat('@'); });
       s.getRange(p, 1, 1, linha.length).setValues([linha]);
       if (HUB_ABAS[aba]) s.getRange(p, HUB_ABAS[aba]).setNumberFormat('@').setValue(ehCluster_(aba, o) ? HUB_GLOBAL : hubAtual_());
     } else anexar_(aba, linha);
+    } catch (e) { histRevertido_(ar, hl, e); throw e; }
     limparCache_();
     return { ok: true, linhas: lerDireto_(aba) };
   });
@@ -1587,9 +1656,9 @@ const MAIL_REL = {
 };
 const COR_FAIXA = { verde: '#16A34A', observacao: '#F59E0B', vermelho: '#DC2626' };
 function fmtMail_(t, args) { return String(t).replace(/\{(\d)\}/g, function (x, i) { return esc_(args[Number(i)]); }); }
-/** Período do relatório: o dia anterior (diário), os 7 dias (semanal) ou os 30 dias (mensal) terminando ontem. */
+/** Período do relatório: o dia de hoje (diário), os 7 dias (semanal) ou os 30 dias (mensal) terminando hoje. O envio agendado sai às 22h, depois das auditorias do dia. */
 function periodoEmail_(freq) {
-  const ate = addDias_(hoje_(), -1), dias = freq === 'Mensal' ? 30 : freq === 'Semanal' ? 7 : 1;
+  const ate = hoje_(), dias = freq === 'Mensal' ? 30 : freq === 'Semanal' ? 7 : 1;
   return { de: addDias_(ate, -(dias - 1)), ate: ate };
 }
 function devidoHoje_(freq) {
@@ -1658,21 +1727,25 @@ function linhasEmailRel_() {
   return lerDireto_('Cad_Relatorio_Email').filter(function (r) { return String(r.Email || '').trim(); });
 }
 /** Envia a UM destinatário. Nunca lança erro: devolve { ok, motivo } para que uma falha não derrube os outros envios. */
-function enviarUmRel_(a, reg) {
+function enviarUmRel_(a, reg, agendado) {
   const email = emailDe_(reg.Email), freq = FREQS.indexOf(reg.Frequencia) > -1 ? reg.Frequencia : 'Semanal';
   try {
     const dest = acessoDe_(email);
     if (!dest.ok) return { email: email, ok: false, motivo: 'sem_acesso' };
     if (dest.telas.indexOf('geral') < 0) return { email: email, ok: false, motivo: 'sem_tela' };
+    if (dest.hubOn && !dest.hub) return { email: email, ok: false, motivo: 'sem_hub' };
     if (typeof MailApp.getRemainingDailyQuota === 'function' && MailApp.getRemainingDailyQuota() < 1) return { email: email, ok: false, motivo: 'cota' };
     const per = periodoEmail_(freq), msg = montarEmailRel_(dest, reg.Idioma, per);
     MailApp.sendEmail({ to: email, subject: msg.assunto, body: msg.texto, htmlBody: msg.html, name: 'Process Check' });
-    // o e-mail já saiu: se só a gravação da data falhar, o envio continua contando como feito (e a falha vai para o log)
-    try {
-      const row = lerDireto_('Cad_Relatorio_Email').find(function (x) { return emailDe_(x.Email) === email; });
-      if (row) aba_('Cad_Relatorio_Email').getRange(row._row, 5).setNumberFormat('@').setValue(agora_());
-    } catch (e0) {
-      try { registrar_(a, 'Relatório enviado, data do envio não gravada', email, String(e0 && e0.message || e0)); } catch (e00) { /* log best-effort */ }
+    // o e-mail já saiu: se só a gravação da data falhar, o envio continua contando como feito (e a falha vai para o log).
+    // Só o envio agendado grava a data: um "Enviar agora" feito de dia sai parcial e não pode bloquear o envio completo das 22h.
+    if (agendado) {
+      try {
+        const row = lerDireto_('Cad_Relatorio_Email').find(function (x) { return emailDe_(x.Email) === email; });
+        if (row) aba_('Cad_Relatorio_Email').getRange(row._row, 5).setNumberFormat('@').setValue(agora_());
+      } catch (e0) {
+        try { registrar_(a, 'Relatório enviado, data do envio não gravada', email, String(e0 && e0.message || e0)); } catch (e00) { /* log best-effort */ }
+      }
     }
     try { registrar_(a, 'Relatório por e-mail enviado', email, 'Período: ' + per.de + ' a ' + per.ate + '; Idioma: ' + idiomaOk_(reg.Idioma)); } catch (e1) { /* log best-effort */ }
     return { email: email, ok: true, motivo: '' };
@@ -1733,14 +1806,15 @@ function excluirEmailRel(email) {
     return emailRelOut_(a);
   });
 }
-/** Liga ou desliga o envio agendado (um gatilho diário, às 7h; cada pessoa recebe conforme a frequência escolhida). */
+const HORA_ENVIO_REL = 22;
+/** Liga ou desliga o envio agendado (um gatilho diário, às 22h; cada pessoa recebe conforme a frequência escolhida). Ligar recria o gatilho, o que também troca um gatilho antigo de outro horário. */
 function alternarAgendamentoRel(ligar) {
   const a = exigirPerm_('email_rel');
   exigirGlobal_(a);
   return comLock_(function () {
     const ts = triggerRel_();
-    if (ligar && !ts.length) ScriptApp.newTrigger('enviarRelatoriosAgendados').timeBased().everyDays(1).atHour(7).create();
-    if (!ligar) ts.forEach(function (t) { ScriptApp.deleteTrigger(t); });
+    ts.forEach(function (t) { ScriptApp.deleteTrigger(t); });
+    if (ligar) ScriptApp.newTrigger('enviarRelatoriosAgendados').timeBased().everyDays(1).atHour(HORA_ENVIO_REL).create();
     registrar_(a, ligar ? 'Relatório por e-mail: agendamento ligado' : 'Relatório por e-mail: agendamento desligado', '', '');
     return emailRelOut_(a);
   });
@@ -1748,13 +1822,22 @@ function alternarAgendamentoRel(ligar) {
 function resumoEnvio_(res) {
   return { enviados: res.filter(function (r) { return r.ok; }).length, falhas: res.filter(function (r) { return !r.ok; }).map(function (r) { return { email: r.email, motivo: r.motivo }; }) };
 }
+/** Envia em lote respeitando o limite de 6 min do Apps Script: o que não couber vira falha visível ("reenvie") e não é marcado como enviado. */
+function enviarLote_(ator, regs, agendado) {
+  const ini = Date.now(), res = [];
+  regs.forEach(function (r) {
+    if (Date.now() - ini > 270000) res.push({ ok: false, email: emailDe_(r.Email), motivo: 'Tempo de execução esgotado; envie de novo.' });
+    else res.push(enviarUmRel_(ator, r, agendado));
+  });
+  return res;
+}
 /** "Enviar agora": um destinatário (email) ou todos os ativos (email vazio). */
 function enviarRelatorioAgora(email) {
   const a = exigirPerm_('email_rel');
   email = emailDe_(email);
   const regs = linhasEmailRel_().filter(function (r) { return String(r.Ativo) !== 'Não' && (!email || emailDe_(r.Email) === email) && emailVisivel_(a, emailDe_(r.Email)); });
   if (!regs.length) return { ok: false, msg: 'Nenhum destinatário ativo para enviar.' };
-  const res = regs.map(function (r) { return enviarUmRel_(a, r); });
+  const res = enviarLote_(a, regs);
   const out = resumoEnvio_(res);
   out.ok = true; out.dados = emailRelOut_(a);
   return out;
@@ -1763,6 +1846,8 @@ function enviarRelatorioAgora(email) {
 function enviarRelatoriosAgendados() {
   const ativo = (Session.getActiveUser().getEmail() || '').trim().toLowerCase(), dono = (Session.getEffectiveUser().getEmail() || '').trim().toLowerCase();
   if (ativo && ativo !== dono) throw new Error('Acesso negado.');
+  // um gatilho antigo (de antes das 22h) não pode enviar um relatório parcial nem marcar o dia como enviado
+  if (!ativo && Number(Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'H')) < HORA_ENVIO_REL) return { enviados: 0, falhas: [], adiado: true };
   if (!ativo) {
     // chamada sem identidade (gatilho ou chamador não identificado): no máximo uma execução por hora, para limitar abuso
     const pr = PropertiesService.getScriptProperties(), ult = Number(pr.getProperty('ULT_AGENDADO') || 0);
@@ -1773,7 +1858,10 @@ function enviarRelatoriosAgendados() {
   const regs = linhasEmailRel_().filter(function (r) {
     return String(r.Ativo) !== 'Não' && devidoHoje_(FREQS.indexOf(r.Frequencia) > -1 ? r.Frequencia : 'Semanal') && String(r.Ultimo_Envio || '').slice(0, 10) !== hoje;
   });
-  const resumo = resumoEnvio_(regs.map(function (r) { return enviarUmRel_(ator, r); }));
+  const resumo = resumoEnvio_(enviarLote_(ator, regs, true));
+  try { reenviarAvisosMetas_(); } catch (e) { console.error('Reenvio de avisos de meta: ' + e.message); }
+  try { gerarFeedbackTodosHubs_(); } catch (e) { console.error('Gatilho de feedback: ' + e.message); }
+  try { reenviarAvisosFeedback_(); } catch (e) { console.error('Reenvio de avisos de feedback: ' + e.message); }
   if (resumo.falhas.length) {
     try { registrar_(ator, 'Agendamento com falhas', resumo.falhas.length + '/' + (resumo.enviados + resumo.falhas.length), resumo.falhas.map(function (x) { return x.email + ' (' + x.motivo + ')'; }).join('; ').slice(0, 450)); } catch (e) { /* log best-effort */ }
   }
@@ -1784,8 +1872,8 @@ function enviarRelatoriosAgendados() {
 function perfilOut_(p, meu) { return { nome: p.nome, desc: p.desc, perms: p.perms, telas: p.telas, escopo: p.escopo, sistema: p.sistema, protegido: p.nome === 'Admin', atribuivel: !!meu && contido_(p, meu) }; }
 function listarAcessos() {
   const a = exigirAcesso_();
-  if (!(tem_(a, 'usuarios') || tem_(a, 'perfis'))) throw new Error('Seu perfil não tem acesso a esta tela.');
-  const pf = perfis_(), out = { perms: PERMS, telas: TELAS, processos: PROCESSOS, turnos: TURNOS, pode: { usuarios: tem_(a, 'usuarios'), perfis: tem_(a, 'perfis') }, meuPerfil: a.perfil };
+  if (!(tem_(a, 'usuarios') || tem_(a, 'perfis') || tem_(a, 'regras_lider'))) throw new Error('Seu perfil não tem acesso a esta tela.');
+  const pf = perfis_(), out = { perms: PERMS, telas: TELAS, processos: PROCESSOS, turnos: TURNOS, pode: { usuarios: tem_(a, 'usuarios'), perfis: tem_(a, 'perfis'), regras: tem_(a, 'regras_lider') }, meuPerfil: a.perfil };
   out.reqTela = REQ_TELA; out.permTela = PERM_TELA;
   out.perfis = Object.keys(pf).map(function (n) { return perfilOut_(pf[n], a.pf); });
   const contar = {};
@@ -1793,9 +1881,9 @@ function listarAcessos() {
   us.forEach(function (u) { contar[u.Perfil] = (contar[u.Perfil] || 0) + 1; });
   out.perfis.forEach(function (p) { p.usuarios = contar[p.nome] || 0; });
   if (tem_(a, 'usuarios')) { const lids = lideresAtivos_(); out.usuarios = us.map(function (u) { return marcarUsuario_(u, pf, a, lids); }); }
-  out.log = a.hubOn && !a.hubGlobal ? [] : lerDireto_('Log_Permissoes').slice(-200).reverse(); // o log do Hub fica na tela Log de atividade
+  out.log = (a.hubOn && !a.hubGlobal) || !(tem_(a, 'usuarios') || tem_(a, 'perfis')) ? [] : lerDireto_('Log_Permissoes').slice(-200).reverse(); // o log do Hub fica na tela Log de atividade
   out.hub = hubResumo_(a);
-  if (a.hubOn) { const nomes = {}; lerAba_('Cad_Hubs').forEach(function (h) { nomes[String(h.ID_Hub)] = String(h.Nome); }); out.hubs = Object.keys(nomes).map(function (k) { return { id: k, nome: nomes[k] }; }); }
+  if (a.hubOn && a.hubGlobal) { const nomes = {}; lerAba_('Cad_Hubs').forEach(function (h) { nomes[String(h.ID_Hub)] = String(h.Nome); }); out.hubs = Object.keys(nomes).map(function (k) { return { id: k, nome: nomes[k] }; }); }
   if (tem_(a, 'perfis')) out.seguranca = diagnosticoSeg_(a);
   return out;
 }
@@ -1834,16 +1922,17 @@ function salvarUsuario(obj, orig) {
       (TEXTO_COLS.Cad_Usuarios).forEach(function (c) { s.getRange(row, c).setNumberFormat('@'); });
       s.getRange(row, 1, 1, 5).setValues([linha]);
       const d = [dif_('Perfil', atual.Perfil, perfil), dif_('Ativo', atual.Status_Ativo, ativo), dif_('Nome', atual.Nome, nome), dif_('E-mail', String(atual.Email_Google).toLowerCase(), email), a.hubOn ? dif_('Hub', String(atual.Hub || ''), hubGrava) : ''].filter(Boolean).join('; ');
-      if (d) registrar_(a, 'Usuário alterado', email, d);
+      if (d) registrar_(a, 'Usuário alterado', email, d, a.hubOn ? String(atual.Hub || '') : undefined);
     } else {
       sol = lerDireto_('Cad_Solicitacoes').find(function (x) { return emailDe_(x.Email) === email && String(x.Status) === 'Pendente'; });
       if (sol && a.hubOn && !a.hubGlobal && String(sol.Hub || '').trim() !== a.hub) { return { ok: false, msg: 'Esta solicitação é de outro Hub.' }; } // antes de gravar qualquer coisa
-      anexar_('Cad_Usuarios', linha); registrar_(a, 'Usuário criado', email, 'Perfil: ' + perfil + '; Ativo: ' + ativo);
+      anexar_('Cad_Usuarios', linha); registrar_(a, 'Usuário criado', email, 'Perfil: ' + perfil + '; Ativo: ' + ativo, a.hubOn ? String(linha[4] || '') : undefined);
       if (sol && ativo === 'Sim') {
         aba_('Cad_Solicitacoes').getRange(sol._row, 6, 1, 4).setValues([['Aprovada', limpar_(a.email), agora_(), perfil]]);
         registrar_(a, 'Cadastro aprovado', email, 'Perfil: ' + perfil);
         // líder que se cadastrou sozinho vira pessoa/líder do Hub e turno escolhidos
         if (String(sol.Cargo) === 'Líder' && TURNOS.indexOf(String(sol.Turno)) > -1 && !lerBruto_('Cad_Pessoas').some(function (x) { return semAcento_(x.Nome) === semAcento_(nome) && (!a.hubOn || String(x.Hub || '').trim() === hubGrava); })) {
+          anexarLinhas_('Pessoas_Historico', [histLinha_(a, 'Criado', null, { Nome: nome, Cargo: 'Líder', Turno: String(sol.Turno), Lider: '' }).concat([a.hubOn ? hubGrava : ''])]);
           anexarLinhas_('Cad_Pessoas', [[limpar_(nome), 'Líder', String(sol.Turno), 'Sim', '', a.hubOn ? hubGrava : '']]);
           registrar_(a, 'Líder cadastrado na aprovação', nome, 'Turno: ' + sol.Turno);
         }
@@ -1868,13 +1957,14 @@ function excluirUsuario(row, orig) {
     if (a.hubOn && !a.hubGlobal && String(atual.Hub || '').trim() !== a.hub) return { ok: false, msg: 'Este usuário pertence a outro Hub.' };
     if (!restaAdmin_(todos.filter(function (x) { return x._row !== Number(row); }))) return { ok: false, msg: 'Não é possível excluir o último Admin ativo.' };
     aba_('Cad_Usuarios').deleteRow(Number(row));
-    registrar_(a, 'Usuário excluído', String(atual.Email_Google).toLowerCase(), 'Perfil: ' + atual.Perfil);
+    registrar_(a, 'Usuário excluído', String(atual.Email_Google).toLowerCase(), 'Perfil: ' + atual.Perfil, a.hubOn ? String(atual.Hub || '') : undefined);
     limparCache_();
     return { ok: true, usuarios: usuariosVisiveis_(a, lerDireto_('Cad_Usuarios')).map(function (u) { return marcarUsuario_(u, pf, a, lideresAtivos_()); }) };
   });
 }
 function salvarPerfil(obj, novo) {
   const a = exigirPerm_('perfis'), erros = {}, o = obj || {}, pf = perfis_();
+  exigirGlobal_(a, 'Perfis são iguais em todos os Hubs.');
   const nome = String(o.nome || '').trim(), desc = String(o.desc || '').trim();
   if (!nome) erros.nome = 'Campo obrigatório.';
   else if (nome.length < 2 || nome.length > 40 || !/^[0-9A-Za-zÀ-ÿ][0-9A-Za-zÀ-ÿ \-]*$/.test(nome)) erros.nome = 'Use de 2 a 40 letras, números, espaço ou hífen.';
@@ -1919,6 +2009,7 @@ function salvarPerfil(obj, novo) {
 }
 function excluirPerfil(nome) {
   const a = exigirPerm_('perfis'), pf = perfis_();
+  exigirGlobal_(a, 'Perfis são iguais em todos os Hubs.');
   nome = String(nome || '');
   if (!pf[nome]) return { ok: false, msg: 'Perfil não encontrado. Atualize a tela.' };
   if (pf[nome].sistema || nome === 'Admin') return { ok: false, msg: 'Perfis padrão do sistema não podem ser excluídos.' };

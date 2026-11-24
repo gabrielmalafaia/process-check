@@ -1,9 +1,30 @@
 /* ---------- v8: Hub, usuários online, log de atividade, aviso de transparência e carga em massa ---------- */
 function hubOn() { return !!(S.u && S.u.hub && S.u.hub.on); }
 function hubGlobal() { return hubOn() && !!S.u.hub.global; }
+/** Aplica o bootstrap com segurança: aviso pendente ou usuário sem acesso nunca deixam o estado do cliente pela metade. */
+/** Esquece tudo o que é do Hub anterior (formulários abertos, filtros, listas, gráficos). */
+function resetEstadoHub() {
+  S.mx = {}; S.edit = null; S.delIdx = -1; S.ac = null; S.d = {}; S.det = null; S.F = null; S.pag = 1; S.lg = null; S.online = null; S.hubs = null; S.rg = null; S.rgEd = null; S.cadQ = ''; S.cadF = '';
+  ['processo', 'doca', 'turno', 'lider', 'colaborador', 'auditor', 'faixa', 'obs'].forEach(function (k) { S.flt[k] = ''; });
+  S.lgSeq = (S.lgSeq || 0) + 1; if ($('#v-log')) $('#v-log').innerHTML = '';
+  destruirGraficos();
+}
+function aplicarBootstrap(b) {
+  if (b && b.bloqueado) { S.reentrar = true; mostrarAviso(b); return false; }
+  if (!b || !b.user || !b.user.ok) { S.reentrar = true; $('#app').classList.add('hidden'); mostrarLogin(b || { user: { ok: false } }); return false; }
+  const idAntes = S.u && S.u.hub ? S.u.hub.id : null;
+  S.u = b.user; aplicarBase(b);
+  if (idAntes !== null && b.user.hub && b.user.hub.id !== idAntes) resetEstadoHub(); // Hub mudou (outra aba): nada do anterior pode sobrar
+  v8Cabecalho(); return true;
+}
+/** O servidor passou a exigir o aceite no meio da sessão: leva a pessoa à tela de aceite. */
+async function reavisar() {
+  if ($('#avisoTela')) return;
+  try { const b = await rpc('bootstrap', false); if (b && b.bloqueado) { S.reentrar = true; mostrarAviso(b); } } catch (e) { /* o aviso de erro já foi exibido */ }
+}
 function hubNomeDe(id) {
   if (id === '*') return tr('Admin global');
-  const l = (S.u && S.u.hub && S.u.hub.lista) || (S.ac && S.ac.hubs) || [];
+  const l = (S.u && S.u.hub && S.u.hub.lista) || S.hubs || (S.ac && S.ac.hubs) || [];
   const h = l.find(function (x) { return x.id === id; });
   return h ? h.nome : String(id || '');
 }
@@ -14,18 +35,34 @@ function v8Cabecalho() {
   if (!hubOn() || !h.nome) { el.classList.add('hidden'); return; }
   el.classList.remove('hidden');
   if (h.global && h.lista && h.lista.length > 1) {
-    el.innerHTML = ic('globe', 14) + '<label class="sr" for="hubSel">' + esc(tr('Hub ativo')) + '</label><select id="hubSel" title="' + esc(tr('Hub ativo')) + '">' + h.lista.map(function (x) { return '<option value="' + esc(x.id) + '"' + (x.id === h.id ? ' selected' : '') + '>' + esc(x.nome) + '</option>'; }).join('') + '</select><span class="op">' + esc(h.operacao) + '</span>';
+    el.innerHTML = '<label class="hl" for="hubSel">' + ic('globe', 14) + esc(tr('Hub ativo')) + '</label><select id="hubSel" title="' + esc(tr('Trocar de Hub')) + '">' + h.lista.map(function (x) { return '<option value="' + esc(x.id) + '"' + (x.id === h.id ? ' selected' : '') + '>' + esc(x.nome) + '</option>'; }).join('') + '</select><span class="op">' + esc(h.operacao) + '</span>';
   } else el.innerHTML = ic('globe', 14) + '<b>' + esc(h.nome) + '</b><span class="op">' + esc(h.operacao) + '</span>';
 }
+/** Troca o Hub sem recarregar a página (recarregar o iframe do Apps Script deixa a tela em branco). */
 async function trocarHub(id) {
-  try { await rpc('definirHubAtivo', id); location.reload(); } catch (e) { /* aviso exibido */ }
+  const sel = $('#hubSel'), antes = S.u.hub.id;
+  if (S.busy || (S.F && S.F.busy)) { v8Cabecalho(); toast(tr('Aguarde terminar a operação em andamento para trocar de Hub.'), true); return; }
+  S.busy = true; if (sel) sel.disabled = true;
+  let trocou = false;
+  try {
+    await rpc('definirHubAtivo', id); trocou = true;
+    const b = await rpc('bootstrap', false); // o servidor já separa o cache por Hub: não precisa limpar o de todos
+    if (!aplicarBootstrap(b)) return;
+    resetEstadoHub(); fbarFill(); renderNav(); nav(S.v);
+    v8OnlineN(); toast(tpl('Hub ativo: {0}', [S.u.hub.nome]));
+  } catch (e) {
+    if (trocou) { try { await rpc('definirHubAtivo', antes); } catch (e2) { /* sem como desfazer agora */ } toast(tr('O Hub não foi trocado. Tente de novo.'), true); }
+    S.u.hub.id = antes; v8Cabecalho();
+  } finally { S.busy = false; const s2 = $('#hubSel'); if (s2) s2.focus(); }
 }
 /* ----- online ----- */
 function v8Pulso() {
   if (typeof google === 'undefined' || document.hidden) return;
-  try { google.script.run.withSuccessHandler(function () { /* ok */ }).withFailureHandler(function () { /* silencioso */ }).pulso(); } catch (e) { /* sem conexão */ }
+  if (S.u && S.u.email) marcarSessao(S.u.email); // renova a sessão enquanto a pessoa usa o sistema
+  try { google.script.run.withSuccessHandler(function (r) { if (r && r.hub && hubOn() && S.u.hub.id && r.hub !== S.u.hub.id && !S.busy) { toast(tr('O Hub ativo foi alterado em outra aba. Atualizando.'), true); atualizar(); } }).withFailureHandler(function () { /* silencioso */ }).pulso(); } catch (e) { /* sem conexão */ }
 }
 async function v8OnlineN() {
+  if (document.hidden) return;
   try {
     const r = await new Promise(function (ok, er) { google.script.run.withSuccessHandler(ok).withFailureHandler(er).listarOnline(); });
     const n = $('#onlineN'); if (n) n.textContent = r.total;
@@ -50,13 +87,15 @@ async function desenharLog() {
     '<label>' + esc(tr('Usuário')) + '<input data-lf="email" maxlength="120" placeholder="' + esc(tr('Nome ou e-mail')) + '"></label><label>' + esc(tr('Ação')) + '<input data-lf="acao" maxlength="120" placeholder="' + esc(tr('Texto da ação')) + '"></label>' +
     (hubGlobal() ? '<label>Hub<select data-lf="hub"><option value="">' + esc(tr('Todos')) + '</option>' + S.u.hub.lista.map(function (x) { return '<option value="' + esc(x.id) + '">' + esc(x.nome) + '</option>'; }).join('') + '</select></label>' : '') +
     '</form><div style="margin-top:10px"><button type="button" class="btn pri" id="lgBuscar">' + esc(tr('Filtrar')) + '</button> <button type="button" class="btn" id="lgLimpar">' + esc(tr('Limpar filtros')) + '</button></div></div><div class="card" id="lgRes">' + skel(5) + '</div>';
-  const f = Object.assign({}, L.f, { pagina: L.pagina });
-  let r; try { r = await rpc('consultarLog', f); } catch (e) { $('#lgRes').innerHTML = esc(tr('Não foi possível carregar o log.')); return; }
-  if (S.v !== 'log') return;
+  const f = Object.assign({}, L.f, { pagina: L.pagina }), seq = S.lgSeq = (S.lgSeq || 0) + 1;
+  let r; try { r = await rpc('consultarLog', f); } catch (e) { if (seq === S.lgSeq && $('#lgRes')) $('#lgRes').innerHTML = esc(tr('Não foi possível carregar o log.')); return; }
+  if (S.v !== 'log' || seq !== S.lgSeq || !$('#lgRes')) return;
   const pag = Math.max(1, Math.ceil(r.total / r.porPagina));
   $('#lgRes').innerHTML = '<div class="scroll"><table><thead><tr><th>' + esc(tr('Quando')) + '</th>' + (hubGlobal() ? '<th>Hub</th>' : '') + '<th>' + esc(tr('Usuário')) + '</th><th>' + esc(tr('Perfil')) + '</th><th>' + esc(tr('Ação')) + '</th><th>' + esc(tr('Alvo')) + '</th><th>' + esc(tr('Detalhe')) + '</th></tr></thead><tbody>' +
     (r.linhas.map(function (x) { return '<tr><td>' + esc(fmtDt(x.ts)) + '</td>' + (hubGlobal() ? '<td>' + esc(x.hubNome) + '</td>' : '') + '<td>' + esc(x.nome) + '<br><small class="muted">' + esc(x.email) + '</small></td><td>' + esc(x.perfil) + '</td><td>' + esc(x.acao) + '</td><td>' + esc(x.alvo) + '</td><td>' + esc(x.detalhe) + '</td></tr>'; }).join('') || '<tr><td colspan="7" class="muted">' + esc(tr('Nenhum registro encontrado.')) + '</td></tr>') +
     '</tbody></table></div><div class="toolbar" style="margin-top:10px"><button type="button" class="btn" id="lgAnt"' + (L.pagina <= 1 ? ' disabled' : '') + '>' + esc(tr('Anterior')) + '</button><span class="muted">' + esc(tpl('Página {0} de {1}', [L.pagina, pag])) + ' · ' + esc(tpl('{0} registros', [r.total])) + '</span><button type="button" class="btn" id="lgProx"' + (L.pagina >= pag ? ' disabled' : '') + '>' + esc(tr('Próxima')) + '</button></div>' +
+    (r.truncado ? '<div class="note bad">' + ic('alert', 16) + '<span>' + esc(tr('O log é grande: só os registros mais recentes foram lidos. Use filtros de data para ver os mais antigos.')) + '</span></div>' : '') +
+    (r.falhasLog ? '<div class="note bad">' + ic('alert', 16) + '<span>' + esc(tpl('{0} ação(ões) foram concluídas mas não puderam ser registradas no log (veja os registros de execução do Apps Script).', [r.falhasLog])) + '</span></div>' : '') +
     '<p class="muted">' + esc(tpl('Mostra as ações dos últimos {0} dias; registros mais antigos ficam na planilha de arquivo, por até 1 ano.', [r.vivoDias])) + '</p>';
 }
 function lerFiltroLog() { const f = {}; $$('#lgForm [data-lf]').forEach(function (i) { if (i.value.trim()) f[i.dataset.lf] = i.value.trim(); }); return f; }
@@ -84,7 +123,7 @@ async function salvarHubUI() {
     const r = await rpc('salvarHub', Object.assign({ _row: S.hubEd ? S.hubEd._row : 0 }, o, { ativo: o.ativo !== 'Não' }), S.hubEd);
     if (!r.ok) { if (r.erros) Object.keys(r.erros).forEach(function (k) { const s = $('#acBody [data-he="' + k + '"]'); if (s) s.textContent = r.erros[k]; }); toast(r.msg || tr('Há campos obrigatórios ou inválidos.'), true); return; }
     S.hubEd = null; toast(tr('Hub salvo')); await drawHubs();
-    S.u.hub.lista = r.hubs.filter(function (h) { return h.ativo; });
+    S.u.hub.lista = r.hubs.filter(function (h) { return h.ativo; }); v8Cabecalho();
   } catch (e) { /* aviso exibido */ } finally { S.busy = false; }
 }
 /** Campo Hub do formulário de usuário (só para o Admin global; os demais criam sempre no próprio Hub). */
@@ -118,9 +157,10 @@ async function cargaModelo() {
 }
 function cargaErros(r) {
   return '<div class="note bad">' + ic('alert', 16) + '<span><b>' + esc(tr('Nada foi gravado.')) + '</b> ' + esc(tpl('{0} erro(s) encontrado(s):', [r.totalErros])) + '</span></div><ul class="cg-err">' +
-    r.erros.map(function (e) { return '<li>' + (e.linha ? esc(tpl('Linha {0}', [e.linha])) : '') + (e.coluna ? ', ' + esc(tr('coluna')) + ' <b>' + esc(e.coluna) + '</b>' : '') + ': ' + esc(e.msg) + '</li>'; }).join('') + '</ul>';
+    r.erros.map(function (e) { return '<li>' + (e.linha ? esc(tpl('Linha {0}', [e.linha])) : '') + (e.coluna ? ', ' + esc(tr('coluna')) + ' <b>' + esc(e.coluna) + '</b>' : '') + ': <span>' + esc(tr(e.msg)) + '</span></li>'; }).join('') + '</ul>';
 }
 async function cargaValidar() {
+  if (!$('#cgTexto')) return;
   const txt = $('#cgTexto').value; if (!txt.trim()) { $('#cgRes').innerHTML = '<div class="note">' + esc(tr('Cole a tabela do Excel na caixa.')) + '</div>'; return; }
   let r; try { r = await rpc('importarPrevia', S.carga.tipo, txt); } catch (e) { return; }
   S.carga.ok = r.ok; $('#cgGravar').classList.toggle('hidden', !r.ok);
@@ -161,8 +201,10 @@ function v8Init() {
   v8Cabecalho();
   if (pode('ver_online')) { $('#onlineBtn').classList.remove('hidden'); v8OnlineN(); setInterval(v8OnlineN, window.PC_POLL || 120000); }
   v8Pulso(); setInterval(v8Pulso, window.PC_POLL || 120000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) v8Pulso(); });
 }
 function v8Eventos() {
+  document.addEventListener('input', function (e) { if (e.target && e.target.id === 'cgTexto' && S.carga) { S.carga.ok = false; const g = $('#cgGravar'); if (g) g.classList.add('hidden'); } });
   document.addEventListener('change', function (e) { if (e.target && e.target.id === 'hubSel') trocarHub(e.target.value); });
   document.addEventListener('click', function (e) {
     const t = e.target && e.target.closest ? e.target.closest('button') : null; if (!t) return;

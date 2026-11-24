@@ -138,7 +138,7 @@ T('e-mail: cada destinatário recebe só o escopo do próprio perfil (líder só
   A.emails.length = 0; const r = A.call('enviarRelatorioAgora', ''); eq([r.ok, r.enviados, r.falhas.length], [true, 3, 0]);
   const por = {}; emails().forEach(m => { por[m.to] = m; });
   const nTot = t => Number((/(?:Auditorias|Audits|Auditorías): (\d+)/.exec(t) || [])[1]);
-  const esperado = (email, nome) => { A.as(email); return R('geral', { de: A.dia(-7), ate: A.dia(-1) }).A.total; };
+  const esperado = (email, nome) => { A.as(email); return R('geral', { de: A.dia(-6), ate: A.dia(0) }).A.total; };
   eq(nTot(por['sl@x.com'].body), esperado('sl@x.com')); eq(nTot(por['lid@x.com'].body), esperado('lid@x.com')); eq(nTot(por['lid2@x.com'].body), esperado('lid2@x.com'));
   ok(nTot(por['sl@x.com'].body) > nTot(por['lid@x.com'].body), 'Site Leader vê mais que o líder'); eq(nTot(por['lid@x.com'].body) + nTot(por['lid2@x.com'].body) >= 4, true);
   ok(!/Dora/.test(por['lid@x.com'].htmlBody + por['lid@x.com'].body), 'líder Carlos não vê dados da Dora'); ok(!/Carlos Lider/.test(por['lid2@x.com'].htmlBody.replace(/Equipe de Carlos Lider/, '')));
@@ -152,7 +152,7 @@ T('e-mail: idioma do destinatário (EN/ES/PT), assunto, números e sem emojis', 
   ok(/script\.google\.com/.test(por['sl@x.com'].htmlBody));
 });
 T('e-mail: dados do e-mail do Site Leader batem com a Visão Geral dele (nota média e metas)', () => {
-  A.as('sl@x.com'); const g = R('geral', { de: A.dia(-7), ate: A.dia(-1) });
+  A.as('sl@x.com'); const g = R('geral', { de: A.dia(-6), ate: A.dia(0) });
   const m = emails().find(x => x.to === 'sl@x.com');
   ok(m.htmlBody.indexOf(g.A.media.toFixed(1) + '%') > -1); ok(new RegExp('Em conformidade: ' + g.A.conf).test(m.body));
 });
@@ -193,6 +193,29 @@ T('e-mail agendado: só o dono ou o gatilho; envia quem vence hoje; não duplica
   A.emails.length = 0; let r = A.call('enviarRelatoriosAgendados'); eq(r.enviados, 3);
   A.emails.length = 0; r = A.call('enviarRelatoriosAgendados'); eq([r.enviados, A.emails.length], [0, 0]);
   eq(A.call('alternarAgendamentoRel', false).agendado, false); eq(A.triggers.length, 0);
+});
+T('e-mail: o período termina HOJE (auditoria de hoje entra no relatório) e o agendamento é às 22h', () => {
+  A.as('owner@x.com');
+  const hoje = A.run('hoje_()');
+  eq(A.run("periodoEmail_('Diario')"), { de: hoje, ate: hoje }); eq(A.run("periodoEmail_('Semanal')").ate, hoje); eq(A.run("periodoEmail_('Mensal')").ate, hoje);
+  A.call('salvarEmailRel', { email: 'sl@x.com', freq: 'Diario', idioma: 'pt' }); A.run('limparCache_()'); A.emails.length = 0;
+  const r = A.call('enviarRelatorioAgora', 'sl@x.com'); eq(r.enviados, 1, JSON.stringify(r));
+  const m = A.emails[0]; ok(!/Nenhuma auditoria no seu escopo/.test(m.htmlBody), 'relatório de hoje não pode sair vazio'); ok(/Auditorias/.test(m.htmlBody)); ok(!/Auditorias: 0\n/.test(m.body));
+  // gatilho antigo (7h, sem a marca de horário) é substituído por um de 22h, sem duplicar
+  A.call('alternarAgendamentoRel', false); A.triggers.length = 0;
+  A.ctx.ScriptApp.newTrigger('enviarRelatoriosAgendados').timeBased().everyDays(1).atHour(7).create();
+  eq(A.triggers.length, 1); eq(A.triggers[0].hora, 7);
+  A.call('alternarAgendamentoRel', true); eq(A.triggers.length, 1); eq(A.triggers[0].hora, 22);
+  A.call('alternarAgendamentoRel', true); eq(A.triggers.length, 1); eq(A.triggers[0].hora, 22);
+  A.call('alternarAgendamentoRel', false); eq(A.triggers.length, 0);
+});
+T('e-mail: "Enviar agora" não marca o dia como enviado (não bloqueia o envio completo das 22h)', () => {
+  A.as('owner@x.com'); A.call('salvarEmailRel', { email: 'sl@x.com', freq: 'Diario', idioma: 'pt' });
+  A.sheets.Cad_Relatorio_Email.d.forEach((l, i) => { if (i) l[4] = ''; }); A.run('limparCache_()'); A.emails.length = 0;
+  eq(A.call('enviarRelatorioAgora', 'sl@x.com').enviados, 1);
+  eq(A.sheets.Cad_Relatorio_Email.d.filter((l, i) => i && l[0] === 'sl@x.com').map(l => l[4]), ['']);
+  const r = A.call('enviarRelatoriosAgendados'); eq(r.enviados >= 1, true, 'o agendado ainda envia depois de um envio manual');
+  ok(A.sheets.Cad_Relatorio_Email.d.filter((l, i) => i && l[0] === 'sl@x.com')[0][4] !== '', 'agendado grava a data');
 });
 T('e-mail agendado: semanal só na segunda e mensal só no dia 1', () => {
   const dow = A.run("new Date(hoje_() + 'T00:00:00Z').getUTCDay()"), dia = A.run("new Date(hoje_() + 'T00:00:00Z').getUTCDate()");

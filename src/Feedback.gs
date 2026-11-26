@@ -176,6 +176,7 @@ function auditoriasDasPend_(pends, comAuditor, comItens) {
     out[p.id] = String(p.ids).split('|').filter(Boolean).map(function (id) {
       const r = porId[id]; if (!r) return null;
       const o = { data: r.ts.slice(0, 10), proc: r.proc, pct: r.pct };
+      if (r.obs.trim()) o.obs = r.obs.trim().slice(0, 300); // observação do auditor (o mesmo limite dos relatórios)
       if (comAuditor) { o.aud = r.email; o.audNome = r.resp; }
       if (querItens(p.id)) { const it = itensFb_(sh, r._r, trad(r.proc)); o.nc = it ? it.nc : null; o.conf = it ? it.conf : null; }
       return o;
@@ -215,7 +216,7 @@ function listarFeedbacksCore_() {
   const imeds = {}; ps.forEach(function (o) { if (o.imediato) imeds[o.id] = 1; });
   const aud = auditoriasDasPend_(ps, verAud, imeds), regs = registrosDe_(ps.filter(function (o) { return o.status === 'Concluida'; }).map(function (o) { return o.id; }));
   return { ok: true, hoje: hoje, prazoDias: FB_PRAZO_DIAS, minimo: fbMinimo_(config_()), janela: FB_JANELA,
-    pendencias: ps.map(function (o) { delete o.ids; const l = aud[o.id] || []; o.auditores = l.map(function (x) { return x.aud; }).filter(function (x, i, v) { return x && v.indexOf(x) === i; }); o.auditorias = l.map(function (x) { const y = { data: x.data, proc: x.proc, pct: x.pct }; if (verAud) { y.aud = x.aud; y.audNome = x.audNome; } return y; }); o.motivos = o.imediato ? motivosImed_(l) : []; o.registro = regs[o.id] || null; return o; }),
+    pendencias: ps.map(function (o) { delete o.ids; const l = aud[o.id] || []; o.auditores = l.map(function (x) { return x.aud; }).filter(function (x, i, v) { return x && v.indexOf(x) === i; }); o.auditorias = l.map(function (x) { const y = { data: x.data, proc: x.proc, pct: x.pct }; if (x.obs) y.obs = x.obs; if (verAud) { y.aud = x.aud; y.audNome = x.audNome; } return y; }); o.motivos = o.imediato ? motivosImed_(l) : []; o.registro = regs[o.id] || null; return o; }),
     responsaveis: designaveisFb_(a).map(function (u) { return { email: emailDe_(u.Email_Google), nome: String(u.Nome), perfil: String(u.Perfil) }; }) };
 }
 function meusFeedbacks() { return medir_('meusFeedbacks', meusFeedbacksCore_, arguments); }

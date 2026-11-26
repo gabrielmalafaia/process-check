@@ -40,12 +40,13 @@ const badge = (t) => { const b = t.$('#nav button[data-v="minhas"] .badge-n'); r
     ok(/inteiro entre 1 e 9999/.test(t.$('#pgErr').textContent), t.$('#pgErr').textContent); eq(linhas(A).length, 0); eq(t.$('#pgEmail').value, 'carlosa@x.com');
     ok(!t.$('#pgSalvar').disabled, 'botão liberado para corrigir'); eq(t.erros, []);
   });
-  await TA('cancelar pede confirmação; ao confirmar a meta vira Cancelada e permanece na tabela de canceladas', async () => {
+  await TA('cancelar pede confirmação; ao confirmar a meta vira Cancelada e sai das Ativas e aparece no filtro Canceladas', async () => {
     const A = cen(); const t = await abrir(A, 'sl@x.com'); await t.nav('programacao');
     t.set('#pgEmail', 'carlosa@x.com'); await t.click('#pgSalvar'); await t.idle();
     await t.click('[data-pg-cancel]'); ok(/Confirmar cancelamento/.test(t.$('[data-pg-cancel]').textContent)); eq(String(linhas(A)[0][13]), 'Ativa');
     await t.click('[data-pg-cancel]'); await t.idle();
-    eq(String(linhas(A)[0][13]), 'Cancelada'); ok(/Metas canceladas/.test(t.$('#v-programacao').textContent)); ok(!t.$('[data-pg-cancel]')); eq(t.erros, []);
+    eq(String(linhas(A)[0][13]), 'Cancelada'); ok(!t.$('[data-pg-cancel]'), 'saiu das ativas');
+    await t.click('[data-pl-f="cancelada"]'); ok(/Cancelada/.test(t.$('#plLista-metas table').textContent)); ok(!t.$('[data-pg-cancel]')); eq(t.erros, []);
   });
   await TA('o líder vê o contador no menu, abre Minhas metas, vê a meta como Nova e o contador zera (no servidor também)', async () => {
     const A = cen(); const sl = await abrir(A, 'sl@x.com'); await sl.nav('programacao');

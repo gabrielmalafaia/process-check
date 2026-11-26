@@ -40,19 +40,6 @@ function desenharProgramacao() {
   const grupo = function (attr, itens, marc, leg) {
     return '<fieldset class="grp-f"><legend class="sect">' + esc(leg) + '</legend><div class="grid">' + itens.map(function (x) { return '<label class="perm"><input type="checkbox" ' + attr + '="' + esc(x) + '"' + (marc.indexOf(x) > -1 ? ' checked' : '') + '><span><b>' + esc(x) + '</b></span></label>'; }).join('') + '</div></fieldset>';
   };
-  const ativas = R.metas.filter(function (m) { return !m.cancelada; }).sort(function (a, b) { return a.fim.localeCompare(b.fim); });
-  const canc = R.metas.filter(function (m) { return m.cancelada; }).sort(function (a, b) { return b.criadaEm.localeCompare(a.criadaEm); });
-  const linha = function (m) {
-    const p = Math.min(100, m.feito / m.qtd * 100), venc = !m.cancelada && m.status === 'nao_atingida';
-    return '<tr><td>' + esc(m.nome) + '<br><small class="muted">' + esc(m.email) + '</small></td><td>' + esc(m.qtd + ' ' + tr('auditoria(s)')) + '<br><small class="muted">' + esc(escopoMeta(m)) + (m.desc ? ' ' + esc(m.desc) : '') + '</small></td>' +
-      '<td>' + esc(fmtD(m.ini) + ' ' + tr('a') + ' ' + fmtD(m.fim)) + (venc ? '<br><small class="muted">' + esc(tr('Prazo vencido')) + '</small>' : '') + '</td>' +
-      '<td>' + (m.cancelada ? '—' : '<div class="meta-t"><span class="nm"><b>' + m.feito + '</b> ' + esc(tr('de')) + ' ' + m.qtd + '</span>' + meter(p, m.status) + '</div>') + '</td>' +
-      '<td>' + pill(m.cancelada ? 'inativa' : m.status, m.cancelada ? tr('Cancelada') : tr(TXT_META[m.status])) + (m.cancelada ? '' : (m.avisoPendente ? '<br><small class="muted">' + esc(tr('Aviso por e-mail pendente')) + '</small>' : '') + (m.visto ? '' : '<br><small class="muted">' + esc(tr('Ainda não aberta pelo líder')) + '</small>')) + '</td>' +
-      '<td>' + (m.cancelada ? '' : '<button type="button" class="btn sm" data-pg-cancel="' + esc(m.id) + '" data-pg-nome="' + esc(m.nome) + '" aria-label="' + esc(tpl(tr('Cancelar a meta de {0}'), [m.nome])) + '">' + esc(tr('Cancelar')) + '</button>') + '</td></tr>';
-  };
-  const tab = function (l) {
-    return '<div class="scroll" role="region" tabindex="0" aria-label="' + esc(tr('Metas programadas')) + '"><table><caption class="sr-only">' + esc(tr('Metas programadas')) + '</caption><thead><tr><th scope="col">' + esc(tr('Responsável')) + '</th><th scope="col">' + esc(tr('O que fazer')) + '</th><th scope="col">' + esc(tr('Prazo')) + '</th><th scope="col">' + esc(tr('Progresso')) + '</th><th scope="col">' + esc(tr('Situação')) + '</th><th scope="col"><span class="sr-only">' + esc(tr('Ações')) + '</span></th></tr></thead><tbody>' + l.map(linha).join('') + '</tbody></table></div>';
-  };
   el.innerHTML = '<div class="card"><div class="hd"><b>' + esc(tr('Programar auditorias')) + '</b></div>' +
     '<p class="muted" style="margin:6px 0 10px">' + esc(tr('Defina quantas auditorias a pessoa deve fazer e até quando. Ela recebe um aviso por e-mail e vê a meta em Minhas metas. A meta só conta auditorias que a regra de auditoria dela permite.')) + '</p>' +
     '<div class="grid"><label class="fld"><span>' + esc(tr('Responsável')) + '</span><select id="pgEmail" required aria-required="true">' + opts + '</select></label>' +
@@ -67,9 +54,25 @@ function desenharProgramacao() {
     grupo('data-pg-t', R.times, f.times, tr('Quais times (nenhum marcado = todos)')) + '</details>' +
     '<div id="pgPrev" class="resumo"></div><div id="pgErr" role="alert"></div><div id="pgLive" class="sr-only" role="status"></div>' +
     '<div style="margin-top:12px"><button type="button" class="btn pri" id="pgSalvar">' + esc(tr('Programar meta')) + '</button></div></div>' +
-    '<div class="card"><div class="hd"><b>' + esc(tr('Metas programadas')) + '</b></div>' + (ativas.length ? tab(ativas) : vz(tr('Nenhuma meta ativa. Programe a primeira acima.'))) + '</div>' +
-    (canc.length ? '<div class="card"><div class="hd"><b>' + esc(tr('Metas canceladas')) + '</b></div>' + tab(canc) + '</div>' : '');
+    '<div class="card"><div class="hd"><b>' + esc(tr('Metas programadas')) + '</b></div>' + (R.metas.length ? plCasca('metas') : vz(tr('Nenhuma meta ativa. Programe a primeira acima.'))) + '</div>';
+  plDesenhar('metas');
   prevPg();
+}
+/** Ativas primeiro, pelo prazo; depois as canceladas, da mais recente. */
+function pgMetasOrdenadas() {
+  if (!S.pg) return null;
+  return S.pg.metas.slice().sort(function (a, b) { return (a.cancelada ? 1 : 0) - (b.cancelada ? 1 : 0) || (a.cancelada ? b.criadaEm.localeCompare(a.criadaEm) : a.fim.localeCompare(b.fim)); });
+}
+function pgTabelaMetas(l) {
+  const linha = function (m) {
+    const p = Math.min(100, m.feito / m.qtd * 100), venc = !m.cancelada && m.status === 'nao_atingida';
+    return '<tr><td>' + esc(m.nome) + '<br><small class="muted">' + esc(m.email) + '</small></td><td>' + esc(m.qtd + ' ' + tr('auditoria(s)')) + '<br><small class="muted">' + esc(escopoMeta(m)) + (m.desc ? ' ' + esc(m.desc) : '') + '</small></td>' +
+      '<td>' + esc(fmtD(m.ini) + ' ' + tr('a') + ' ' + fmtD(m.fim)) + (venc ? '<br><small class="muted">' + esc(tr('Prazo vencido')) + '</small>' : '') + '</td>' +
+      '<td>' + (m.cancelada ? '—' : '<div class="meta-t"><span class="nm"><b>' + m.feito + '</b> ' + esc(tr('de')) + ' ' + m.qtd + '</span>' + meter(p, m.status) + '</div>') + '</td>' +
+      '<td>' + pill(m.cancelada ? 'inativa' : m.status, m.cancelada ? tr('Cancelada') : tr(TXT_META[m.status])) + (m.cancelada ? '' : (m.avisoPendente ? '<br><small class="muted">' + esc(tr('Aviso por e-mail pendente')) + '</small>' : '') + (m.visto ? '' : '<br><small class="muted">' + esc(tr('Ainda não aberta pelo líder')) + '</small>')) + '</td>' +
+      '<td>' + (m.cancelada ? '' : '<button type="button" class="btn sm" data-pg-cancel="' + esc(m.id) + '" data-pg-nome="' + esc(m.nome) + '" aria-label="' + esc(tpl(tr('Cancelar a meta de {0}'), [m.nome])) + '">' + esc(tr('Cancelar')) + '</button>') + '</td></tr>';
+  };
+  return '<div class="scroll" role="region" tabindex="0" aria-label="' + esc(tr('Metas programadas')) + '"><table><caption class="sr-only">' + esc(tr('Metas programadas')) + '</caption><thead><tr><th scope="col">' + esc(tr('Responsável')) + '</th><th scope="col">' + esc(tr('O que fazer')) + '</th><th scope="col">' + esc(tr('Prazo')) + '</th><th scope="col">' + esc(tr('Progresso')) + '</th><th scope="col">' + esc(tr('Situação')) + '</th><th scope="col"><span class="sr-only">' + esc(tr('Ações')) + '</span></th></tr></thead><tbody>' + l.map(linha).join('') + '</tbody></table></div>';
 }
 function prevPg() {
   const f = S.pgForm, p = $('#pgPrev'); if (!p) return;
@@ -119,12 +122,12 @@ async function cancelarPgUI(id, btn) {
     S.pgCancel = '';
     if (!r.ok) { toast(r.msg || tr('O servidor recusou o cancelamento.'), true); await loadProgramacao(); return; }
     toast(tr('Meta cancelada'));
-    if (r.recarregar) await loadProgramacao(); else { S.pg = r; if (pgNaTela()) desenharProgramacao(); }
+    if (r.recarregar) await loadProgramacao(); else { S.pg = r; if (pgNaTela()) { desenharProgramacao(); plFocoFiltro('metas'); } }
   } catch (x) { S.pgCancel = ''; if (pgNaTela()) await loadProgramacao(); } finally { S.busy = false; }
 }
 function v10Eventos() {
   document.addEventListener('change', function (e) { if (pgMetas() && e.target && e.target.closest && e.target.closest('#v-programacao')) { lerPgForm(); prevPg(); } });
-  document.addEventListener('input', function (e) { if (pgMetas() && e.target && e.target.closest && e.target.closest('#v-programacao')) { lerPgForm(); prevPg(); } });
+  document.addEventListener('input', function (e) { if (pgMetas() && e.target && e.target.closest && e.target.closest('#v-programacao') && !(e.target.dataset && e.target.dataset.plQ)) { lerPgForm(); prevPg(); } });
   document.addEventListener('click', function (e) {
     const t = e.target && e.target.closest ? e.target.closest('button') : null; if (!t || !pgNaTela()) return;
     if (t.dataset.pgtab) { if (t.dataset.pgtab !== (S.pgTab || 'metas')) { S.pgTab = t.dataset.pgtab; loadProgramacao(); } }
@@ -141,4 +144,5 @@ function v10Eventos() {
   });
   document.addEventListener('change', function (e) { if (pgNaTela() && e.target && e.target.dataset && e.target.dataset.fbSel !== undefined) avisoAuditorFb(e.target); });
   fbEventos();
+  plEventos();
 }

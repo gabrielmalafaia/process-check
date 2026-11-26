@@ -29,7 +29,7 @@ function fbMotivo(p) {
 function fbAuditorias(p) {
   if (!p.auditorias.length) return '';
   const temItens = p.auditorias.some(function (x) { return x.nc || x.conf; });
-  return '<details' + (temItens ? ' open' : '') + '><summary>' + esc(tpl(tr('{0} auditoria(s) abaixo de {1}%'), [p.qtd, p.corte])) + '</summary><ul class="lista-fb">' + p.auditorias.map(function (x) { return '<li>' + esc(fmtD(x.data) + ' · ' + x.proc + ' · ' + pc(x.pct)) + (x.audNome ? '<br><small class="muted">' + esc(tpl(tr('Auditado por {0}'), [x.audNome])) + '</small>' : '') + fbItens(x) + '</li>'; }).join('') + '</ul></details>'; // quem auditou só vem do servidor para quem tem "ver_auditor"
+  return '<details' + (temItens ? ' open' : '') + '><summary>' + esc(tpl(tr('{0} auditoria(s) abaixo de {1}%'), [p.qtd, p.corte])) + '</summary><ul class="lista-fb">' + p.auditorias.map(function (x) { return '<li>' + esc(fmtD(x.data) + ' · ' + x.proc + ' · ' + pc(x.pct)) + (x.audNome ? '<br><small class="muted">' + esc(tpl(tr('Auditado por {0}'), [x.audNome])) + '</small>' : '') + (x.obs ? '<br><small class="muted fb-obs">' + esc(tpl(tr('Observação: {0}'), [x.obs])) + '</small>' : '') + fbItens(x) + '</li>'; }).join('') + '</ul></details>'; // quem auditou só vem do servidor para quem tem "ver_auditor"
 }
 function fbTime(p) {
   const mudou = p.timeAtual !== p.timeEpoca || p.turnoAtual !== p.turnoEpoca;
@@ -49,11 +49,23 @@ async function loadFeedbacksSL(n) {
 }
 function desenharFeedbacksSL() {
   const R = S.fbl, el = $('#pgPainel'); if (!el) return;
-  const opts = function (p) {
-    return '<option value="">' + esc(tr('Escolha quem dará o feedback')) + '</option>' + R.responsaveis.slice().sort(function (a, b) { return a.nome.localeCompare(b.nome); }).map(function (u) {
-      return '<option value="' + esc(u.email) + '"' + (p.designadoEmail === u.email ? ' selected' : '') + '>' + esc(u.nome + ' (' + u.perfil + ')') + '</option>';
-    }).join('');
-  };
+  el.innerHTML = '<div class="card"><div class="hd"><b>' + esc(tr('Feedbacks obrigatórios')) + '</b></div>' +
+    '<p class="muted" style="margin:6px 0 10px">' + esc(tpl(tr('Quando um colaborador tem {0} ou mais auditorias abaixo da nota média em {1} dias, o feedback passa a ser obrigatório. Escolha quem vai conversar com ele: o líder tem {2} dias para registrar o que foi falado (mínimo de {3} caracteres).'), [R.minimo, R.janela, R.prazoDias, FB_MIN])) + '</p>' +
+    '<div id="fbErr" role="alert"></div>' + (R.pendencias.length ? plCasca('feedbacks') : vz(tr('Nenhum feedback obrigatório no momento.'))) + '</div>';
+  plDesenhar('feedbacks');
+}
+/** Abertas, depois designadas, depois concluídas; o feedback imediato primeiro em cada situação. */
+function fbOrdenadas() {
+  if (!S.fbl) return null;
+  const k = { Aberta: 0, Designada: 1, Concluida: 2 };
+  return S.fbl.pendencias.slice().sort(function (a, b) { return k[a.status] - k[b.status] || (b.imediato ? 1 : 0) - (a.imediato ? 1 : 0) || String(a.prazo).localeCompare(String(b.prazo)); });
+}
+function fbTabelaSL(l) {
+  const R = S.fbl;
+  // as opções de quem dá o feedback são montadas uma vez por página (antes, uma lista ordenada por linha)
+  const base = R.responsaveis.slice().sort(function (a, b) { return a.nome.localeCompare(b.nome); });
+  const todas = '<option value="">' + esc(tr('Escolha quem dará o feedback')) + '</option>' + base.map(function (u) { return '<option value="' + esc(u.email) + '">' + esc(u.nome + ' (' + u.perfil + ')') + '</option>'; }).join('');
+  const opts = function (p) { const v = 'value="' + esc(p.designadoEmail || '') + '"'; return p.designadoEmail ? todas.replace(v + '>', v + ' selected>') : todas; };
   const linha = function (p) {
     const acao = p.status === 'Concluida'
       ? (p.registro ? '<details><summary>' + esc(tr('Ver feedback registrado')) + '</summary><p style="margin:6px 0 2px;white-space:pre-wrap">' + esc(p.registro.texto) + '</p><small class="muted">' + esc(tpl(tr('Registrado por {0} em {1}'), [p.registro.autor, fmtDt(p.registro.registradoEm)])) + '</small></details>' : '')
@@ -61,11 +73,83 @@ function desenharFeedbacksSL() {
         '<button type="button" class="btn sm pri" style="margin-top:6px" data-fb-des="' + esc(p.id) + '" aria-label="' + esc(tpl(tr(p.status === 'Designada' ? 'Reatribuir o feedback de {0}' : 'Designar o feedback de {0}'), [p.colaborador])) + '">' + esc(tr(p.status === 'Designada' ? 'Reatribuir' : 'Designar')) + '</button><div class="muted" role="status" data-fb-av="' + esc(p.id) + '"></div>';
     return '<tr' + (p.imediato ? ' class="fb-imed"' : '') + '><td>' + esc(p.colaborador) + '<br>' + fbTime(p) + fbMotivo(p) + '</td><td>' + fbAuditorias(p) + '</td><td>' + fbSituacao(p) + (p.status !== 'Aberta' && p.designadoNome ? '<br><small class="muted">' + esc(p.designadoNome) + '</small>' : '') + (p.status === 'Designada' && p.avisoPendente ? '<br><small class="muted">' + esc(tr('Aviso por e-mail pendente')) + '</small>' : '') + '</td><td>' + acao + '</td></tr>';
   };
-  const ord = R.pendencias.slice().sort(function (a, b) { const k = { Aberta: 0, Designada: 1, Concluida: 2 }; return k[a.status] - k[b.status] || (b.imediato ? 1 : 0) - (a.imediato ? 1 : 0) || String(a.prazo).localeCompare(String(b.prazo)); }); // feedback imediato primeiro em cada situação
-  el.innerHTML = '<div class="card"><div class="hd"><b>' + esc(tr('Feedbacks obrigatórios')) + '</b></div>' +
-    '<p class="muted" style="margin:6px 0 10px">' + esc(tpl(tr('Quando um colaborador tem {0} ou mais auditorias abaixo da nota média em {1} dias, o feedback passa a ser obrigatório. Escolha quem vai conversar com ele: o líder tem {2} dias para registrar o que foi falado (mínimo de {3} caracteres).'), [R.minimo, R.janela, R.prazoDias, FB_MIN])) + '</p>' +
-    '<div id="fbErr" role="alert"></div>' +
-    (ord.length ? '<div class="scroll" role="region" tabindex="0" aria-label="' + esc(tr('Feedbacks obrigatórios')) + '"><table><caption class="sr-only">' + esc(tr('Feedbacks obrigatórios')) + '</caption><thead><tr><th scope="col">' + esc(tr('Colaborador')) + '</th><th scope="col">' + esc(tr('Auditorias')) + '</th><th scope="col">' + esc(tr('Situação')) + '</th><th scope="col">' + esc(tr('Quem dá o feedback')) + '</th></tr></thead><tbody>' + ord.map(linha).join('') + '</tbody></table></div>' : vz(tr('Nenhum feedback obrigatório no momento.'))) + '</div>';
+  return '<div class="scroll" role="region" tabindex="0" aria-label="' + esc(tr('Feedbacks obrigatórios')) + '"><table><caption class="sr-only">' + esc(tr('Feedbacks obrigatórios')) + '</caption><thead><tr><th scope="col">' + esc(tr('Colaborador')) + '</th><th scope="col">' + esc(tr('Auditorias')) + '</th><th scope="col">' + esc(tr('Situação')) + '</th><th scope="col">' + esc(tr('Quem dá o feedback')) + '</th></tr></thead><tbody>' + l.map(linha).join('') + '</tbody></table></div>';
+}
+
+/* ---- Programação: filtro por situação, busca por nome e páginas de 20 ----
+   Tudo no navegador, sobre o que o servidor já mandou: trocar de filtro ou de página não chama o servidor
+   e redesenha só a lista (a busca não perde o foco). */
+const PL_POR_PAG = 20;
+const META_ANDAMENTO = ['no_ritmo', 'em_risco', 'futura'];
+/** [id, rótulo, teste]. Metas abre em Ativas; Feedbacks abre em Abertas (ou em Todas, se não houver abertas). */
+const PL_SIT = {
+  metas: [
+    ['ativas', 'Ativas', function (m) { return !m.cancelada; }],
+    ['andamento', 'Em andamento', function (m) { return !m.cancelada && META_ANDAMENTO.indexOf(m.status) > -1; }],
+    ['atingida', 'Atingidas', function (m) { return !m.cancelada && m.status === 'atingida'; }],
+    ['vencida', 'Vencidas', function (m) { return !m.cancelada && m.status === 'nao_atingida'; }],
+    ['cancelada', 'Canceladas', function (m) { return !!m.cancelada; }]
+  ],
+  feedbacks: [
+    ['aberta', 'Abertas', function (p) { return p.status === 'Aberta'; }],
+    ['designada', 'Designadas no prazo', function (p) { return p.status === 'Designada' && !p.atrasado; }],
+    ['atrasada', 'Atrasadas', function (p) { return !!p.atrasado; }],
+    ['concluida', 'Concluídas', function (p) { return p.status === 'Concluida'; }],
+    ['todas', 'Todas', function () { return true; }]
+  ]
+};
+const PL = {
+  metas: { dados: pgMetasOrdenadas, nome: function (m) { return m.nome + ' ' + m.email; }, tabela: pgTabelaMetas, busca: 'Buscar responsável' },
+  feedbacks: { dados: fbOrdenadas, nome: function (p) { return p.colaborador; }, tabela: fbTabelaSL, busca: 'Buscar colaborador' }
+};
+/** Estado do filtro de cada aba: fica ao recarregar os dados (designar, cancelar), volta ao padrão ao recarregar o app. */
+function plEstado(aba, todos) {
+  S.pl = S.pl || {};
+  if (!S.pl[aba]) S.pl[aba] = { f: aba === 'feedbacks' && !todos.some(PL_SIT.feedbacks[0][2]) ? 'todas' : PL_SIT[aba][0][0], q: '', p: 1 };
+  return S.pl[aba];
+}
+/** Ordenação, contagem por situação e nomes sem acento: uma vez por carga de dados (não a cada tecla ou página). */
+const PL_MEMO = {};
+function plMemo(aba) {
+  const fonte = aba === 'metas' ? S.pg : S.fbl; if (!fonte) return null;
+  const m = PL_MEMO[aba]; if (m && m.fonte === fonte) return m;
+  const todos = PL[aba].dados(), cont = {};
+  PL_SIT[aba].forEach(function (s) { cont[s[0]] = todos.filter(s[2]).length; });
+  return (PL_MEMO[aba] = { fonte: fonte, todos: todos, cont: cont, nomes: todos.map(function (x) { return norm(PL[aba].nome(x)); }) });
+}
+function plCasca(aba) {
+  const st = (S.pl && S.pl[aba]) || { q: '' }, rot = tr(PL[aba].busca);
+  return '<div class="toolbar cbar"><input type="search" data-pl-q="' + aba + '" value="' + esc(st.q) + '" placeholder="' + esc(rot) + '" aria-label="' + esc(rot) + '">' +
+    '<div class="chips" role="group" aria-label="' + esc(tr('Situação')) + '" id="plChips-' + aba + '"></div><span class="muted" role="status" id="plCount-' + aba + '"></span></div><div id="plLista-' + aba + '"></div>';
+}
+function plDesenhar(aba) {
+  const cfg = PL[aba], chips = $('#plChips-' + aba), alvo = $('#plLista-' + aba), m = plMemo(aba);
+  if (!m || !chips || !alvo) return;
+  const todos = m.todos, st = plEstado(aba, todos), sits = PL_SIT[aba], sit = sits.find(function (s) { return s[0] === st.f; }) || sits[0], q = norm(st.q);
+  const itens = todos.filter(function (x, i) { return sit[2](x) && (!q || m.nomes[i].indexOf(q) > -1); });
+  const pags = Math.max(1, Math.ceil(itens.length / PL_POR_PAG)); st.p = Math.min(Math.max(1, st.p), pags);
+  chips.innerHTML = sits.map(function (s) { const on = s[0] === sit[0]; return '<button type="button" class="chip' + (on ? ' on' : '') + '" aria-pressed="' + on + '" data-pl-aba="' + aba + '" data-pl-f="' + s[0] + '">' + esc(tr(s[1])) + ' <span class="cn">' + m.cont[s[0]] + '</span></button>'; }).join('');
+  $('#plCount-' + aba).textContent = tpl(tr('{0} encontrado(s)'), [itens.length]);
+  const pager = pags < 2 ? '' : '<div class="pager"><span>' + esc(tpl(tr('Página {0} de {1}'), [st.p, pags])) + '</span>' +
+    '<button type="button" class="btn sm" data-pl-aba="' + aba + '" data-pl-p="-1"' + (st.p <= 1 ? ' disabled' : '') + '>' + esc(tr('Anterior')) + '</button>' +
+    '<button type="button" class="btn sm" data-pl-aba="' + aba + '" data-pl-p="1"' + (st.p >= pags ? ' disabled' : '') + '>' + esc(tr('Próxima')) + '</button></div>';
+  alvo.innerHTML = itens.length ? cfg.tabela(itens.slice((st.p - 1) * PL_POR_PAG, st.p * PL_POR_PAG)) + pager : vz(tr(q ? 'Nada encontrado para esta busca.' : 'Nada nesta situação.'));
+}
+function plFocoFiltro(aba) { const b = $('#plChips-' + aba + ' .chip.on'); if (b) b.focus(); }
+const plBuscaAdiada = {};
+function plEventos() {
+  document.addEventListener('click', function (e) {
+    const t = e.target && e.target.closest ? e.target.closest('button[data-pl-aba]') : null; if (!t || !pgNaTela()) return;
+    const aba = t.dataset.plAba, st = S.pl && S.pl[aba]; if (!st) return;
+    if (t.dataset.plF) { st.f = t.dataset.plF; st.p = 1; plDesenhar(aba); const b = $('#plChips-' + aba + ' [data-pl-f="' + st.f + '"]'); if (b) b.focus(); }
+    else if (t.dataset.plP) { st.p += Number(t.dataset.plP); plDesenhar(aba); const r = $('#plLista-' + aba + ' .scroll'); if (r) { r.focus(); r.scrollIntoView({ block: 'nearest' }); } }
+  });
+  document.addEventListener('input', function (e) {
+    const t = e.target; if (!t || !t.dataset || !t.dataset.plQ || !pgNaTela()) return;
+    const aba = t.dataset.plQ; S.pl = S.pl || {}; const st = S.pl[aba]; if (!st) return;
+    st.q = t.value; st.p = 1;
+    (plBuscaAdiada[aba] = plBuscaAdiada[aba] || adiar(function () { if (pgNaTela()) plDesenhar(aba); }, BUSCA_MS))();
+  });
 }
 /** Aviso (não bloqueio): a pessoa escolhida fez alguma das auditorias que geraram o feedback. */
 function avisoAuditorFb(sel) {
@@ -82,7 +166,7 @@ async function designarFbUI(id) {
     const r = await rpc('designarFeedback', id, sel.value);
     if (!r.ok) { err.innerHTML = aviso(esc(r.msg ? tr(r.msg) : tr('O servidor recusou a designação.'))); return; }
     toast(r.emailEnviado ? tr('Feedback designado. O aviso foi enviado por e-mail.') : tr('Feedback designado, mas o e-mail não foi enviado. O aviso será reenviado às 22h.'), !r.emailEnviado);
-    if (r.recarregar) await loadProgramacao(); else { S.fbl = r; if (pgNaTela() && (S.pgTab || 'metas') === 'feedbacks') desenharFeedbacksSL(); }
+    if (r.recarregar) await loadProgramacao(); else { S.fbl = r; if (pgNaTela() && (S.pgTab || 'metas') === 'feedbacks') { desenharFeedbacksSL(); plFocoFiltro('feedbacks'); } }
     sondarFb();
   } catch (x) { /* o aviso de erro já foi exibido */ } finally { S.busy = false; }
 }

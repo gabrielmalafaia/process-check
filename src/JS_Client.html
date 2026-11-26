@@ -285,7 +285,21 @@ DICT.push(
   ['Quais times (nenhum marcado = todos)', 'Which teams (none checked = all)', 'Qué equipos (ninguno marcado = todos)'],
   ['Programar meta', 'Schedule goal', 'Programar meta'],
   ['Metas programadas', 'Scheduled goals', 'Metas programadas'],
-  ['Metas canceladas', 'Cancelled goals', 'Metas canceladas'],
+  ['Ativas', 'Active', 'Activas'],
+  ['Em andamento', 'In progress', 'En curso'],
+  ['Atingidas', 'Achieved', 'Alcanzadas'],
+  ['Vencidas', 'Overdue', 'Vencidas'],
+  ['Canceladas', 'Cancelled', 'Canceladas'],
+  ['Abertas', 'Open', 'Abiertas'],
+  ['Designadas no prazo', 'Assigned, on time', 'Asignadas en plazo'],
+  ['Atrasadas', 'Late', 'Atrasadas'],
+  ['Concluídas', 'Completed', 'Concluidas'],
+  ['Todas', 'All', 'Todas'],
+  ['Buscar responsável', 'Search person in charge', 'Buscar responsable'],
+  ['Buscar colaborador', 'Search employee', 'Buscar colaborador'],
+  ['{0} encontrado(s)', '{0} found', '{0} encontrado(s)'],
+  ['Nada nesta situação.', 'Nothing in this status.', 'Nada en esta situación.'],
+  ['Observação: {0}', 'Note: {0}', 'Observación: {0}'],
   ['Nenhuma meta ativa. Programe a primeira acima.', 'No active goal. Schedule the first one above.', 'Ninguna meta activa. Programe la primera arriba.'],
   ['{0} deve fazer {1} auditoria(s) de {2} a {3}.', '{0} must do {1} audit(s) from {2} to {3}.', '{0} debe hacer {1} auditoría(s) del {2} al {3}.'],
   ['auditoria(s)', 'audit(s)', 'auditoría(s)'],
@@ -4014,19 +4028,6 @@ function desenharProgramacao() {
   const grupo = function (attr, itens, marc, leg) {
     return '<fieldset class="grp-f"><legend class="sect">' + esc(leg) + '</legend><div class="grid">' + itens.map(function (x) { return '<label class="perm"><input type="checkbox" ' + attr + '="' + esc(x) + '"' + (marc.indexOf(x) > -1 ? ' checked' : '') + '><span><b>' + esc(x) + '</b></span></label>'; }).join('') + '</div></fieldset>';
   };
-  const ativas = R.metas.filter(function (m) { return !m.cancelada; }).sort(function (a, b) { return a.fim.localeCompare(b.fim); });
-  const canc = R.metas.filter(function (m) { return m.cancelada; }).sort(function (a, b) { return b.criadaEm.localeCompare(a.criadaEm); });
-  const linha = function (m) {
-    const p = Math.min(100, m.feito / m.qtd * 100), venc = !m.cancelada && m.status === 'nao_atingida';
-    return '<tr><td>' + esc(m.nome) + '<br><small class="muted">' + esc(m.email) + '</small></td><td>' + esc(m.qtd + ' ' + tr('auditoria(s)')) + '<br><small class="muted">' + esc(escopoMeta(m)) + (m.desc ? ' ' + esc(m.desc) : '') + '</small></td>' +
-      '<td>' + esc(fmtD(m.ini) + ' ' + tr('a') + ' ' + fmtD(m.fim)) + (venc ? '<br><small class="muted">' + esc(tr('Prazo vencido')) + '</small>' : '') + '</td>' +
-      '<td>' + (m.cancelada ? '—' : '<div class="meta-t"><span class="nm"><b>' + m.feito + '</b> ' + esc(tr('de')) + ' ' + m.qtd + '</span>' + meter(p, m.status) + '</div>') + '</td>' +
-      '<td>' + pill(m.cancelada ? 'inativa' : m.status, m.cancelada ? tr('Cancelada') : tr(TXT_META[m.status])) + (m.cancelada ? '' : (m.avisoPendente ? '<br><small class="muted">' + esc(tr('Aviso por e-mail pendente')) + '</small>' : '') + (m.visto ? '' : '<br><small class="muted">' + esc(tr('Ainda não aberta pelo líder')) + '</small>')) + '</td>' +
-      '<td>' + (m.cancelada ? '' : '<button type="button" class="btn sm" data-pg-cancel="' + esc(m.id) + '" data-pg-nome="' + esc(m.nome) + '" aria-label="' + esc(tpl(tr('Cancelar a meta de {0}'), [m.nome])) + '">' + esc(tr('Cancelar')) + '</button>') + '</td></tr>';
-  };
-  const tab = function (l) {
-    return '<div class="scroll" role="region" tabindex="0" aria-label="' + esc(tr('Metas programadas')) + '"><table><caption class="sr-only">' + esc(tr('Metas programadas')) + '</caption><thead><tr><th scope="col">' + esc(tr('Responsável')) + '</th><th scope="col">' + esc(tr('O que fazer')) + '</th><th scope="col">' + esc(tr('Prazo')) + '</th><th scope="col">' + esc(tr('Progresso')) + '</th><th scope="col">' + esc(tr('Situação')) + '</th><th scope="col"><span class="sr-only">' + esc(tr('Ações')) + '</span></th></tr></thead><tbody>' + l.map(linha).join('') + '</tbody></table></div>';
-  };
   el.innerHTML = '<div class="card"><div class="hd"><b>' + esc(tr('Programar auditorias')) + '</b></div>' +
     '<p class="muted" style="margin:6px 0 10px">' + esc(tr('Defina quantas auditorias a pessoa deve fazer e até quando. Ela recebe um aviso por e-mail e vê a meta em Minhas metas. A meta só conta auditorias que a regra de auditoria dela permite.')) + '</p>' +
     '<div class="grid"><label class="fld"><span>' + esc(tr('Responsável')) + '</span><select id="pgEmail" required aria-required="true">' + opts + '</select></label>' +
@@ -4041,9 +4042,25 @@ function desenharProgramacao() {
     grupo('data-pg-t', R.times, f.times, tr('Quais times (nenhum marcado = todos)')) + '</details>' +
     '<div id="pgPrev" class="resumo"></div><div id="pgErr" role="alert"></div><div id="pgLive" class="sr-only" role="status"></div>' +
     '<div style="margin-top:12px"><button type="button" class="btn pri" id="pgSalvar">' + esc(tr('Programar meta')) + '</button></div></div>' +
-    '<div class="card"><div class="hd"><b>' + esc(tr('Metas programadas')) + '</b></div>' + (ativas.length ? tab(ativas) : vz(tr('Nenhuma meta ativa. Programe a primeira acima.'))) + '</div>' +
-    (canc.length ? '<div class="card"><div class="hd"><b>' + esc(tr('Metas canceladas')) + '</b></div>' + tab(canc) + '</div>' : '');
+    '<div class="card"><div class="hd"><b>' + esc(tr('Metas programadas')) + '</b></div>' + (R.metas.length ? plCasca('metas') : vz(tr('Nenhuma meta ativa. Programe a primeira acima.'))) + '</div>';
+  plDesenhar('metas');
   prevPg();
+}
+/** Ativas primeiro, pelo prazo; depois as canceladas, da mais recente. */
+function pgMetasOrdenadas() {
+  if (!S.pg) return null;
+  return S.pg.metas.slice().sort(function (a, b) { return (a.cancelada ? 1 : 0) - (b.cancelada ? 1 : 0) || (a.cancelada ? b.criadaEm.localeCompare(a.criadaEm) : a.fim.localeCompare(b.fim)); });
+}
+function pgTabelaMetas(l) {
+  const linha = function (m) {
+    const p = Math.min(100, m.feito / m.qtd * 100), venc = !m.cancelada && m.status === 'nao_atingida';
+    return '<tr><td>' + esc(m.nome) + '<br><small class="muted">' + esc(m.email) + '</small></td><td>' + esc(m.qtd + ' ' + tr('auditoria(s)')) + '<br><small class="muted">' + esc(escopoMeta(m)) + (m.desc ? ' ' + esc(m.desc) : '') + '</small></td>' +
+      '<td>' + esc(fmtD(m.ini) + ' ' + tr('a') + ' ' + fmtD(m.fim)) + (venc ? '<br><small class="muted">' + esc(tr('Prazo vencido')) + '</small>' : '') + '</td>' +
+      '<td>' + (m.cancelada ? '—' : '<div class="meta-t"><span class="nm"><b>' + m.feito + '</b> ' + esc(tr('de')) + ' ' + m.qtd + '</span>' + meter(p, m.status) + '</div>') + '</td>' +
+      '<td>' + pill(m.cancelada ? 'inativa' : m.status, m.cancelada ? tr('Cancelada') : tr(TXT_META[m.status])) + (m.cancelada ? '' : (m.avisoPendente ? '<br><small class="muted">' + esc(tr('Aviso por e-mail pendente')) + '</small>' : '') + (m.visto ? '' : '<br><small class="muted">' + esc(tr('Ainda não aberta pelo líder')) + '</small>')) + '</td>' +
+      '<td>' + (m.cancelada ? '' : '<button type="button" class="btn sm" data-pg-cancel="' + esc(m.id) + '" data-pg-nome="' + esc(m.nome) + '" aria-label="' + esc(tpl(tr('Cancelar a meta de {0}'), [m.nome])) + '">' + esc(tr('Cancelar')) + '</button>') + '</td></tr>';
+  };
+  return '<div class="scroll" role="region" tabindex="0" aria-label="' + esc(tr('Metas programadas')) + '"><table><caption class="sr-only">' + esc(tr('Metas programadas')) + '</caption><thead><tr><th scope="col">' + esc(tr('Responsável')) + '</th><th scope="col">' + esc(tr('O que fazer')) + '</th><th scope="col">' + esc(tr('Prazo')) + '</th><th scope="col">' + esc(tr('Progresso')) + '</th><th scope="col">' + esc(tr('Situação')) + '</th><th scope="col"><span class="sr-only">' + esc(tr('Ações')) + '</span></th></tr></thead><tbody>' + l.map(linha).join('') + '</tbody></table></div>';
 }
 function prevPg() {
   const f = S.pgForm, p = $('#pgPrev'); if (!p) return;
@@ -4093,12 +4110,12 @@ async function cancelarPgUI(id, btn) {
     S.pgCancel = '';
     if (!r.ok) { toast(r.msg || tr('O servidor recusou o cancelamento.'), true); await loadProgramacao(); return; }
     toast(tr('Meta cancelada'));
-    if (r.recarregar) await loadProgramacao(); else { S.pg = r; if (pgNaTela()) desenharProgramacao(); }
+    if (r.recarregar) await loadProgramacao(); else { S.pg = r; if (pgNaTela()) { desenharProgramacao(); plFocoFiltro('metas'); } }
   } catch (x) { S.pgCancel = ''; if (pgNaTela()) await loadProgramacao(); } finally { S.busy = false; }
 }
 function v10Eventos() {
   document.addEventListener('change', function (e) { if (pgMetas() && e.target && e.target.closest && e.target.closest('#v-programacao')) { lerPgForm(); prevPg(); } });
-  document.addEventListener('input', function (e) { if (pgMetas() && e.target && e.target.closest && e.target.closest('#v-programacao')) { lerPgForm(); prevPg(); } });
+  document.addEventListener('input', function (e) { if (pgMetas() && e.target && e.target.closest && e.target.closest('#v-programacao') && !(e.target.dataset && e.target.dataset.plQ)) { lerPgForm(); prevPg(); } });
   document.addEventListener('click', function (e) {
     const t = e.target && e.target.closest ? e.target.closest('button') : null; if (!t || !pgNaTela()) return;
     if (t.dataset.pgtab) { if (t.dataset.pgtab !== (S.pgTab || 'metas')) { S.pgTab = t.dataset.pgtab; loadProgramacao(); } }
@@ -4115,6 +4132,7 @@ function v10Eventos() {
   });
   document.addEventListener('change', function (e) { if (pgNaTela() && e.target && e.target.dataset && e.target.dataset.fbSel !== undefined) avisoAuditorFb(e.target); });
   fbEventos();
+  plEventos();
 }
 /* ---------- v10 fase 3: feedback obrigatório ---------- */
 const FB_MIN = 50;
@@ -4147,7 +4165,7 @@ function fbMotivo(p) {
 function fbAuditorias(p) {
   if (!p.auditorias.length) return '';
   const temItens = p.auditorias.some(function (x) { return x.nc || x.conf; });
-  return '<details' + (temItens ? ' open' : '') + '><summary>' + esc(tpl(tr('{0} auditoria(s) abaixo de {1}%'), [p.qtd, p.corte])) + '</summary><ul class="lista-fb">' + p.auditorias.map(function (x) { return '<li>' + esc(fmtD(x.data) + ' · ' + x.proc + ' · ' + pc(x.pct)) + (x.audNome ? '<br><small class="muted">' + esc(tpl(tr('Auditado por {0}'), [x.audNome])) + '</small>' : '') + fbItens(x) + '</li>'; }).join('') + '</ul></details>'; // quem auditou só vem do servidor para quem tem "ver_auditor"
+  return '<details' + (temItens ? ' open' : '') + '><summary>' + esc(tpl(tr('{0} auditoria(s) abaixo de {1}%'), [p.qtd, p.corte])) + '</summary><ul class="lista-fb">' + p.auditorias.map(function (x) { return '<li>' + esc(fmtD(x.data) + ' · ' + x.proc + ' · ' + pc(x.pct)) + (x.audNome ? '<br><small class="muted">' + esc(tpl(tr('Auditado por {0}'), [x.audNome])) + '</small>' : '') + (x.obs ? '<br><small class="muted fb-obs">' + esc(tpl(tr('Observação: {0}'), [x.obs])) + '</small>' : '') + fbItens(x) + '</li>'; }).join('') + '</ul></details>'; // quem auditou só vem do servidor para quem tem "ver_auditor"
 }
 function fbTime(p) {
   const mudou = p.timeAtual !== p.timeEpoca || p.turnoAtual !== p.turnoEpoca;
@@ -4167,11 +4185,23 @@ async function loadFeedbacksSL(n) {
 }
 function desenharFeedbacksSL() {
   const R = S.fbl, el = $('#pgPainel'); if (!el) return;
-  const opts = function (p) {
-    return '<option value="">' + esc(tr('Escolha quem dará o feedback')) + '</option>' + R.responsaveis.slice().sort(function (a, b) { return a.nome.localeCompare(b.nome); }).map(function (u) {
-      return '<option value="' + esc(u.email) + '"' + (p.designadoEmail === u.email ? ' selected' : '') + '>' + esc(u.nome + ' (' + u.perfil + ')') + '</option>';
-    }).join('');
-  };
+  el.innerHTML = '<div class="card"><div class="hd"><b>' + esc(tr('Feedbacks obrigatórios')) + '</b></div>' +
+    '<p class="muted" style="margin:6px 0 10px">' + esc(tpl(tr('Quando um colaborador tem {0} ou mais auditorias abaixo da nota média em {1} dias, o feedback passa a ser obrigatório. Escolha quem vai conversar com ele: o líder tem {2} dias para registrar o que foi falado (mínimo de {3} caracteres).'), [R.minimo, R.janela, R.prazoDias, FB_MIN])) + '</p>' +
+    '<div id="fbErr" role="alert"></div>' + (R.pendencias.length ? plCasca('feedbacks') : vz(tr('Nenhum feedback obrigatório no momento.'))) + '</div>';
+  plDesenhar('feedbacks');
+}
+/** Abertas, depois designadas, depois concluídas; o feedback imediato primeiro em cada situação. */
+function fbOrdenadas() {
+  if (!S.fbl) return null;
+  const k = { Aberta: 0, Designada: 1, Concluida: 2 };
+  return S.fbl.pendencias.slice().sort(function (a, b) { return k[a.status] - k[b.status] || (b.imediato ? 1 : 0) - (a.imediato ? 1 : 0) || String(a.prazo).localeCompare(String(b.prazo)); });
+}
+function fbTabelaSL(l) {
+  const R = S.fbl;
+  // as opções de quem dá o feedback são montadas uma vez por página (antes, uma lista ordenada por linha)
+  const base = R.responsaveis.slice().sort(function (a, b) { return a.nome.localeCompare(b.nome); });
+  const todas = '<option value="">' + esc(tr('Escolha quem dará o feedback')) + '</option>' + base.map(function (u) { return '<option value="' + esc(u.email) + '">' + esc(u.nome + ' (' + u.perfil + ')') + '</option>'; }).join('');
+  const opts = function (p) { const v = 'value="' + esc(p.designadoEmail || '') + '"'; return p.designadoEmail ? todas.replace(v + '>', v + ' selected>') : todas; };
   const linha = function (p) {
     const acao = p.status === 'Concluida'
       ? (p.registro ? '<details><summary>' + esc(tr('Ver feedback registrado')) + '</summary><p style="margin:6px 0 2px;white-space:pre-wrap">' + esc(p.registro.texto) + '</p><small class="muted">' + esc(tpl(tr('Registrado por {0} em {1}'), [p.registro.autor, fmtDt(p.registro.registradoEm)])) + '</small></details>' : '')
@@ -4179,11 +4209,83 @@ function desenharFeedbacksSL() {
         '<button type="button" class="btn sm pri" style="margin-top:6px" data-fb-des="' + esc(p.id) + '" aria-label="' + esc(tpl(tr(p.status === 'Designada' ? 'Reatribuir o feedback de {0}' : 'Designar o feedback de {0}'), [p.colaborador])) + '">' + esc(tr(p.status === 'Designada' ? 'Reatribuir' : 'Designar')) + '</button><div class="muted" role="status" data-fb-av="' + esc(p.id) + '"></div>';
     return '<tr' + (p.imediato ? ' class="fb-imed"' : '') + '><td>' + esc(p.colaborador) + '<br>' + fbTime(p) + fbMotivo(p) + '</td><td>' + fbAuditorias(p) + '</td><td>' + fbSituacao(p) + (p.status !== 'Aberta' && p.designadoNome ? '<br><small class="muted">' + esc(p.designadoNome) + '</small>' : '') + (p.status === 'Designada' && p.avisoPendente ? '<br><small class="muted">' + esc(tr('Aviso por e-mail pendente')) + '</small>' : '') + '</td><td>' + acao + '</td></tr>';
   };
-  const ord = R.pendencias.slice().sort(function (a, b) { const k = { Aberta: 0, Designada: 1, Concluida: 2 }; return k[a.status] - k[b.status] || (b.imediato ? 1 : 0) - (a.imediato ? 1 : 0) || String(a.prazo).localeCompare(String(b.prazo)); }); // feedback imediato primeiro em cada situação
-  el.innerHTML = '<div class="card"><div class="hd"><b>' + esc(tr('Feedbacks obrigatórios')) + '</b></div>' +
-    '<p class="muted" style="margin:6px 0 10px">' + esc(tpl(tr('Quando um colaborador tem {0} ou mais auditorias abaixo da nota média em {1} dias, o feedback passa a ser obrigatório. Escolha quem vai conversar com ele: o líder tem {2} dias para registrar o que foi falado (mínimo de {3} caracteres).'), [R.minimo, R.janela, R.prazoDias, FB_MIN])) + '</p>' +
-    '<div id="fbErr" role="alert"></div>' +
-    (ord.length ? '<div class="scroll" role="region" tabindex="0" aria-label="' + esc(tr('Feedbacks obrigatórios')) + '"><table><caption class="sr-only">' + esc(tr('Feedbacks obrigatórios')) + '</caption><thead><tr><th scope="col">' + esc(tr('Colaborador')) + '</th><th scope="col">' + esc(tr('Auditorias')) + '</th><th scope="col">' + esc(tr('Situação')) + '</th><th scope="col">' + esc(tr('Quem dá o feedback')) + '</th></tr></thead><tbody>' + ord.map(linha).join('') + '</tbody></table></div>' : vz(tr('Nenhum feedback obrigatório no momento.'))) + '</div>';
+  return '<div class="scroll" role="region" tabindex="0" aria-label="' + esc(tr('Feedbacks obrigatórios')) + '"><table><caption class="sr-only">' + esc(tr('Feedbacks obrigatórios')) + '</caption><thead><tr><th scope="col">' + esc(tr('Colaborador')) + '</th><th scope="col">' + esc(tr('Auditorias')) + '</th><th scope="col">' + esc(tr('Situação')) + '</th><th scope="col">' + esc(tr('Quem dá o feedback')) + '</th></tr></thead><tbody>' + l.map(linha).join('') + '</tbody></table></div>';
+}
+
+/* ---- Programação: filtro por situação, busca por nome e páginas de 20 ----
+   Tudo no navegador, sobre o que o servidor já mandou: trocar de filtro ou de página não chama o servidor
+   e redesenha só a lista (a busca não perde o foco). */
+const PL_POR_PAG = 20;
+const META_ANDAMENTO = ['no_ritmo', 'em_risco', 'futura'];
+/** [id, rótulo, teste]. Metas abre em Ativas; Feedbacks abre em Abertas (ou em Todas, se não houver abertas). */
+const PL_SIT = {
+  metas: [
+    ['ativas', 'Ativas', function (m) { return !m.cancelada; }],
+    ['andamento', 'Em andamento', function (m) { return !m.cancelada && META_ANDAMENTO.indexOf(m.status) > -1; }],
+    ['atingida', 'Atingidas', function (m) { return !m.cancelada && m.status === 'atingida'; }],
+    ['vencida', 'Vencidas', function (m) { return !m.cancelada && m.status === 'nao_atingida'; }],
+    ['cancelada', 'Canceladas', function (m) { return !!m.cancelada; }]
+  ],
+  feedbacks: [
+    ['aberta', 'Abertas', function (p) { return p.status === 'Aberta'; }],
+    ['designada', 'Designadas no prazo', function (p) { return p.status === 'Designada' && !p.atrasado; }],
+    ['atrasada', 'Atrasadas', function (p) { return !!p.atrasado; }],
+    ['concluida', 'Concluídas', function (p) { return p.status === 'Concluida'; }],
+    ['todas', 'Todas', function () { return true; }]
+  ]
+};
+const PL = {
+  metas: { dados: pgMetasOrdenadas, nome: function (m) { return m.nome + ' ' + m.email; }, tabela: pgTabelaMetas, busca: 'Buscar responsável' },
+  feedbacks: { dados: fbOrdenadas, nome: function (p) { return p.colaborador; }, tabela: fbTabelaSL, busca: 'Buscar colaborador' }
+};
+/** Estado do filtro de cada aba: fica ao recarregar os dados (designar, cancelar), volta ao padrão ao recarregar o app. */
+function plEstado(aba, todos) {
+  S.pl = S.pl || {};
+  if (!S.pl[aba]) S.pl[aba] = { f: aba === 'feedbacks' && !todos.some(PL_SIT.feedbacks[0][2]) ? 'todas' : PL_SIT[aba][0][0], q: '', p: 1 };
+  return S.pl[aba];
+}
+/** Ordenação, contagem por situação e nomes sem acento: uma vez por carga de dados (não a cada tecla ou página). */
+const PL_MEMO = {};
+function plMemo(aba) {
+  const fonte = aba === 'metas' ? S.pg : S.fbl; if (!fonte) return null;
+  const m = PL_MEMO[aba]; if (m && m.fonte === fonte) return m;
+  const todos = PL[aba].dados(), cont = {};
+  PL_SIT[aba].forEach(function (s) { cont[s[0]] = todos.filter(s[2]).length; });
+  return (PL_MEMO[aba] = { fonte: fonte, todos: todos, cont: cont, nomes: todos.map(function (x) { return norm(PL[aba].nome(x)); }) });
+}
+function plCasca(aba) {
+  const st = (S.pl && S.pl[aba]) || { q: '' }, rot = tr(PL[aba].busca);
+  return '<div class="toolbar cbar"><input type="search" data-pl-q="' + aba + '" value="' + esc(st.q) + '" placeholder="' + esc(rot) + '" aria-label="' + esc(rot) + '">' +
+    '<div class="chips" role="group" aria-label="' + esc(tr('Situação')) + '" id="plChips-' + aba + '"></div><span class="muted" role="status" id="plCount-' + aba + '"></span></div><div id="plLista-' + aba + '"></div>';
+}
+function plDesenhar(aba) {
+  const cfg = PL[aba], chips = $('#plChips-' + aba), alvo = $('#plLista-' + aba), m = plMemo(aba);
+  if (!m || !chips || !alvo) return;
+  const todos = m.todos, st = plEstado(aba, todos), sits = PL_SIT[aba], sit = sits.find(function (s) { return s[0] === st.f; }) || sits[0], q = norm(st.q);
+  const itens = todos.filter(function (x, i) { return sit[2](x) && (!q || m.nomes[i].indexOf(q) > -1); });
+  const pags = Math.max(1, Math.ceil(itens.length / PL_POR_PAG)); st.p = Math.min(Math.max(1, st.p), pags);
+  chips.innerHTML = sits.map(function (s) { const on = s[0] === sit[0]; return '<button type="button" class="chip' + (on ? ' on' : '') + '" aria-pressed="' + on + '" data-pl-aba="' + aba + '" data-pl-f="' + s[0] + '">' + esc(tr(s[1])) + ' <span class="cn">' + m.cont[s[0]] + '</span></button>'; }).join('');
+  $('#plCount-' + aba).textContent = tpl(tr('{0} encontrado(s)'), [itens.length]);
+  const pager = pags < 2 ? '' : '<div class="pager"><span>' + esc(tpl(tr('Página {0} de {1}'), [st.p, pags])) + '</span>' +
+    '<button type="button" class="btn sm" data-pl-aba="' + aba + '" data-pl-p="-1"' + (st.p <= 1 ? ' disabled' : '') + '>' + esc(tr('Anterior')) + '</button>' +
+    '<button type="button" class="btn sm" data-pl-aba="' + aba + '" data-pl-p="1"' + (st.p >= pags ? ' disabled' : '') + '>' + esc(tr('Próxima')) + '</button></div>';
+  alvo.innerHTML = itens.length ? cfg.tabela(itens.slice((st.p - 1) * PL_POR_PAG, st.p * PL_POR_PAG)) + pager : vz(tr(q ? 'Nada encontrado para esta busca.' : 'Nada nesta situação.'));
+}
+function plFocoFiltro(aba) { const b = $('#plChips-' + aba + ' .chip.on'); if (b) b.focus(); }
+const plBuscaAdiada = {};
+function plEventos() {
+  document.addEventListener('click', function (e) {
+    const t = e.target && e.target.closest ? e.target.closest('button[data-pl-aba]') : null; if (!t || !pgNaTela()) return;
+    const aba = t.dataset.plAba, st = S.pl && S.pl[aba]; if (!st) return;
+    if (t.dataset.plF) { st.f = t.dataset.plF; st.p = 1; plDesenhar(aba); const b = $('#plChips-' + aba + ' [data-pl-f="' + st.f + '"]'); if (b) b.focus(); }
+    else if (t.dataset.plP) { st.p += Number(t.dataset.plP); plDesenhar(aba); const r = $('#plLista-' + aba + ' .scroll'); if (r) { r.focus(); r.scrollIntoView({ block: 'nearest' }); } }
+  });
+  document.addEventListener('input', function (e) {
+    const t = e.target; if (!t || !t.dataset || !t.dataset.plQ || !pgNaTela()) return;
+    const aba = t.dataset.plQ; S.pl = S.pl || {}; const st = S.pl[aba]; if (!st) return;
+    st.q = t.value; st.p = 1;
+    (plBuscaAdiada[aba] = plBuscaAdiada[aba] || adiar(function () { if (pgNaTela()) plDesenhar(aba); }, BUSCA_MS))();
+  });
 }
 /** Aviso (não bloqueio): a pessoa escolhida fez alguma das auditorias que geraram o feedback. */
 function avisoAuditorFb(sel) {
@@ -4200,7 +4302,7 @@ async function designarFbUI(id) {
     const r = await rpc('designarFeedback', id, sel.value);
     if (!r.ok) { err.innerHTML = aviso(esc(r.msg ? tr(r.msg) : tr('O servidor recusou a designação.'))); return; }
     toast(r.emailEnviado ? tr('Feedback designado. O aviso foi enviado por e-mail.') : tr('Feedback designado, mas o e-mail não foi enviado. O aviso será reenviado às 22h.'), !r.emailEnviado);
-    if (r.recarregar) await loadProgramacao(); else { S.fbl = r; if (pgNaTela() && (S.pgTab || 'metas') === 'feedbacks') desenharFeedbacksSL(); }
+    if (r.recarregar) await loadProgramacao(); else { S.fbl = r; if (pgNaTela() && (S.pgTab || 'metas') === 'feedbacks') { desenharFeedbacksSL(); plFocoFiltro('feedbacks'); } }
     sondarFb();
   } catch (x) { /* o aviso de erro já foi exibido */ } finally { S.busy = false; }
 }

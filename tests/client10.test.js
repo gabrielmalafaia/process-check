@@ -5,7 +5,7 @@ const { abrir, sleep } = require('./cli.js');
 const R = { ok: 0, f: [] };
 async function TA(nome, fn) { try { await fn(); R.ok++; } catch (e) { R.f.push(nome + '\n      -> ' + String(e.stack || e.message).split('\n').slice(0, 4).join('\n         ')); } }
 const ok = (c, m) => assert.ok(c, m || 'esperava verdadeiro');
-const eq = (a, b, m) => assert.deepStrictEqual(a, b, m);
+const eq = (a, b, m) => (m === undefined ? assert.deepStrictEqual(a, b) : assert.deepStrictEqual(a, b, m));
 const TXT = 'Conversei com o colaborador sobre os itens reprovados nas últimas auditorias e combinamos reforçar a conferência antes de liberar a doca.';
 const cen = () => {
   const A = cenario(); A.as('owner@x.com'); A.call('migrarV10');
@@ -27,7 +27,7 @@ const aba = async (t, id) => { await t.click('#pgTab-' + id); };
     const A = cen(); const t = await abrir(A, 'sl@x.com'); await t.nav('programacao'); await aba(t, 'feedbacks');
     await t.click('[data-fb-des]'); ok(/Escolha quem dará o feedback\./.test(t.$('#fbErr').textContent));
     t.set('[data-fb-sel]', 'aud2@x.com'); await t.click('[data-fb-des]'); await t.idle();
-    ok(/Feedback designado/.test(t.toast()), t.toast()); ok(/Designado/.test(t.$('#v-programacao table').textContent) && /Audi Dois/.test(t.$('#v-programacao table').textContent));
+    ok(/Feedback designado/.test(t.toast()), t.toast()); await t.click('[data-pl-f="designada"]'); ok(/Designado/.test(t.$('#v-programacao table').textContent) && /Audi Dois/.test(t.$('#v-programacao table').textContent));
     eq(A.emails.filter((m) => m.to === 'aud2@x.com').length, 1); eq(t.erros, []);
   });
   await TA('aviso (não bloqueio) quando o escolhido fez uma das auditorias: só o Admin vê; ainda designa', async () => {
@@ -133,6 +133,51 @@ const aba = async (t, id) => { await t.click('#pgTab-' + id); };
     const abre = async (email) => { const t = await abrir(A, email); await t.nav('cad'); const tb = t.$('#v-cad [data-t="Cad_Processos_Perguntas"]'); if (tb) await t.click(tb); await t.click(t.$('#v-cad [data-addsub]')); return t; };
     const sl = await abre('sl@x.com'); ok(sl.$('[data-c="Feedback_Imediato"]'), 'Site Leader deveria ver o campo'); eq(sl.erros, []);
     const an = await abre('ana@x.com'); ok(!an.$('[data-c="Feedback_Imediato"]'), 'Analista não deveria ver o campo'); eq(an.erros, []);
+  });
+  // v10.10: filtro por situação, busca e páginas de 20 em Programação; observação do auditor nos feedbacks
+  const cenMuitas = (n) => {
+    const A = cen(), d = A.sheets.Feedback_Pendencias.d;
+    for (let i = 0; i < n; i++) { const r = new Array(20).fill(''); Object.assign(r, { 0: 'FBK-T' + i, 1: 'T' + i, 2: 'Pessoa ' + String(i).padStart(2, '0'), 3: 'Dora Lider', 4: 'T2', 5: '2026-11-01', 6: '2026-11-02', 7: 3, 8: '', 9: 90, 10: '2026-11-20 10:00:00', 11: 'Aberta' }); d.push(r); }
+    return A;
+  };
+  const busca = (t, v) => { const i = t.$('[data-pl-q="feedbacks"]'); i.value = v; t.ev(i, 'input'); };
+  const linhasPl = (t) => t.$$('#plLista-feedbacks tbody tr').length;
+  await TA('Feedbacks: abre em Abertas, 20 por página, Próxima mostra o resto', async () => {
+    const A = cenMuitas(25); const t = await abrir(A, 'sl@x.com'); await t.nav('programacao'); await aba(t, 'feedbacks');
+    eq(t.$('[data-pl-f="aberta"]').getAttribute('aria-pressed'), 'true'); ok(/26/.test(t.$('[data-pl-f="aberta"]').textContent));
+    eq(linhasPl(t), 20); ok(/Página 1 de 2/.test(t.$('#plLista-feedbacks').textContent));
+    await t.click('[data-pl-p="1"]'); eq(linhasPl(t), 6); ok(t.$('[data-pl-p="1"]').disabled); eq(t.erros, []);
+  });
+  await TA('Feedbacks: busca pelo colaborador (sem acento) e filtro sem itens', async () => {
+    const A = cenMuitas(25); const t = await abrir(A, 'sl@x.com'); await t.nav('programacao'); await aba(t, 'feedbacks');
+    busca(t, 'carla'); await sleep(300); eq(linhasPl(t), 1); ok(/Carla Dias/.test(t.$('#plLista-feedbacks').textContent));
+    ok(t.$('[data-pl-q="feedbacks"]'), 'o campo de busca continua lá');
+    busca(t, 'zzz'); await sleep(300); ok(/Nada encontrado para esta busca/.test(t.$('#plLista-feedbacks').textContent));
+    busca(t, ''); await sleep(300);
+    await t.click('[data-pl-f="concluida"]'); ok(/Nada nesta situação/.test(t.$('#plLista-feedbacks').textContent));
+    await t.click('[data-pl-f="todas"]'); eq(linhasPl(t), 20); eq(t.erros, []);
+  });
+  await TA('Metas: filtro Canceladas e Ativas, com a quantidade em cada um', async () => {
+    const A = cen(); A.call('salvarPerfil', { nome: 'LiderAud', desc: 't', perms: ['auditar'], telas: ['matriz', 'form', 'minhas'], escopo: { modo: 'time', processos: [], turnos: [] } }, true);
+    A.ctx.anexar_('Cad_Usuarios', ['carlosa@x.com', 'Carlos Lider', 'LiderAud', 'Sim']); A.run('limparCache_()');
+    const t = await abrir(A, 'sl@x.com'); await t.nav('programacao');
+    t.set('#pgEmail', 'carlosa@x.com'); await t.click('#pgSalvar'); await t.idle();
+    ok(/1/.test(t.$('[data-pl-f="ativas"]').textContent)); eq(t.$$('#plLista-metas tbody tr').length, 1);
+    await t.click('[data-pl-f="cancelada"]'); ok(/Nada nesta situação/.test(t.$('#plLista-metas').textContent)); eq(t.erros, []);
+  });
+  const cenObs = () => {
+    const A = cenario(); A.as('owner@x.com'); A.call('migrarV10');
+    for (let i = 0; i < 3; i++) A.audit('aud1@x.com', 'Expedição', { conf: 5, f: { doca: '07', colaboradores: ['Carla Dias'], observacoes: i ? '' : 'Doca <b>suja</b> na entrada' } });
+    A.run('gerarPendenciasFeedback_()'); return A;
+  };
+  await TA('observação do auditor aparece no feedback do Site Leader e de quem dá o feedback (escapada)', async () => {
+    const A = cenObs(); A.as('sl@x.com'); const p = A.call('listarFeedbacks').pendencias[0];
+    eq(p.auditorias.filter((x) => x.obs).map((x) => x.obs), ['Doca <b>suja</b> na entrada']);
+    const t = await abrir(A, 'sl@x.com'); await t.nav('programacao'); await aba(t, 'feedbacks');
+    ok(/Observação: Doca <b>suja<\/b> na entrada/.test(t.$('#plLista-feedbacks').textContent)); ok(!t.$('#plLista-feedbacks b b, .fb-obs b'), 'HTML não escapado');
+    A.as('sl@x.com'); A.call('designarFeedback', p.id, 'aud2@x.com');
+    A.as('aud2@x.com'); eq(A.call('meusFeedbacks')[0].auditorias.filter((x) => x.obs).length, 1);
+    const d = await abrir(A, 'aud2@x.com'); await d.nav('feedbacks'); ok(/Observação: Doca/.test(d.$('#v-feedbacks').textContent)); eq(t.erros, []); eq(d.erros, []);
   });
   console.log('Cliente v10 fase 3 (feedback): ' + R.ok + ' passaram, ' + R.f.length + ' falharam');
   R.f.forEach(x => console.log('  FALHA: ' + x)); process.exit(R.f.length ? 1 : 0);

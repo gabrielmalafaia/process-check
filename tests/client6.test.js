@@ -78,7 +78,8 @@ const respostas = t => Object.keys(t.win.__S.F.resp).length;
   });
   await TA('Acessos: a consulta automática de pendentes não redesenha a tela (edição em curso fica)', async () => {
     const t = await abrir(A, 'owner@x.com'); await t.nav('acessos'); t.set('[data-u="Email_Google"]', 'digitando@x.com', 'input');
-    t.win.__S.pend = -5; t.win.eval('sondar()'); await t.idle();
+    // desde a v10.4 os contadores chegam juntos no pulso (v8Pulso), que substituiu o sondar()
+    t.win.__S.pend = -5; t.win.eval('v8Pulso()'); await t.idle();
     eq(t.$('[data-u="Email_Google"]').value, 'digitando@x.com');
   });
   await TA('Acessos: terminar de salvar depois de trocar de aba não desenha a aba errada', async () => {

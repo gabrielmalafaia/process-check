@@ -373,6 +373,14 @@ DICT.push(
   ['Tamanho mínimo atingido.', 'Minimum length reached.', 'Tamaño mínimo alcanzado.'],
   ['Registrar feedback de {0}', 'Record feedback of {0}', 'Registrar feedback de {0}'],
   ['Registrar feedback', 'Record feedback', 'Registrar feedback'],
+  ['Não conformes ({0})', 'Non-compliant ({0})', 'No conformes ({0})'],
+  ['Feedback imediato', 'Immediate feedback', 'Feedback inmediato'],
+  ['FEEDBACK IMEDIATO', 'IMMEDIATE FEEDBACK', 'FEEDBACK INMEDIATO'],
+  ['Motivo: {0}', 'Reason: {0}', 'Motivo: {0}'],
+  ['Feedback obrigatório: auditorias abaixo da nota média','Mandatory feedback: audits below the average score', 'Feedback obligatorio: auditorías por debajo de la nota media'],
+  ['Quantas auditorias abaixo da nota média, em 30 dias, tornam o feedback obrigatório. Vale para os próximos feedbacks gerados; os que já existem não mudam.', 'How many audits below the average score, within 30 days, make feedback mandatory. Applies to feedbacks generated from now on; existing ones stay as they are.', 'Cuántas auditorías por debajo de la nota media, en 30 días, hacen obligatorio el feedback. Vale para los próximos feedbacks generados; los que ya existen no cambian.'],
+  ['Conformes ({0})', 'Compliant ({0})', 'Conformes ({0})'],
+  ['Nenhum item não conforme.', 'No non-compliant items.', 'Ningún ítem no conforme.'],
   ['Você foi designado(a) para dar estes feedbacks. Registre o que foi conversado, com pelo menos {0} caracteres. O texto fica visível para você, para o Site Leader do Hub e para o Admin, e é guardado por 12 meses.', 'You were assigned to give these feedbacks. Record what was discussed, with at least {0} characters. The text is visible to you, the Hub Site Leader and the Admin, and is kept for 12 months.', 'Usted fue designado(a) para dar estos feedbacks. Registre lo conversado, con al menos {0} caracteres. El texto es visible para usted, el Site Leader del Hub y el Admin, y se conserva por 12 meses.'],
   ['Nenhum feedback a registrar.', 'No feedback to record.', 'Ningún feedback por registrar.'],
   ['Registrados recentemente', 'Recently recorded', 'Registrados recientemente'],
@@ -1068,6 +1076,9 @@ DICT.push(
   ['Não foi possível carregar o envio de relatórios. Tente atualizar.', 'Could not load report sending. Try refreshing.', 'No se pudo cargar el envío de informes. Intente actualizar.'],
   /* servidor: permissões, mensagens e log */
   ['Ver nomes de colaboradores nos relatórios', 'See employee names in reports', 'Ver nombres de colaboradores en los informes'],
+  ['Ver quem auditou (feedbacks)', 'See who audited (feedbacks)', 'Ver quién auditó (feedbacks)'],
+  ['Mostra quem fez as auditorias na lista de feedbacks e em Meus feedbacks. Sem esta permissão, quem auditou fica em sigilo. Só o Admin a tem por padrão.', 'Shows who performed the audits in the feedback list and in My feedbacks. Without this permission, the auditor stays confidential. Only the Admin has it by default.', 'Muestra quién hizo las auditorías en la lista de feedbacks y en Mis feedbacks. Sin este permiso, quien auditó queda en reserva. Solo el Admin lo tiene por defecto.'],
+  ['Auditado por {0}', 'Audited by {0}', 'Auditado por {0}'],
   ['Sem esta permissão os relatórios mostram só equipes, processos e totais, sem nomes de colaboradores.', 'Without this permission, reports show only teams, processes and totals, with no employee names.', 'Sin este permiso, los informes muestran solo equipos, procesos y totales, sin nombres de colaboradores.'],
   ['Gerir o relatório por e-mail', 'Manage the e-mail report', 'Gestionar el informe por correo'],
   ['Escolher quem recebe o relatório por e-mail e a frequência. Cada pessoa recebe só os dados do próprio perfil.', 'Choose who receives the e-mail report and how often. Each person receives only the data of their own profile.', 'Elegir quién recibe el informe por correo y con qué frecuencia. Cada persona recibe solo los datos de su propio perfil.'],
@@ -1510,6 +1521,12 @@ function toast(m, err, acao) {
   }
   clearTimeout(toast.t); toast.t = setTimeout(function () { t.className = 'hidden'; }, acao ? 9000 : 4500);
 }
+/** Debounce: só executa depois de ms sem novas chamadas, com os argumentos da última (busca que filtra a cada tecla). */
+function adiar(fn, ms) {
+  let t = 0;
+  return function () { const a = arguments; clearTimeout(t); t = setTimeout(function () { fn.apply(null, a); }, ms); };
+}
+const BUSCA_MS = 200;
 /** Blocos cinza animados que ocupam o lugar do conteúdo enquanto ele carrega. */
 function skel(n, cls) {
   let h = ''; for (let i = 0; i < n; i++) h += '<div class="sk ' + (cls || 'sk-row') + '"></div>';
@@ -1551,12 +1568,56 @@ const perg = function (proc) { return S.db.Cad_Processos_Perguntas.filter(functi
 const tipoProc = function (p) { return S.tipos[p] || ''; };
 const multi = function (p) { return !!(S.cfg.MULTI && S.cfg.MULTI[p]); };
 const semLinha = function (o) { const c = Object.assign({}, o); delete c._row; delete c._saving; delete c.editavel; return c; };
-function modal(html) {
-  const m = $('#modal'); S.lastFocus = document.activeElement;
-  m.innerHTML = '<div class="box">' + html + '</div>'; m.classList.remove('hidden');
-  const b = m.querySelector('[data-fechar]'); if (b && b.focus) b.focus();
+/* <dialogo> */
+/* Diálogos acessíveis (modal, busca, aviso, drawer): guarda quem abriu, leva o foco para dentro, prende o Tab, deixa o fundo
+   inerte (#app e #login, quando o diálogo está fora deles) e devolve o foco ao fechar. O diálogo é localizado pelo seletor
+   a cada uso, porque o drawer é redesenhado a cada render. Abrir de novo o mesmo diálogo (modal em cascata) mantém quem abriu primeiro. */
+const DLG_FOCAVEIS = 'a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+const DLG_FUNDOS = ['#app', '#login'];
+const dlgPilha = [];
+function dlgFocaveis(el) { return Array.prototype.filter.call(el.querySelectorAll(DLG_FOCAVEIS), function (x) { return !x.disabled && x.getAttribute('aria-hidden') !== 'true'; }); }
+function dlgVisivel(el) { return !el.getClientRects || el.getClientRects().length > 0; } // display:none em algum ancestral = invisível
+function dlgAtualizarFundo() {
+  // diálogo que sumiu do DOM sem passar por fecharDialogo (redesenho) sai da pilha: senão o fundo ficaria inerte para sempre
+  for (let i = dlgPilha.length - 1; i >= 0; i--) if (!document.querySelector(dlgPilha[i].sel)) dlgPilha.splice(i, 1);
+  DLG_FUNDOS.forEach(function (s) {
+    const f = document.querySelector(s); if (!f) return;
+    const dentro = dlgPilha.some(function (d) { const el = document.querySelector(d.sel); return el && f.contains(el); });
+    if (dlgPilha.length && !dentro) f.setAttribute('inert', ''); else f.removeAttribute('inert');
+  });
 }
-function fecharModal() { const m = $('#modal'); m.classList.add('hidden'); m.innerHTML = ''; if (S.lastFocus && S.lastFocus.focus) S.lastFocus.focus(); }
+/** Abre (ou reabre) o diálogo do seletor. inicial: onde pôr o foco; volta: quem abriu (padrão: o foco atual),
+    ou um seletor, quando o botão de origem será redesenhado antes do fechamento. */
+function abrirDialogo(sel, inicial, volta) {
+  const el = document.querySelector(sel); if (!el) return;
+  if (!dlgPilha.some(function (d) { return d.sel === sel; })) dlgPilha.push({ sel: sel, volta: volta || document.activeElement });
+  dlgAtualizarFundo();
+  if (el.contains(document.activeElement)) return; // o foco já está dentro (ex.: o render escolheu o campo): não mexe
+  const alvo = inicial || dlgFocaveis(el)[0];
+  if (alvo) alvo.focus(); else { el.setAttribute('tabindex', '-1'); el.focus(); }
+}
+function fecharDialogo(sel) {
+  let i = -1; dlgPilha.forEach(function (d, k) { if (d.sel === sel) i = k; });
+  if (i < 0) return;
+  const d = dlgPilha.splice(i, 1)[0];
+  dlgAtualizarFundo();
+  const v = typeof d.volta === 'string' ? document.querySelector(d.volta) : d.volta;
+  if (v && v.focus && document.contains(v)) v.focus();
+}
+document.addEventListener('keydown', function (e) {
+  if (e.key !== 'Tab' || !dlgPilha.length) return;
+  const el = document.querySelector(dlgPilha[dlgPilha.length - 1].sel); if (!el || !dlgVisivel(el)) return;
+  const f = dlgFocaveis(el); if (!f.length) { e.preventDefault(); return; }
+  const at = document.activeElement, pri = f[0], ult = f[f.length - 1];
+  if (e.shiftKey ? (at === pri || !el.contains(at)) : (at === ult || !el.contains(at))) { e.preventDefault(); (e.shiftKey ? ult : pri).focus(); }
+});
+/* </dialogo> */
+function modal(html) {
+  const m = $('#modal');
+  m.innerHTML = '<div class="box">' + html + '</div>'; m.classList.remove('hidden');
+  abrirDialogo('#modal', m.querySelector('[data-fechar]'));
+}
+function fecharModal() { const m = $('#modal'); m.classList.add('hidden'); m.innerHTML = ''; fecharDialogo('#modal'); }
 
 /* ---------- identidade visual: cor + símbolo (docas e clusters) ---------- */
 const HEX = { Azul: '#1E6FD9', Verde: '#2E9E5B', Vermelho: '#D93025', Laranja: '#F57C00', Amarelo: '#F5C400', Roxo: '#7B3FA0', Rosa: '#E85DA0', Marrom: '#7A4B2A', Preto: '#222222', Branco: '#FFFFFF', Cinza: '#9E9E9E' };
@@ -1621,7 +1682,8 @@ function renderNav() {
     });
     if (sh) h += '<div class="nsec">' + esc(sec.sec) + '</div>' + sh;
   });
-  $('#nav').innerHTML = h;
+  // o pulso chama isto a cada poucos minutos: sem mudança, o menu não é recriado (mantém foco e hover, sem trabalho de layout)
+  if (h !== S.navHtml) { S.navHtml = h; $('#nav').innerHTML = h; }
   $$('#nav button[data-v]').forEach(function (b) { b.classList.toggle('on', b.dataset.v === S.v || (b.dataset.v === 'acessos' && S.v === 'acessos')); });
 }
 const LOAD = {
@@ -1745,9 +1807,30 @@ const linhasCorte = {
     });
   }
 };
+/* Chart.js sob demanda: a abertura do app não espera a biblioteca (~200 KB); ela vem na primeira tela com gráfico.
+   Arquivo original do pacote (já minificado na 4.4.1) com hash fixo: se o CDN entregar outro conteúdo, o navegador não executa. */
+const CHART_SRC = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js';
+const CHART_SRI = 'sha256-dEAdc43T4D7l37O2hBIQ/ixOrYqWDEARykugt4qf2PM=';
+/** Um único carregamento em andamento; se o CDN falhar, a próxima tela com gráfico tenta de novo. */
+function carregarChart() {
+  if (carregarChart.p) return carregarChart.p;
+  carregarChart.p = new Promise(function (ok, er) {
+    const s = document.createElement('script');
+    s.src = CHART_SRC; s.integrity = CHART_SRI; s.crossOrigin = 'anonymous'; s.async = true;
+    s.onload = function () { ok(); };
+    s.onerror = function () { carregarChart.p = null; er(new Error('Chart.js não carregou')); };
+    document.head.appendChild(s);
+  });
+  return carregarChart.p;
+}
 function mkChart(id, cfg) {
   const el = document.getElementById(id); if (!el) return;
-  if (typeof Chart === 'undefined') { el.parentNode.innerHTML = vz('Gráfico indisponível (biblioteca não carregou). Os dados estão nas tabelas.'); return; }
+  if (typeof Chart === 'undefined') {
+    // desenha quando a biblioteca chegar, se o gráfico ainda estiver na tela (o usuário pode ter trocado de tela)
+    carregarChart().then(function () { if (document.getElementById(id) === el && typeof Chart !== 'undefined') mkChart(id, cfg); })
+      .catch(function () { if (el.parentNode) el.parentNode.innerHTML = vz('Gráfico indisponível (biblioteca não carregou). Os dados estão nas tabelas.'); });
+    return;
+  }
   Chart.defaults.color = tema() ? '#98A1AB' : '#6B7280'; Chart.defaults.borderColor = tema() ? '#323840' : '#E4E7EB'; Chart.defaults.font.family = '-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
   cfg.options = Object.assign({ maintainAspectRatio: false, responsive: true }, cfg.options || {});
   cfg.options.plugins = Object.assign({ legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true } } }, cfg.options.plugins || {});
@@ -1790,11 +1873,11 @@ function tabelaInterativa(raiz) {
     });
   });
   Array.prototype.slice.call(raiz.querySelectorAll('input[data-busca]')).forEach(function (i) {
-    i.addEventListener('input', function () {
+    i.addEventListener('input', adiar(function () {
       const q = norm(i.value);
       const alvo = i.closest('.card') || raiz; // a busca age só na tabela do próprio cartão
       Array.prototype.slice.call(alvo.querySelectorAll('table[data-sort] tbody tr')).forEach(function (tr) { tr.classList.toggle('hidden', !!q && norm(tr.textContent).indexOf(q) < 0); });
-    });
+    }, BUSCA_MS));
   });
 }
 
@@ -2292,7 +2375,8 @@ function removerColab(F, nome) {
   if (F.colaboradores.length) sincDerivados(F);
 }
 function novoForm(p, chave) {
-  const F = { processo: p || S.procs[0] || '', doca: '', colaboradores: [], lider: '', turno: '', obs: '', resp: {}, k: '', err: {}, faltam: [], busy: false };
+  // cid: identifica este formulário; se o envio for repetido (rede caiu, erro depois de gravar), o servidor não grava duas vezes
+  const F = { processo: p || S.procs[0] || '', doca: '', colaboradores: [], lider: '', turno: '', obs: '', resp: {}, k: '', err: {}, faltam: [], busy: false, cid: 'f-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10) };
   if (chave) { if (tipoProc(F.processo)) aplicarDoca(F, chave); else aplicarLider(F, chave); }
   S.F = F;
 }
@@ -2457,8 +2541,8 @@ async function finalizar() {
   const bf = $('#bFin'); if (bf) { bf.disabled = true; bf.textContent = 'Salvando…'; }
   try {
     await pend.catch(function () {});
-    const respostas = itens.map(function (i) { const r = F.resp[i._row]; return { k: i._row, ok: r === 'na' ? null : r }; });
-    const r = await rpc('salvarAuditoria', { processo: F.processo, doca: F.doca, colaboradores: F.colaboradores, lider: F.lider, turno: F.turno, observacoes: F.obs, respostas: respostas });
+    const respostas = itens.map(function (i) { const r = F.resp[i._row]; return { k: i._row, id: i.ID_Subprocesso, ok: r === 'na' ? null : r }; }); // id: o servidor confere que a linha ainda é o mesmo item
+    const r = await rpc('salvarAuditoria', { processo: F.processo, doca: F.doca, colaboradores: F.colaboradores, lider: F.lider, turno: F.turno, observacoes: F.obs, respostas: respostas, clientId: F.cid });
     if (!r.ok) { F.busy = false; F.err = r.erros || {}; F.faltam = r.faltam || []; renderForm(true); toast('O servidor recusou a auditoria. Corrija os campos destacados.', true); return; }
     toast('Auditoria salva: ' + String(r.pct).replace('.', ',') + '% — ' + r.status); S.F = null; S.mx = {}; nav('matriz');
   } catch (e) { F.busy = false; if (bf) { bf.disabled = false; bf.textContent = 'Finalizar auditoria'; } }
@@ -2574,8 +2658,10 @@ document.addEventListener('input', function (e) {
 const SCH = {
   Cad_Estrutura: [['Tipo', ['Doca', 'Cluster'], 1, 'Tipo'], ['Identificador', 'text', 1, 'Identificador (ex: A-10)'], ['Cor', 'COR', 1, 'Cor'], ['Simbolo', 'SIMB', 1, 'Símbolo'], ['Lider_Padrao', 'LIDER', 0, 'Líder padrão'], ['Turno_Padrao', 'TURNO', 0, 'Turno padrão']],
   Cad_Pessoas: [['Nome', 'text', 1, 'Nome'], ['Cargo', ['Líder', 'Colaborador'], 1, 'Cargo'], ['Turno', 'TURNO', 1, 'Turno'], ['Lider', 'LIDER', 0, 'Líder (obrigatório p/ colaborador)'], ['Status_Ativo', ['Sim', 'Não'], 1, 'Ativo']],
-  Cad_Processos_Perguntas: [['Processo', 'PROC', 1, 'Processo'], ['ID_Subprocesso', 'text', 1, 'Sub-processo'], ['Descricao_Item', 'text', 1, 'Descrição do item'], ['Requisito_Critico', ['Sim', 'Não'], 1, 'Crítico'], ['Subprocesso_EN', 'text', 0, 'Sub-processo em inglês (opcional)'], ['Subprocesso_ES', 'text', 0, 'Sub-processo em espanhol (opcional)'], ['Descricao_EN', 'text', 0, 'Descrição em inglês (opcional)'], ['Descricao_ES', 'text', 0, 'Descrição em espanhol (opcional)']]
+  Cad_Processos_Perguntas: [['Processo', 'PROC', 1, 'Processo'], ['ID_Subprocesso', 'text', 1, 'Sub-processo'], ['Descricao_Item', 'text', 1, 'Descrição do item'], ['Requisito_Critico', ['Sim', 'Não'], 1, 'Crítico'], ['Subprocesso_EN', 'text', 0, 'Sub-processo em inglês (opcional)'], ['Subprocesso_ES', 'text', 0, 'Sub-processo em espanhol (opcional)'], ['Descricao_EN', 'text', 0, 'Descrição em inglês (opcional)'], ['Descricao_ES', 'text', 0, 'Descrição em espanhol (opcional)'], ['Feedback_Imediato', ['Sim', 'Não'], 0, 'Feedback imediato (não conforme gera feedback na hora)']]
 };
+/** Feedback imediato: só Site Leader e Admin (permissão de obrigações) veem e definem o campo; o servidor também não o envia aos outros. */
+function campoCadVisivel(c) { return c[0] !== 'Feedback_Imediato' || pode('obrigacoes'); }
 const ABA_NOME = { Cad_Estrutura: 'Docas e clusters', Cad_Pessoas: 'Pessoas', Cad_Processos_Perguntas: 'Perguntas' };
 const ABA_NOVO = { Cad_Estrutura: 'Nova doca ou cluster', Cad_Pessoas: 'Nova pessoa', Cad_Processos_Perguntas: 'Nova pergunta' };
 const ABA_EDIT = { Cad_Estrutura: 'Editar doca ou cluster', Cad_Pessoas: 'Editar pessoa', Cad_Processos_Perguntas: 'Editar pergunta' };
@@ -2627,6 +2713,7 @@ function acoesLinha(x) {
   if (x.r._saving) return '<span class="muted">Salvando…</span>';
   return '<div class="acts"><button type="button" class="btn sm" data-e="' + x.i + '">' + ic('pencil', 14) + 'Editar</button><span class="rmw"><button type="button" class="btn sm ico" data-m="' + x.i + '" aria-label="Mais ações" aria-haspopup="menu" aria-expanded="' + (S.cadMenu === x.i) + '">' + ic('more', 16) + '</button>' + (S.cadMenu === x.i ? menuLinha(x) : '') + '</span></div>';
 }
+const listaCadAdiada = adiar(function () { if (S.v === 'cad') listaCad(); }, BUSCA_MS); // a tela pode ter mudado durante a espera
 function listaCad() {
   const aba = S.cad, L = linhasCad(), el = $('#cList'); if (!el) return;
   const n = $('#cCount'); if (n) n.textContent = L.length + (L.length === 1 ? ' registro' : ' registros');
@@ -2636,7 +2723,7 @@ function listaCad() {
     el.innerHTML = ordem.map(function (k) {
       return '<details class="grupo" open><summary><span class="gt">' + esc(k) + '</span><span class="gn">' + g[k].length + '</span><button type="button" class="btn sm" data-addsub="' + esc(k) + '">' + ic('plus', 14) + 'Item</button></summary>' +
         g[k].map(function (x) {
-          return '<div class="lin' + (x.r._saving ? ' saving' : '') + '"><div class="ld">' + esc(x.r.Descricao_Item) + (x.r.Requisito_Critico === 'Sim' ? ' <span class="crit">CRÍTICO</span>' : '') + '</div>' + acoesLinha(x) + '</div>';
+          return '<div class="lin' + (x.r._saving ? ' saving' : '') + '"><div class="ld">' + esc(x.r.Descricao_Item) + (x.r.Requisito_Critico === 'Sim' ? ' <span class="crit">CRÍTICO</span>' : '') + (x.r.Feedback_Imediato === 'Sim' ? ' <span class="crit">' + esc(tr('FEEDBACK IMEDIATO')) + '</span>' : '') + '</div>' + acoesLinha(x) + '</div>';
         }).join('') + '</details>';
     }).join('') || '<div class="empty">' + (S.cadQ ? 'Nada encontrado para esta busca.' : 'Nenhuma pergunta neste processo. Use Nova pergunta para criar a primeira.') + '</div>';
     return;
@@ -2653,7 +2740,7 @@ function renderCad(preset) {
   const abas = abasCad();
   if (!abas.length) { $('#v-cad').innerHTML = '<div class="card">' + vz('Seu perfil não tem permissão de cadastro.') + '</div>'; return; }
   if (abas.indexOf(S.cad) < 0) { S.cad = abas[0]; S.edit = null; S.cadOpen = false; }
-  const aba = S.cad, sch = SCH[aba], ed = preset ? preset.edit : S.edit;
+  const aba = S.cad, sch = SCH[aba].filter(campoCadVisivel), ed = preset ? preset.edit : S.edit;
   if (preset) S.cadOpen = true;
   S.edit = ed || null;
   if (aba === 'Cad_Processos_Perguntas' && S.procs.indexOf(S.cadProc) < 0) S.cadProc = S.procs[0] || '';
@@ -2675,8 +2762,19 @@ function renderCad(preset) {
   atualizarPrevCS();
   if (preset && preset.erros) mostrarErrosCad(preset.erros);
   if (S.cadOpen && !preset) { const f = $('#v-cad .drawer [data-c]'); if (f && f.focus) f.focus(); }
+  // o drawer segue o estado em todo render: aberto = diálogo (Tab preso); fechado por qualquer caminho (X, Esc, salvar, trocar aba) = foco volta.
+  // Recusado pelo servidor (preset): o foco vai ao primeiro campo com erro. A origem é guardada por seletor: a lista é redesenhada.
+  if (S.cadOpen) abrirDialogo('#v-cad .drawer.open', preset ? $('#v-cad .drawer .invalid') : null, S.cadVolta || '#cNovo');
+  else fecharDialogo('#v-cad .drawer.open');
 }
-function abrirDrawer(ed, pre) { S.edit = ed || null; S.cadPre = pre || null; S.cadOpen = true; renderCad(); }
+/** Seletor estável de quem abriu o drawer (botão Novo ou o Editar da linha), para devolver o foco depois do redesenho. */
+function seletorVolta(el) {
+  if (!el || !el.getAttribute) return null;
+  if (el.id) return '#' + el.id;
+  const e = el.getAttribute('data-e');
+  return e === null ? null : '#v-cad [data-e="' + e + '"]';
+}
+function abrirDrawer(ed, pre) { S.cadVolta = seletorVolta(document.activeElement); S.edit = ed || null; S.cadPre = pre || null; S.cadOpen = true; renderCad(); }
 function fecharDrawer() { if (!S.cadOpen) return; S.cadOpen = false; S.edit = null; S.cadPre = null; renderCad(); }
 function atualizarPrevCS() {
   const el = $('#csPrev'); if (!el) return;
@@ -2765,14 +2863,24 @@ async function desfazerExclusao(aba, r) {
     S.db[aba] = x.linhas; S.mx = {}; fbarFill(); if (S.v === 'cad') renderCad(); toast('Registro restaurado');
   } catch (e) { /* aviso exibido */ } finally { S.busy = false; }
 }
+/** Nova lista com o item da linha row trocado com o vizinho (dir -1 acima, 1 abaixo), mesma regra do servidor:
+    só troca com o vizinho do mesmo processo. Cada item fica com a linha da posição nova. A lista original não muda. null = nada a trocar. */
+function trocarVizinho(linhas, row, dir) {
+  const d = Number(dir) < 0 ? -1 : 1, a = linhas.find(function (x) { return x._row === row; }), b = linhas.find(function (x) { return x._row === row + d; });
+  if (!a || !b || b.Processo !== a.Processo) return null;
+  return linhas.map(function (x) { return x === a ? Object.assign({}, b, { _row: a._row }) : x === b ? Object.assign({}, a, { _row: b._row }) : x; });
+}
+/** Ordenação otimista: a troca aparece na hora; se o servidor recusar ou falhar, a lista volta ao que era e o aviso aparece. */
 async function moverCad(i, dir) {
   if (S.busy) return;
   const aba = S.cad, r = S.db[aba][i]; if (!r) return;
+  const antes = S.db[aba], nova = trocarVizinho(antes, r._row, dir);
   S.cadMenu = -1; S.busy = true;
+  if (nova) { S.db[aba] = nova; renderCad(); }
   try {
     const x = await rpc('moverCadastro', aba, r._row, semLinha(r), dir);
-    if (!x.ok) toast(x.msg, true); else { S.db[aba] = x.linhas; S.mx = {}; }
-  } catch (e) { /* aviso exibido */ } finally { S.busy = false; renderCad(); }
+    if (!x.ok) { S.db[aba] = antes; toast(x.msg, true); } else { S.db[aba] = x.linhas; S.mx = {}; }
+  } catch (e) { S.db[aba] = antes; /* aviso exibido */ } finally { S.busy = false; renderCad(); }
 }
 document.addEventListener('click', function (e) {
   const t = e.target;
@@ -2807,7 +2915,7 @@ document.addEventListener('change', function (e) {
 document.addEventListener('input', function (e) {
   const t = e.target;
   if (!t.closest || !t.closest('#v-cad')) return;
-  if (t.id === 'cBusca') { S.cadQ = t.value; S.cadMenu = -1; listaCad(); return; }
+  if (t.id === 'cBusca') { S.cadQ = t.value; S.cadMenu = -1; listaCadAdiada(); return; }
   if (!t.dataset.c) return;
   t.classList.remove('invalid');
   const s = $('#v-cad [data-err="' + t.dataset.c + '"]'); if (s) s.textContent = '';
@@ -2824,12 +2932,13 @@ function loadCfgBase() {
     '<label>Vida útil da auditoria (dias) <span class="req">*</span><input type="number" min="1" step="1" id="k1" value="' + esc(S.cfg.DIAS_VIDA_UTIL_AUDITORIA) + '"><span class="err" id="e1"></span></label>' +
     '<label>Nota de corte (%) <span class="req">*</span><input type="number" min="0" max="100" step="any" id="k2" value="' + esc(S.cfg.NOTA_CORTE_PCT) + '"><span class="err" id="e2"></span></label>' +
     '<label>Nota média (%) <span class="req">*</span><input type="number" min="0" max="100" step="any" id="k3" value="' + esc(S.cfg.NOTA_MEDIA_PCT) + '"><span class="err" id="e3"></span></label>' +
-    '<label>Poucas auditorias: abaixo de <span class="req">*</span><input type="number" min="1" max="50" step="1" id="k4" value="' + esc(S.cfg.POUCAS_AUDITORIAS == null ? 3 : S.cfg.POUCAS_AUDITORIAS) + '"><small class="muted">Quem tem menos auditorias que isso aparece com o aviso "Poucas auditorias", porque a nota média ainda não é confiável.</small><span class="err" id="e4"></span></label></div>' +
+    '<label>Poucas auditorias: abaixo de <span class="req">*</span><input type="number" min="1" max="50" step="1" id="k4" value="' + esc(S.cfg.POUCAS_AUDITORIAS == null ? 3 : S.cfg.POUCAS_AUDITORIAS) + '"><small class="muted">Quem tem menos auditorias que isso aparece com o aviso "Poucas auditorias", porque a nota média ainda não é confiável.</small><span class="err" id="e4"></span></label>' +
+    '<label>Feedback obrigatório: auditorias abaixo da nota média <span class="req">*</span><input type="number" min="1" max="50" step="1" id="k5" aria-describedby="k5d e5" value="' + esc(S.cfg.FEEDBACK_MIN_AUDITORIAS == null ? 3 : S.cfg.FEEDBACK_MIN_AUDITORIAS) + '"><small class="muted" id="k5d">Quantas auditorias abaixo da nota média, em 30 dias, tornam o feedback obrigatório. Vale para os próximos feedbacks gerados; os que já existem não mudam.</small><span class="err" id="e5"></span></label></div>' +
     '<div class="card" style="max-width:760px"><b>Como as cores são definidas</b><div id="kFaixas" class="legend" style="flex-direction:column;gap:6px"></div></div>' +
     '<div class="card" style="max-width:760px"><b>Vários colaboradores por auditoria</b><p class="muted">Marque os processos em que uma mesma auditoria pode valer para mais de um colaborador (até ' + MAX_COLAB + '). A nota é única e vale para todos.</p>' +
     '<div class="grid" id="kMulti">' + S.procs.map(function (p) { return '<label class="perm"><input type="checkbox" value="' + esc(p) + '"' + (multi(p) ? ' checked' : '') + '><span><b>' + esc(p) + '</b></span></label>'; }).join('') + '</div></div>' +
     '<div class="savebar hidden" id="cfgBar" role="status"><span>Alterações não salvas</span><span class="sp"></span><button type="button" class="btn" id="kDesc">Descartar</button><button type="button" class="btn pri" id="kSalvar">Salvar configurações</button></div>';
-  const foto = function () { return [$('#k1').value, $('#k2').value, $('#k3').value, $('#k4').value].concat($$('#kMulti input').map(function (i) { return i.checked ? '1' : '0'; })).join('|'); };
+  const foto = function () { return [$('#k1').value, $('#k2').value, $('#k3').value, $('#k4').value, $('#k5').value].concat($$('#kMulti input').map(function (i) { return i.checked ? '1' : '0'; })).join('|'); };
   let base = foto();
   const sujo = function () { $('#cfgBar').classList.toggle('hidden', foto() === base); };
   $('#v-cfg').oninput = $('#v-cfg').onchange = sujo;
@@ -2843,19 +2952,23 @@ function loadCfgBase() {
   };
   faixas(); $('#k2').oninput = $('#k3').oninput = faixas;
   $('#kSalvar').onclick = async function () {
-    ['e1', 'e2', 'e3', 'e4'].forEach(function (id) { $('#' + id).textContent = ''; });
-    const v1 = $('#k1').value, v2 = $('#k2').value, v3 = $('#k3').value, v4 = $('#k4').value, c = Number(v2), m = Number(v3);
-    if (vazio(v4) || !(Number(v4) >= 1) || Number(v4) > 50 || Math.floor(Number(v4)) !== Number(v4)) $('#e4').textContent = 'Informe um número inteiro entre 1 e 50.';
+    ['e1', 'e2', 'e3', 'e4', 'e5'].forEach(function (id) { $('#' + id).textContent = ''; $('#k' + id.slice(1)).removeAttribute('aria-invalid'); });
+    const v1 = $('#k1').value, v2 = $('#k2').value, v3 = $('#k3').value, v4 = $('#k4').value, v5 = $('#k5').value, c = Number(v2), m = Number(v3);
+    const int150 = function (v) { return !vazio(v) && Number(v) >= 1 && Number(v) <= 50 && Math.floor(Number(v)) === Number(v); };
+    if (!int150(v4)) $('#e4').textContent = 'Informe um número inteiro entre 1 e 50.';
+    if (!int150(v5)) $('#e5').textContent = 'Informe um número inteiro entre 1 e 50.';
     if (vazio(v1) || !(Number(v1) >= 1) || Math.floor(Number(v1)) !== Number(v1)) $('#e1').textContent = 'Informe um número inteiro de dias, 1 ou mais.';
     if (vazio(v2) || isNaN(c) || c < 0 || c > 100) $('#e2').textContent = 'Informe um valor entre 0 e 100.';
     if (vazio(v3) || isNaN(m) || m < 0 || m > 100) $('#e3').textContent = 'Informe um valor entre 0 e 100.';
     else if (!$('#e2').textContent && m <= c) $('#e3').textContent = 'A nota média deve ser maior que a nota de corte.';
-    if ($('#e1').textContent || $('#e2').textContent || $('#e3').textContent || $('#e4').textContent) { toast('Corrija os campos destacados.', true); return; }
+    const comErro = ['1', '2', '3', '4', '5'].filter(function (n) { return $('#e' + n).textContent; });
+    comErro.forEach(function (n) { $('#k' + n).setAttribute('aria-invalid', 'true'); });
+    if (comErro.length) { toast('Corrija os campos destacados.', true); $('#k' + comErro[0]).focus(); return; }
     const mu = {}; $$('#kMulti input').forEach(function (i) { mu[i.value] = i.checked; });
     const b = $('#kSalvar'); b.disabled = true; b.textContent = 'Salvando…';
     try {
-      const r = await rpc('salvarConfigs', { dias: v1, corte: v2, media: v3, poucas: v4, multi: mu });
-      if (!r.ok) { if (r.erros.dias) $('#e1').textContent = r.erros.dias; if (r.erros.corte) $('#e2').textContent = r.erros.corte; if (r.erros.media) $('#e3').textContent = r.erros.media; if (r.erros.poucas) $('#e4').textContent = r.erros.poucas; toast('O servidor recusou os valores.', true); }
+      const r = await rpc('salvarConfigs', { dias: v1, corte: v2, media: v3, poucas: v4, fbMin: v5, multi: mu });
+      if (!r.ok) { if (r.erros.dias) $('#e1').textContent = r.erros.dias; if (r.erros.corte) $('#e2').textContent = r.erros.corte; if (r.erros.media) $('#e3').textContent = r.erros.media; if (r.erros.poucas) $('#e4').textContent = r.erros.poucas; if (r.erros.fbMin) $('#e5').textContent = r.erros.fbMin; toast('O servidor recusou os valores.', true); }
       else { S.cfg = r.config; S.mx = {}; base = foto(); sujo(); toast('Configurações salvas'); }
     } catch (e) { /* aviso exibido */ } finally { b.disabled = false; b.textContent = 'Salvar configurações'; }
   };
@@ -3180,25 +3293,27 @@ async function concluirAprovacao(r) {
   if (pode('autorizar')) { try { S.pend = Math.max(0, await rpc('contarPendentes')); } catch (x) { S.pend = Math.max(0, S.pend - 1); } }
   S.acTab = 'autorizar'; nav('autorizar');
 }
-/** Consulta silenciosa do número de pendentes (a cada 2 minutos, só com a aba visível e só para quem autoriza). */
-function sondar() {
-  if (!S.u || !pode('autorizar') || document.hidden) return;
-  google.script.run.withSuccessHandler(function (n) {
-    if (typeof n !== 'number' || n === S.pend) return;
-    S.pend = n; renderNav();
-    if (!S.busy && $('#modal').classList.contains('hidden') && (S.v === 'autorizar' || (S.v === 'acessos' && S.acTab === 'autorizar'))) recarregarFila();
-    else if (S.v === 'acessos' && S.ac) atualizarSeloAcessos(); // só o selo: não apaga formulário nem edição em curso
-  }).withFailureHandler(function () { /* silencioso: tenta de novo no próximo ciclo */ }).contarPendentes();
+/* Os selos do menu chegam pelo pulso (v8Pulso, a cada 2 minutos, só com a aba visível): uma chamada só em vez de uma por selo. */
+/** Novo número de pendentes (só para quem autoriza). */
+function aplicarPend(n) {
+  if (typeof n !== 'number' || !pode('autorizar') || n === S.pend) return;
+  S.pend = n; renderNav();
+  if (!S.busy && $('#modal').classList.contains('hidden') && (S.v === 'autorizar' || (S.v === 'acessos' && S.acTab === 'autorizar'))) recarregarFila();
+  else if (S.v === 'acessos' && S.ac) atualizarSeloAcessos(); // só o selo: não apaga formulário nem edição em curso
 }
-
-/** Consulta silenciosa de metas novas (a cada 2 minutos, só com a aba visível). */
-function sondarMetas() {
-  if (!S.u || !tela('minhas') || document.hidden) return;
-  google.script.run.withSuccessHandler(function (n) {
-    if (typeof n !== 'number' || n === S.metasNovas) return;
-    S.metasNovas = n; renderNav();
-    if (S.v === 'minhas' && !S.busy && $('#modal').classList.contains('hidden')) loadMinhas(); // quem já está na tela vê a meta nova na hora
-  }).withFailureHandler(function () { /* silencioso: tenta de novo no próximo ciclo */ }).contarMetasNovas();
+/** Novo número de metas novas. */
+function aplicarMetasNovas(n) {
+  if (typeof n !== 'number' || !tela('minhas') || n === S.metasNovas) return;
+  S.metasNovas = n; renderNav();
+  if (S.v === 'minhas' && !S.busy && $('#modal').classList.contains('hidden')) loadMinhas(); // quem já está na tela vê a meta nova na hora
+}
+/** Resposta do pulso: cada selo que veio é aplicado; o que não veio (sem permissão ou erro no servidor) mantém o último valor. */
+function aplicarPulso(r) {
+  if (!r || !S.u || !Array.isArray(S.u.telas)) return; // boot que falhou deixa S.u sem telas: nada a aplicar
+  aplicarPend(r.pend);
+  aplicarMetasNovas(r.metasNovas);
+  if (r.fb) aplicarFbSonda(r.fb);
+  if (typeof r.online === 'number') { const n = $('#onlineN'); if (n) n.textContent = r.online; }
 }
 
 /* ---------- temas: automático, claro, escuro e laranja ---------- */
@@ -3252,9 +3367,9 @@ function cmdDesenhar() {
 }
 function cmdAbrir() {
   if (!S.u) return;
-  S.cmd = { lista: [], idx: 0 }; $('#cmdk').classList.remove('hidden'); $('#cmdIn').value = ''; cmdDesenhar(); $('#cmdIn').focus();
+  S.cmd = { lista: [], idx: 0 }; $('#cmdk').classList.remove('hidden'); $('#cmdIn').value = ''; cmdDesenhar(); abrirDialogo('#cmdk', $('#cmdIn'));
 }
-function cmdFechar() { $('#cmdk').classList.add('hidden'); }
+function cmdFechar() { const c = $('#cmdk'); if (c.classList.contains('hidden')) return; c.classList.add('hidden'); fecharDialogo('#cmdk'); }
 function cmdIr(i) { const x = S.cmd.lista[i]; if (!x) return; cmdFechar(); x.go(); }
 function atalhos() {
   modal('<div class="mhd"><h2 id="modalT">Atalhos de teclado</h2><button type="button" class="btn ico" data-fechar aria-label="Fechar">' + ic('x', 16) + '</button></div>' +
@@ -3322,19 +3437,33 @@ function abrirCadastro() {
   const hs = S.bl.hubs || []; $('#cdHubW').classList.toggle('hidden', !hs.length);
   $('#cdHub').innerHTML = '<option value="">' + esc(tr('Selecione o Hub')) + '</option>' + hs.map(function (h) { return '<option value="' + esc(h.id) + '">' + esc(h.nome) + '</option>'; }).join('');
   $('#cdEmail').value = S.bl.email; $('#cdEmail').readOnly = true;
-  $$('[data-lg-err]').forEach(function (s) { s.textContent = ''; });
+  limparErrosCad();
   painelLogin('lgCad'); $('#cdNome').focus();
+}
+/** Campo de cada erro do cadastro (a chave vem do servidor ou da validação local). */
+const CAMPO_CAD = { nome: 'cdNome', cargo: 'cdCargo', cargoOutro: 'cdOutro', hub: 'cdHub', turno: 'cdTurno', email: 'cdEmail' };
+function limparErrosCad() {
+  $$('[data-lg-err]').forEach(function (s) { s.textContent = ''; });
+  Object.keys(CAMPO_CAD).forEach(function (k) { const c = $('#' + CAMPO_CAD[k]); if (c) c.removeAttribute('aria-invalid'); });
 }
 async function enviarCadastro() {
   if (S.busy) return;
   const o = { nome: $('#cdNome').value.replace(/\s+/g, ' ').trim(), cargo: $('#cdCargo').value, cargoOutro: $('#cdOutro').value.replace(/\s+/g, ' ').trim(), email: $('#cdEmail').value.trim().toLowerCase(), idioma: idiomaAtual(), hub: $('#cdHub').value, turno: $('#cdTurno').value }, e = {};
-  $$('[data-lg-err]').forEach(function (s) { s.textContent = ''; });
+  limparErrosCad();
   if (o.nome.length < 3) e.nome = 'Informe o nome completo.';
   if (!o.cargo) e.cargo = 'Selecione o cargo.'; else if (o.cargo === 'Outros' && o.cargoOutro.length < 2) e.cargoOutro = 'Digite o cargo.';
   if ((S.bl.hubs || []).length && !o.hub) e.hub = 'Selecione o Hub.';
   if ((S.bl.hubs || []).length && o.cargo === 'Líder' && !o.turno) e.turno = 'Selecione o turno.';
   if (!o.email) e.email = 'Campo obrigatório.'; else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(o.email)) e.email = 'E-mail inválido.';
-  const mostrar = function (er) { Object.keys(er).forEach(function (k) { const s = $('[data-lg-err="' + k + '"]'); if (s) s.textContent = er[k]; }); };
+  // erro visível, campo marcado como inválido (lido junto com a mensagem pelo aria-describedby) e foco no primeiro campo com erro
+  const mostrar = function (er) {
+    let primeiro = null;
+    Object.keys(er).forEach(function (k) {
+      const s = $('[data-lg-err="' + k + '"]'); if (s) s.textContent = er[k];
+      const c = CAMPO_CAD[k] && $('#' + CAMPO_CAD[k]); if (c) { c.setAttribute('aria-invalid', 'true'); if (!primeiro) primeiro = c; }
+    });
+    if (primeiro) primeiro.focus();
+  };
   if (Object.keys(e).length) { mostrar(e); return; }
   S.busy = true; const b = $('#cdEnviar'); b.disabled = true; b.textContent = 'Enviando…';
   try {
@@ -3426,9 +3555,6 @@ function iniciarApp(b) {
   v8Init();
   nav(['matriz', 'form', 'minhas', 'geral'].filter(tela)[0] || S.u.telas[0]);
   setInterval(relUpd, 30000);
-  if (pode('autorizar')) setInterval(sondar, window.PC_POLL || 120000);
-  if (tela('minhas')) setInterval(sondarMetas, window.PC_POLL || 120000);
-  setInterval(sondarFb, window.PC_POLL || 120000);
 }
 let bootLigado = false;
 function tentarDeNovo() {
@@ -3580,7 +3706,12 @@ async function trocarHub(id) {
 function v8Pulso() {
   if (typeof google === 'undefined' || document.hidden) return;
   if (S.u && S.u.email) marcarSessao(S.u.email); // renova a sessão enquanto a pessoa usa o sistema
-  try { google.script.run.withSuccessHandler(function (r) { if (r && r.hub && hubOn() && S.u.hub.id && r.hub !== S.u.hub.id && !S.busy) { toast(tr('O Hub ativo foi alterado em outra aba. Atualizando.'), true); atualizar(); } }).withFailureHandler(function () { /* silencioso */ }).pulso(); } catch (e) { /* sem conexão */ }
+  try {
+    google.script.run.withSuccessHandler(function (r) {
+      if (r && r.hub && hubOn() && S.u.hub.id && r.hub !== S.u.hub.id && !S.busy) { toast(tr('O Hub ativo foi alterado em outra aba. Atualizando.'), true); atualizar(); return; }
+      aplicarPulso(r);
+    }).withFailureHandler(function () { /* silencioso: tenta de novo no próximo ciclo */ }).pulso();
+  } catch (e) { /* sem conexão */ }
 }
 async function v8OnlineN() {
   if (document.hidden) return;
@@ -3700,19 +3831,19 @@ async function cargaGravar() {
 /* ----- aviso de transparência (aceite) ----- */
 function mostrarAviso(b) {
   S.avisoB = b;
-  let el = $('#avisoTela'); if (el) el.remove();
+  let el = $('#avisoTela'); if (el) { el.remove(); fecharDialogo('#avisoTela'); }
   const idi = idiomaAtual(), texto = b.aviso.texto[idi] || b.aviso.texto.pt;
   document.body.insertAdjacentHTML('beforeend', '<div id="avisoTela" class="aviso-tela" role="dialog" aria-modal="true" aria-labelledby="avT"><div class="box"><h2 id="avT">' + esc(tr('Aviso de transparência')) + '</h2><p>' + esc(texto) + '</p><p class="muted">' + esc(tr('Você precisa aceitar para continuar. Um novo aceite é pedido sempre que este texto mudar.')) + '</p><button type="button" class="btn pri" id="avAceitar">' + esc(tr('Li e aceito')) + '</button></div></div>');
   $('#carregando') && $('#carregando').classList.add('hidden');
   const l = $('#login'); if (l) l.classList.add('hidden');
-  $('#avAceitar').focus();
+  abrirDialogo('#avisoTela', $('#avAceitar')); // aceite obrigatório: sem Esc, foco preso e fundo inerte
 }
 async function aceitarAvisoUI() {
   if (S.busy) return; S.busy = true;
   try {
     const r = await rpc('aceitarAviso', S.avisoB.aviso.versao);
     if (!r.ok) { toast(r.msg, true); const b = await rpc('bootstrap', false); mostrarAviso(b); return; }
-    const b = await rpc('bootstrap', false); const e = $('#avisoTela'); if (e) e.remove();
+    const b = await rpc('bootstrap', false); const e = $('#avisoTela'); if (e) { e.remove(); fecharDialogo('#avisoTela'); }
     entrarApp(b);
   } catch (e) { /* aviso exibido */ } finally { S.busy = false; }
 }
@@ -3720,7 +3851,7 @@ async function aceitarAvisoUI() {
 function entrarApp(b) { if (b.bloqueado) { mostrarAviso(b); return false; } iniciarApp(b); return true; }
 function v8Init() {
   v8Cabecalho();
-  if (pode('ver_online')) { $('#onlineBtn').classList.remove('hidden'); v8OnlineN(); setInterval(v8OnlineN, window.PC_POLL || 120000); }
+  if (pode('ver_online')) $('#onlineBtn').classList.remove('hidden'); // o número chega no pulso
   v8Pulso(); setInterval(v8Pulso, window.PC_POLL || 120000);
   document.addEventListener('visibilitychange', function () { if (!document.hidden) v8Pulso(); });
 }
@@ -3998,9 +4129,25 @@ function aplicarFb(fb, user) {
   if (S.fb.fbTotalMeus > 0 && i < 0) user.telas.push('feedbacks');
   else if (S.fb.fbTotalMeus === 0 && i > -1) user.telas.splice(i, 1);
 }
+/** Itens da auditoria para quem dá o feedback: não conformes à vista (o assunto da conversa), conformes recolhidos. Sem itens (visão do Site Leader ou detalhe ilegível): nada. */
+function fbItens(x) {
+  if (!x.nc && !x.conf) return '';
+  const nome = function (i) { return esc((LANG === 'en' ? i.desc_en : LANG === 'es' ? i.desc_es : '') || i.desc) + (i.critico ? '<span class="crit">' + esc(tr('CRÍTICO')) + '</span>' : ''); };
+  const lista = function (l) { return '<ul>' + l.map(function (i) { return '<li>' + nome(i) + '</li>'; }).join('') + '</ul>'; };
+  const nc = x.nc || [], cf = x.conf || [];
+  return '<div class="fb-itens"><b class="fb-nc">' + esc(tpl(tr('Não conformes ({0})'), [nc.length])) + '</b>' + (nc.length ? lista(nc) : '<p class="muted">' + esc(tr('Nenhum item não conforme.')) + '</p>') +
+    (cf.length ? '<details><summary>' + esc(tpl(tr('Conformes ({0})'), [cf.length])) + '</summary>' + lista(cf) + '</details>' : '') + '</div>';
+}
+/** Feedback imediato: selo e motivo (as perguntas marcadas que ficaram não conformes, no texto da época). */
+function fbMotivo(p) {
+  if (!p.imediato) return '';
+  const nomes = (p.motivos || []).map(function (i) { return (LANG === 'en' ? i.desc_en : LANG === 'es' ? i.desc_es : '') || i.desc; });
+  return '<div class="fb-imed-m"><b>' + esc(tr('Feedback imediato')) + '</b>' + (nomes.length ? '<br>' + esc(tpl(tr('Motivo: {0}'), [nomes.join('; ')])) : '') + '</div>';
+}
 function fbAuditorias(p) {
   if (!p.auditorias.length) return '';
-  return '<details><summary>' + esc(tpl(tr('{0} auditoria(s) abaixo de {1}%'), [p.qtd, p.corte])) + '</summary><ul class="lista-fb">' + p.auditorias.map(function (x) { return '<li>' + esc(fmtD(x.data) + ' · ' + x.proc + ' · ' + pc(x.pct)) + '</li>'; }).join('') + '</ul></details>';
+  const temItens = p.auditorias.some(function (x) { return x.nc || x.conf; });
+  return '<details' + (temItens ? ' open' : '') + '><summary>' + esc(tpl(tr('{0} auditoria(s) abaixo de {1}%'), [p.qtd, p.corte])) + '</summary><ul class="lista-fb">' + p.auditorias.map(function (x) { return '<li>' + esc(fmtD(x.data) + ' · ' + x.proc + ' · ' + pc(x.pct)) + (x.audNome ? '<br><small class="muted">' + esc(tpl(tr('Auditado por {0}'), [x.audNome])) + '</small>' : '') + fbItens(x) + '</li>'; }).join('') + '</ul></details>'; // quem auditou só vem do servidor para quem tem "ver_auditor"
 }
 function fbTime(p) {
   const mudou = p.timeAtual !== p.timeEpoca || p.turnoAtual !== p.turnoEpoca;
@@ -4030,9 +4177,9 @@ function desenharFeedbacksSL() {
       ? (p.registro ? '<details><summary>' + esc(tr('Ver feedback registrado')) + '</summary><p style="margin:6px 0 2px;white-space:pre-wrap">' + esc(p.registro.texto) + '</p><small class="muted">' + esc(tpl(tr('Registrado por {0} em {1}'), [p.registro.autor, fmtDt(p.registro.registradoEm)])) + '</small></details>' : '')
       : '<label class="fld" style="margin:0"><span class="sr-only">' + esc(tpl(tr('Quem dará o feedback a {0}'), [p.colaborador])) + '</span><select data-fb-sel="' + esc(p.id) + '">' + opts(p) + '</select></label>' +
         '<button type="button" class="btn sm pri" style="margin-top:6px" data-fb-des="' + esc(p.id) + '" aria-label="' + esc(tpl(tr(p.status === 'Designada' ? 'Reatribuir o feedback de {0}' : 'Designar o feedback de {0}'), [p.colaborador])) + '">' + esc(tr(p.status === 'Designada' ? 'Reatribuir' : 'Designar')) + '</button><div class="muted" role="status" data-fb-av="' + esc(p.id) + '"></div>';
-    return '<tr><td>' + esc(p.colaborador) + '<br>' + fbTime(p) + '</td><td>' + fbAuditorias(p) + '</td><td>' + fbSituacao(p) + (p.status !== 'Aberta' && p.designadoNome ? '<br><small class="muted">' + esc(p.designadoNome) + '</small>' : '') + (p.status === 'Designada' && p.avisoPendente ? '<br><small class="muted">' + esc(tr('Aviso por e-mail pendente')) + '</small>' : '') + '</td><td>' + acao + '</td></tr>';
+    return '<tr' + (p.imediato ? ' class="fb-imed"' : '') + '><td>' + esc(p.colaborador) + '<br>' + fbTime(p) + fbMotivo(p) + '</td><td>' + fbAuditorias(p) + '</td><td>' + fbSituacao(p) + (p.status !== 'Aberta' && p.designadoNome ? '<br><small class="muted">' + esc(p.designadoNome) + '</small>' : '') + (p.status === 'Designada' && p.avisoPendente ? '<br><small class="muted">' + esc(tr('Aviso por e-mail pendente')) + '</small>' : '') + '</td><td>' + acao + '</td></tr>';
   };
-  const ord = R.pendencias.slice().sort(function (a, b) { const k = { Aberta: 0, Designada: 1, Concluida: 2 }; return k[a.status] - k[b.status] || String(a.prazo).localeCompare(String(b.prazo)); });
+  const ord = R.pendencias.slice().sort(function (a, b) { const k = { Aberta: 0, Designada: 1, Concluida: 2 }; return k[a.status] - k[b.status] || (b.imediato ? 1 : 0) - (a.imediato ? 1 : 0) || String(a.prazo).localeCompare(String(b.prazo)); }); // feedback imediato primeiro em cada situação
   el.innerHTML = '<div class="card"><div class="hd"><b>' + esc(tr('Feedbacks obrigatórios')) + '</b></div>' +
     '<p class="muted" style="margin:6px 0 10px">' + esc(tpl(tr('Quando um colaborador tem {0} ou mais auditorias abaixo da nota média em {1} dias, o feedback passa a ser obrigatório. Escolha quem vai conversar com ele: o líder tem {2} dias para registrar o que foi falado (mínimo de {3} caracteres).'), [R.minimo, R.janela, R.prazoDias, FB_MIN])) + '</p>' +
     '<div id="fbErr" role="alert"></div>' +
@@ -4074,7 +4221,7 @@ function desenharFeedbacksMeus() {
   const rasc = fbRascunhos();
   const feitos = L.filter(function (p) { return p.status === 'Concluida'; }), abertos = L.filter(function (p) { return p.status === 'Designada'; }).sort(function (a, b) { return String(a.prazo).localeCompare(String(b.prazo)); });
   const card = function (p) {
-    const c = '<div class="card"><div class="hd"><b role="heading" aria-level="3">' + esc(p.colaborador) + '</b>' + fbSituacao(p) + '</div><p style="margin:4px 0">' + fbTime(p) + '</p>' + fbAuditorias(p);
+    const c = '<div class="card' + (p.imediato ? ' fb-imed' : '') + '"><div class="hd"><b role="heading" aria-level="3">' + esc(p.colaborador) + '</b>' + fbSituacao(p) + '</div><p style="margin:4px 0">' + fbTime(p) + '</p>' + fbMotivo(p) + fbAuditorias(p);
     if (p.status === 'Concluida') return c + (p.registro ? '<p style="margin:10px 0 2px;white-space:pre-wrap">' + esc(p.registro.texto) + '</p><small class="muted">' + esc(tpl(tr('Registrado em {0}'), [fmtDt(p.registro.registradoEm)])) + '</small>' : '') + '</div>';
     return c + '<label class="fld" style="margin-top:10px"><span>' + esc(tr('O que foi conversado com o colaborador')) + '<span class="sr-only"> — ' + esc(p.colaborador) + '</span></span><textarea data-fb-txt="' + esc(p.id) + '" rows="5" maxlength="2000" aria-describedby="fbc-' + esc(p.id) + '" required aria-required="true"></textarea></label>' +
       '<div class="muted" id="fbc-' + esc(p.id) + '" data-fb-cont="' + esc(p.id) + '">' + esc(tpl(tr('0 de {0} caracteres no mínimo'), [FB_MIN])) + '</div><div class="sr-only" role="status" data-fb-live="' + esc(p.id) + '"></div>' +
@@ -4108,18 +4255,19 @@ async function registrarFbUI(id) {
 }
 
 /* ---- contadores (selos do menu) ---- */
+/** Novos contadores de feedback (do pulso ou de sondarFb). */
+function aplicarFbSonda(fb) {
+  if (!fb || JSON.stringify(fb) === JSON.stringify(S.fb)) return;
+  aplicarFb(fb, S.u); renderNav();
+  const ab = $('#pgTab-feedbacks'); if (ab && pgNaTela()) ab.innerHTML = pgRotuloAba('feedbacks', tr('Feedbacks obrigatórios'), pgNAcao());
+  if (!tela('feedbacks') && fbNaTela()) nav(['matriz', 'form', 'minhas', 'geral'].filter(tela)[0] || S.u.telas[0]);
+  else if (fbNaTela() && !S.busy && $('#modal').classList.contains('hidden') && !$$('#v-feedbacks textarea').some(function (t) { return t.value; })) loadFeedbacksMeus(); // nunca apaga um texto em digitação
+}
+/** Consulta imediata dos contadores de feedback (depois de registrar um feedback; o resto chega pelo pulso). */
 function sondarFb() {
   if (!S.u || document.hidden) return Promise.resolve();
   return new Promise(function (ok) {
-    google.script.run.withSuccessHandler(function (fb) {
-      if (fb && JSON.stringify(fb) !== JSON.stringify(S.fb)) {
-        aplicarFb(fb, S.u); renderNav();
-        const ab = $('#pgTab-feedbacks'); if (ab && pgNaTela()) ab.innerHTML = pgRotuloAba('feedbacks', tr('Feedbacks obrigatórios'), pgNAcao());
-        if (!tela('feedbacks') && fbNaTela()) nav(['matriz', 'form', 'minhas', 'geral'].filter(tela)[0] || S.u.telas[0]);
-        else if (fbNaTela() && !S.busy && $('#modal').classList.contains('hidden') && !$$('#v-feedbacks textarea').some(function (t) { return t.value; })) loadFeedbacksMeus(); // nunca apaga um texto em digitação
-      }
-      ok();
-    }).withFailureHandler(function () { ok(); }).contarFeedbacks();
+    google.script.run.withSuccessHandler(function (fb) { aplicarFbSonda(fb); ok(); }).withFailureHandler(function () { ok(); }).contarFeedbacks();
   });
 }
 function fbEventos() {

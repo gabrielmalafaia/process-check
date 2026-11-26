@@ -42,6 +42,19 @@ function criarSheet(nome) {
     return R;
   };
   S.getDataRange = () => S.getRange(1, 1, Math.max(S.getLastRow(), 1), Math.max(S.getLastColumn(), 1));
+  // faixas em A1 ("B5:B9"), como o anexar_ usa para formatar as colunas de texto numa chamada só
+  const col = (l) => l.split('').reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0);
+  const faixa = (a1) => {
+    const m = /^([A-Z]+)(\d+):([A-Z]+)(\d+)$/.exec(a1);
+    if (!m) throw new Error('A1 inválida: ' + a1);
+    const r = +m[2], c = col(m[1]);
+    return S.getRange(r, c, +m[4] - r + 1, col(m[3]) - c + 1);
+  };
+  S.getRangeList = (a1s) => {
+    const rs = a1s.map(faixa);
+    const L = { setNumberFormat: (f) => { rs.forEach((R) => R.setNumberFormat(f)); return L; } };
+    return L;
+  };
   return S;
 }
 
@@ -62,7 +75,8 @@ function criarAmbiente(codePath) {
       create: (nome) => { const id = 'ARQ' + (A.planilhasExtra = A.planilhasExtra || {}, Object.keys(A.planilhasExtra).length + 1); if (A.arquivoFalha) throw new Error('Sem autorização do Google'); A.planilhasExtra[id] = { sheets: {}, getId: () => id, getSheetByName: n => A.planilhasExtra[id].sheets[n] || null, insertSheet: n => (A.planilhasExtra[id].sheets[n] = criarSheet(n)) }; return A.planilhasExtra[id]; },
       openById: (id) => { if (!A.planilhasExtra || !A.planilhasExtra[id]) throw new Error('Planilha não encontrada'); return A.planilhasExtra[id]; } },
     PropertiesService: { getScriptProperties: () => ({ getProperty: k => (A.props = A.props || {})[k] || null, setProperty: (k, v) => { (A.props = A.props || {})[k] = v; }, deleteProperty: k => { delete (A.props = A.props || {})[k]; } }) },
-    Utilities: { formatDate: (d, tz, p) => fmtData(d, p), DigestAlgorithm: { SHA_256: 'SHA_256' }, Charset: { UTF_8: 'UTF_8' },
+    // 'H' (hora sem zero à esquerda) é o que o portão das 22h usa
+    Utilities: { formatDate: (d, tz, p) => (p === 'H' ? String(d.getUTCHours()) : fmtData(d, p)), DigestAlgorithm: { SHA_256: 'SHA_256' }, Charset: { UTF_8: 'UTF_8' },
       computeDigest: (alg, s) => Array.from(require('crypto').createHash('sha256').update(String(s), 'utf8').digest()).map(b => (b > 127 ? b - 256 : b)) },
     Session: { getActiveUser: () => ({ getEmail: () => A.email }), getEffectiveUser: () => ({ getEmail: () => A.efetivo }), getScriptTimeZone: () => 'UTC' },
     CacheService: { getScriptCache: () => ({
@@ -94,6 +108,8 @@ function criarAmbiente(codePath) {
   A.as = (email) => { A.email = email; };
   A.J = (x) => JSON.parse(JSON.stringify(x === undefined ? null : x));
   A.call = (fn, ...args) => {
+    // cada chamada do navegador é uma execução nova no Apps Script: as memórias da execução começam vazias
+    vm.runInContext("if (typeof ABA_MEMO_ !== 'undefined') ABA_MEMO_ = {}; if (typeof ABA_LIDA_ !== 'undefined') ABA_LIDA_ = {};", ctx);
     if (!process.env.PC_SRV) return A.J(ctx[fn](...args));
     const SRV = (global.__SRV = global.__SRV || new Set());
     if (!global.__SRVSAVE) { global.__SRVSAVE = 1; process.on('exit', () => require('fs').writeFileSync(process.env.PC_SRV, JSON.stringify([...global.__SRV].sort()))); }

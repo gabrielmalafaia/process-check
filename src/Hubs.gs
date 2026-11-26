@@ -94,7 +94,7 @@ function definirHubAtivo(id) {
   if (!h) throw new Error('Hub inexistente ou inativo.');
   CacheService.getScriptCache().put('hubAtivo:' + a.email, String(h.ID_Hub), 21600);
   PropertiesService.getScriptProperties().setProperty('hubAtivo:' + a.email, String(h.ID_Hub)); // sobrevive à expiração do cache: a gravação nunca cai em outro Hub sem aviso
-  CacheService.getScriptCache().remove('aba:Cad_Hubs'); // a lista de Hubs em cache pode estar velha (Hub digitado direto na planilha)
+  CacheService.getScriptCache().remove(chaveAba_('Cad_Hubs')); // a lista de Hubs em cache pode estar velha (Hub digitado direto na planilha)
   logAtiv_(a, 'Hub ativo trocado', String(h.Nome), '');
   return { ok: true };
 }
@@ -108,7 +108,7 @@ function exigirHubGlobal_() {
 function listarHubs() {
   exigirHubGlobal_();
   const us = lerBruto_('Cad_Usuarios'), cont = {};
-  us.forEach(function (u) { const h = String(u.Hub || ''); if (String(u.Status_Ativo).trim().toLowerCase() === 'sim') cont[h] = (cont[h] || 0) + 1; });
+  us.forEach(function (u) { const h = String(u.Hub || ''); if (usuarioAtivo_(u)) cont[h] = (cont[h] || 0) + 1; });
   return { hubs: lerBruto_('Cad_Hubs').map(function (h) { const o = hubOut_(h); o.usuarios = cont[o.id] || 0; o._row = h._row; return o; }) };
 }
 function textoSeguro_(v, max) {
@@ -132,7 +132,7 @@ function salvarHub(obj, orig) {
       if (!atual || !orig || String(orig.id) !== String(atual.ID_Hub)) return { ok: false, msg: 'Este Hub foi alterado ou removido. Clique em Atualizar e tente de novo.' };
       if (ativo === 'Não' && hubAtivoHub_(atual)) {
         if (String(atual.ID_Hub) === String(a.hub)) return { ok: false, msg: 'Troque para outro Hub antes de desativar o Hub em uso.' };
-        const n = lerBruto_('Cad_Usuarios').filter(function (u) { return String(u.Hub) === String(atual.ID_Hub) && String(u.Status_Ativo).trim().toLowerCase() === 'sim'; }).length;
+        const n = lerBruto_('Cad_Usuarios').filter(function (u) { return String(u.Hub) === String(atual.ID_Hub) && usuarioAtivo_(u); }).length;
         if (n) return { ok: false, msg: 'Não é possível desativar: há ' + n + ' usuário(s) ativo(s) neste Hub. Mova-os antes.' };
       }
       aba_('Cad_Hubs').getRange(row, 2, 1, 3).setValues([[limpar_(nome.v), limpar_(oper.v), ativo]]);
@@ -214,17 +214,31 @@ function migrarV8() {
   return rel;
 }
 /** Liga o isolamento por Hub (roda a migração antes). Para desligar: removerIsolamentoHub(). */
+/** Só no editor do Apps Script: lá quem executa é a própria conta (ativo = efetivo). Pelo navegador o efetivo é o dono e o ativo é o visitante. */
+function soEditor_() {
+  const ativo = emailDe_(Session.getActiveUser().getEmail()), efetivo = emailDe_(Session.getEffectiveUser().getEmail());
+  if (!efetivo || ativo !== efetivo) throw new Error('Acesso negado: rode esta função no editor do Apps Script.');
+  return efetivo;
+}
+/** Chave de segurança (isolamento, aceite): só pelo editor, por quem passa na manutenção, e registrada no log ANTES de mudar. Sem log, a chave não muda. */
+function mudarChaveSeguranca_(chave, valor, acao) {
+  const efetivo = soEditor_();
+  manutencao_();
+  const a = acesso_(true), ator = a.ok ? a : { nome: 'Editor do projeto', email: efetivo, perfil: 'Editor', hub: '' };
+  registrar_(ator, acao, chave, 'Novo valor: ' + valor);
+  PropertiesService.getScriptProperties().setProperty(chave, valor); limparFlag_(chave);
+}
 function ativarHubs() {
+  soEditor_();
   const rel = migrarV8();
-  PropertiesService.getScriptProperties().setProperty('HUBS_ATIVO', 'Sim'); limparFlag_('HUBS_ATIVO');
+  mudarChaveSeguranca_('HUBS_ATIVO', 'Sim', 'Isolamento por Hub ligado');
   HUB_CTX = null; // a chave mudou: a próxima leitura refaz o contexto
   limparCache_();
   rel.ativo = true;
   return rel;
 }
 function desativarHubs() {
-  manutencao_();
-  PropertiesService.getScriptProperties().setProperty('HUBS_ATIVO', 'Não'); limparFlag_('HUBS_ATIVO');
+  mudarChaveSeguranca_('HUBS_ATIVO', 'Não', 'Isolamento por Hub desligado');
   HUB_CTX = null;
   limparCache_();
   return 'Isolamento por Hub desligado.';

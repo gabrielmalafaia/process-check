@@ -183,16 +183,26 @@ T('e-mail: período sem auditorias gera aviso (não envia números inventados)',
   A.as('owner@x.com');
   const m = A.run("montarEmailRel_(acessoDe_('lid@x.com'), 'pt', { de: '2020-01-01', ate: '2020-01-07' })"); ok(/Nenhuma auditoria no seu escopo/.test(m.html)); eq(m.total, 0);
 });
+// desde a v10.3 o passo noturno tem gatilho próprio: os testes contam os gatilhos de cada função
+const gat = (fn) => (A.triggers || []).filter(t => t.getHandlerFunction() === fn);
 T('e-mail agendado: só o dono ou o gatilho; envia quem vence hoje; não duplica no mesmo dia', () => {
   A.as('owner@x.com');
   A.call('alternarAgendamentoRel', false); eq(A.call('listarEmailRel').agendado, false);
-  eq(A.call('alternarAgendamentoRel', true).agendado, true); eq(A.call('alternarAgendamentoRel', true).agendado, true); eq(A.triggers.length, 1, 'não cria gatilho duplicado');
+  eq(A.call('alternarAgendamentoRel', true).agendado, true); eq(A.call('alternarAgendamentoRel', true).agendado, true); eq(gat('enviarRelatoriosAgendados').length, 1, 'não cria gatilho duplicado');
+  eq(gat('passoNoturno').length, 1, 'ligar o relatório garante um gatilho do passo noturno, sem duplicar');
   A.as('sl@x.com'); nega(() => A.call('enviarRelatoriosAgendados'), 'Acesso negado'); A.as('owner@x.com');
   ['sl@x.com', 'lid@x.com', 'lid2@x.com'].forEach(e => A.call('salvarEmailRel', { email: e, freq: 'Diario', idioma: 'pt' }));
   A.sheets.Cad_Relatorio_Email.d.forEach((l, i) => { if (i) l[4] = ''; });
   A.emails.length = 0; let r = A.call('enviarRelatoriosAgendados'); eq(r.enviados, 3);
   A.emails.length = 0; r = A.call('enviarRelatoriosAgendados'); eq([r.enviados, A.emails.length], [0, 0]);
-  eq(A.call('alternarAgendamentoRel', false).agendado, false); eq(A.triggers.length, 0);
+  eq(A.call('alternarAgendamentoRel', false).agendado, false); eq(gat('enviarRelatoriosAgendados').length, 0);
+  eq(gat('passoNoturno').length, 1, 'desligar o relatório não desliga o passo noturno');
+});
+T('passo noturno: agendarPassoNoturno só no editor e sem duplicar o gatilho', () => {
+  A.as('sl@x.com'); nega(() => A.call('agendarPassoNoturno'));
+  A.as('owner@x.com'); A.triggers = (A.triggers || []).filter(t => t.getHandlerFunction() !== 'passoNoturno');
+  A.call('agendarPassoNoturno'); A.call('agendarPassoNoturno');
+  eq(gat('passoNoturno').length, 1); eq(gat('passoNoturno')[0].hora, 22);
 });
 T('e-mail: o período termina HOJE (auditoria de hoje entra no relatório) e o agendamento é às 22h', () => {
   A.as('owner@x.com');
@@ -205,9 +215,10 @@ T('e-mail: o período termina HOJE (auditoria de hoje entra no relatório) e o a
   A.call('alternarAgendamentoRel', false); A.triggers.length = 0;
   A.ctx.ScriptApp.newTrigger('enviarRelatoriosAgendados').timeBased().everyDays(1).atHour(7).create();
   eq(A.triggers.length, 1); eq(A.triggers[0].hora, 7);
-  A.call('alternarAgendamentoRel', true); eq(A.triggers.length, 1); eq(A.triggers[0].hora, 22);
-  A.call('alternarAgendamentoRel', true); eq(A.triggers.length, 1); eq(A.triggers[0].hora, 22);
-  A.call('alternarAgendamentoRel', false); eq(A.triggers.length, 0);
+  const rel = () => gat('enviarRelatoriosAgendados');
+  A.call('alternarAgendamentoRel', true); eq(rel().length, 1); eq(rel()[0].hora, 22);
+  A.call('alternarAgendamentoRel', true); eq(rel().length, 1); eq(rel()[0].hora, 22);
+  A.call('alternarAgendamentoRel', false); eq(rel().length, 0);
 });
 T('e-mail: "Enviar agora" não marca o dia como enviado (não bloqueia o envio completo das 22h)', () => {
   A.as('owner@x.com'); A.call('salvarEmailRel', { email: 'sl@x.com', freq: 'Diario', idioma: 'pt' });
@@ -244,17 +255,18 @@ T('migrarV7: planilha v6.2 (sem colunas de tradução, sem aba de e-mail, perfis
   const nAud = B.hist().getLastRow(), snap = () => JSON.stringify([B.sheets.Cad_Processos_Perguntas.d.map(l => l.slice(0, 4)), B.sheets.Cad_Usuarios.d, B.sheets.Cad_Estrutura.d, B.sheets.Cad_Pessoas.d]);
   const antes = snap();
   const r1 = B.call('migrarV7');
-  eq(B.sheets.Cad_Processos_Perguntas.d[0], ['Processo', 'ID_Subprocesso', 'Descricao_Item', 'Requisito_Critico', 'Subprocesso_EN', 'Subprocesso_ES', 'Descricao_EN', 'Descricao_ES']);
+  // v10.9: a coluna Feedback_Imediato também entra ao completar o cabeçalho
+  eq(B.sheets.Cad_Processos_Perguntas.d[0], ['Processo', 'ID_Subprocesso', 'Descricao_Item', 'Requisito_Critico', 'Subprocesso_EN', 'Subprocesso_ES', 'Descricao_EN', 'Descricao_ES', 'Feedback_Imediato']);
   ok(B.sheets.Cad_Relatorio_Email); eq(B.sheets.Cad_Relatorio_Email.d[0], ['Email', 'Frequencia', 'Idioma', 'Ativo', 'Ultimo_Envio']);
   ok(String(gestor()[2]).split(',').indexOf('ver_nomes') > -1, 'perfil que via relatórios continua vendo nomes');
   ok(r1.v7.perfisAtualizados >= 1); eq(snap(), antes, 'dados e cadastros preservados'); eq(B.hist().getLastRow(), nAud);
   const depois = JSON.stringify(B.sheets.Cad_Perfis.d); const r2 = B.call('migrarV7');
   eq(JSON.stringify(B.sheets.Cad_Perfis.d), depois, 'segunda execução não muda nada'); eq(r2.v7.perfisAtualizados, 0);
-  eq(B.sheets.Cad_Processos_Perguntas.d[0].length, 8);
+  eq(B.sheets.Cad_Processos_Perguntas.d[0].length, 9);
   // salvar pergunta numa planilha ainda sem as colunas também funciona (cabeçalho completado na hora)
   const C = novo(); C.as('owner@x.com'); C.sheets.Cad_Processos_Perguntas.d = C.sheets.Cad_Processos_Perguntas.d.map(l => l.slice(0, 4));
   const rr = C.call('salvarCadastro', 'Cad_Processos_Perguntas', { Processo: 'Compra', ID_Subprocesso: 'Sub9', Descricao_Item: 'Item novo', Requisito_Critico: 'Não', Descricao_EN: 'New item' }, null);
-  eq(rr.ok, true); eq(C.sheets.Cad_Processos_Perguntas.d[0].length, 8);
+  eq(rr.ok, true); eq(C.sheets.Cad_Processos_Perguntas.d[0].length, 9);
 });
 T('migração a partir da v6.1 (Cad_Solicitacoes com 9 colunas) continua funcionando', () => {
   const B = novo(); B.as('owner@x.com'); B.sheets.Cad_Solicitacoes.d = B.sheets.Cad_Solicitacoes.d.map(l => l.slice(0, 9)); B.call('migrarV7');

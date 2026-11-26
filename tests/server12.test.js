@@ -63,7 +63,8 @@ T('falha DEPOIS do histórico (salvar, excluir): fica a marca Revertido e o cada
     + 'histCadastro_ = function () { var r = __h.apply(null, arguments); __falha = true; return r; };');
   const o = pessoa('Davi Reis');
   let n0 = hist().length;
-  nega(() => salvar(o, { Turno: 'T1' }), 'planilha protegida');
+  // desde a v10.2 o usuário vê a mensagem padrão do desfazer; o erro técnico vai para o log de atividade
+  nega(() => salvar(o, { Turno: 'T1' }), 'nada foi alterado');
   A.run('__falha = false;');
   eq(hist().slice(n0).map((x) => x.ev.split(':')[0]), ['Alterado', 'Revertido']); eq(pessoa('Davi Reis').Turno, 'T2');
   n0 = hist().length;

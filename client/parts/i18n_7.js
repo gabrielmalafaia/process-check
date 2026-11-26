@@ -93,6 +93,9 @@ DICT.push(
   ['Não foi possível carregar o envio de relatórios. Tente atualizar.', 'Could not load report sending. Try refreshing.', 'No se pudo cargar el envío de informes. Intente actualizar.'],
   /* servidor: permissões, mensagens e log */
   ['Ver nomes de colaboradores nos relatórios', 'See employee names in reports', 'Ver nombres de colaboradores en los informes'],
+  ['Ver quem auditou (feedbacks)', 'See who audited (feedbacks)', 'Ver quién auditó (feedbacks)'],
+  ['Mostra quem fez as auditorias na lista de feedbacks e em Meus feedbacks. Sem esta permissão, quem auditou fica em sigilo. Só o Admin a tem por padrão.', 'Shows who performed the audits in the feedback list and in My feedbacks. Without this permission, the auditor stays confidential. Only the Admin has it by default.', 'Muestra quién hizo las auditorías en la lista de feedbacks y en Mis feedbacks. Sin este permiso, quien auditó queda en reserva. Solo el Admin lo tiene por defecto.'],
+  ['Auditado por {0}', 'Audited by {0}', 'Auditado por {0}'],
   ['Sem esta permissão os relatórios mostram só equipes, processos e totais, sem nomes de colaboradores.', 'Without this permission, reports show only teams, processes and totals, with no employee names.', 'Sin este permiso, los informes muestran solo equipos, procesos y totales, sin nombres de colaboradores.'],
   ['Gerir o relatório por e-mail', 'Manage the e-mail report', 'Gestionar el informe por correo'],
   ['Escolher quem recebe o relatório por e-mail e a frequência. Cada pessoa recebe só os dados do próprio perfil.', 'Choose who receives the e-mail report and how often. Each person receives only the data of their own profile.', 'Elegir quién recibe el informe por correo y con qué frecuencia. Cada persona recibe solo los datos de su propio perfil.'],

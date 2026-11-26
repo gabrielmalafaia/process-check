@@ -131,9 +131,11 @@ T('0b: fila de pendentes em cache, invalidada ao solicitar e ao recusar', () => 
 T('0b: Atualizar só derruba o cache para todos 1 vez a cada 30 s', () => {
   const A = novo(); A.as('owner@x.com');
   A.call('bootstrap', true); ok(A.cache.has('forcado'));
-  A.cache.set('marca', '1'); A.cache.set('aba:Configuracoes', '[]');
-  A.call('bootstrap', true); eq(A.cache.get('aba:Configuracoes'), '[]', 'segundo clique em 30 s não limpa o cache');
-  A.cache.delete('forcado'); A.call('bootstrap', true); ok(A.cache.get('aba:Configuracoes') !== '[]');
+  // desde a v10.5 a chave da aba leva a versão dos dados (chaveAba_)
+  const k = A.run("chaveAba_('Configuracoes')");
+  A.cache.set('marca', '1'); A.cache.set(k, '[]');
+  A.call('bootstrap', true); eq(A.cache.get(k), '[]', 'segundo clique em 30 s não limpa o cache');
+  A.cache.delete('forcado'); A.call('bootstrap', true); ok(A.cache.get(k) !== '[]');
 });
 T('0b: a chave do cache dos relatórios muda com as permissões', () => {
   const A = novo(); let n = 0;

@@ -59,7 +59,12 @@ async function trocarHub(id) {
 function v8Pulso() {
   if (typeof google === 'undefined' || document.hidden) return;
   if (S.u && S.u.email) marcarSessao(S.u.email); // renova a sessão enquanto a pessoa usa o sistema
-  try { google.script.run.withSuccessHandler(function (r) { if (r && r.hub && hubOn() && S.u.hub.id && r.hub !== S.u.hub.id && !S.busy) { toast(tr('O Hub ativo foi alterado em outra aba. Atualizando.'), true); atualizar(); } }).withFailureHandler(function () { /* silencioso */ }).pulso(); } catch (e) { /* sem conexão */ }
+  try {
+    google.script.run.withSuccessHandler(function (r) {
+      if (r && r.hub && hubOn() && S.u.hub.id && r.hub !== S.u.hub.id && !S.busy) { toast(tr('O Hub ativo foi alterado em outra aba. Atualizando.'), true); atualizar(); return; }
+      aplicarPulso(r);
+    }).withFailureHandler(function () { /* silencioso: tenta de novo no próximo ciclo */ }).pulso();
+  } catch (e) { /* sem conexão */ }
 }
 async function v8OnlineN() {
   if (document.hidden) return;
@@ -179,19 +184,19 @@ async function cargaGravar() {
 /* ----- aviso de transparência (aceite) ----- */
 function mostrarAviso(b) {
   S.avisoB = b;
-  let el = $('#avisoTela'); if (el) el.remove();
+  let el = $('#avisoTela'); if (el) { el.remove(); fecharDialogo('#avisoTela'); }
   const idi = idiomaAtual(), texto = b.aviso.texto[idi] || b.aviso.texto.pt;
   document.body.insertAdjacentHTML('beforeend', '<div id="avisoTela" class="aviso-tela" role="dialog" aria-modal="true" aria-labelledby="avT"><div class="box"><h2 id="avT">' + esc(tr('Aviso de transparência')) + '</h2><p>' + esc(texto) + '</p><p class="muted">' + esc(tr('Você precisa aceitar para continuar. Um novo aceite é pedido sempre que este texto mudar.')) + '</p><button type="button" class="btn pri" id="avAceitar">' + esc(tr('Li e aceito')) + '</button></div></div>');
   $('#carregando') && $('#carregando').classList.add('hidden');
   const l = $('#login'); if (l) l.classList.add('hidden');
-  $('#avAceitar').focus();
+  abrirDialogo('#avisoTela', $('#avAceitar')); // aceite obrigatório: sem Esc, foco preso e fundo inerte
 }
 async function aceitarAvisoUI() {
   if (S.busy) return; S.busy = true;
   try {
     const r = await rpc('aceitarAviso', S.avisoB.aviso.versao);
     if (!r.ok) { toast(r.msg, true); const b = await rpc('bootstrap', false); mostrarAviso(b); return; }
-    const b = await rpc('bootstrap', false); const e = $('#avisoTela'); if (e) e.remove();
+    const b = await rpc('bootstrap', false); const e = $('#avisoTela'); if (e) { e.remove(); fecharDialogo('#avisoTela'); }
     entrarApp(b);
   } catch (e) { /* aviso exibido */ } finally { S.busy = false; }
 }
@@ -199,7 +204,7 @@ async function aceitarAvisoUI() {
 function entrarApp(b) { if (b.bloqueado) { mostrarAviso(b); return false; } iniciarApp(b); return true; }
 function v8Init() {
   v8Cabecalho();
-  if (pode('ver_online')) { $('#onlineBtn').classList.remove('hidden'); v8OnlineN(); setInterval(v8OnlineN, window.PC_POLL || 120000); }
+  if (pode('ver_online')) $('#onlineBtn').classList.remove('hidden'); // o número chega no pulso
   v8Pulso(); setInterval(v8Pulso, window.PC_POLL || 120000);
   document.addEventListener('visibilitychange', function () { if (!document.hidden) v8Pulso(); });
 }

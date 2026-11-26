@@ -140,7 +140,6 @@ function agendarArquivoLog() {
 }
 /** Liga o aviso de transparência com aceite (rodar no editor, depois de publicar a versão com a tela de aceite). */
 function ativarAvisoLog() {
-  manutencao_();
-  PropertiesService.getScriptProperties().setProperty('ACEITE_ATIVO', 'Sim'); limparFlag_('ACEITE_ATIVO');
+  mudarChaveSeguranca_('ACEITE_ATIVO', 'Sim', 'Aviso de transparência ligado');
   return 'Aviso de transparência ligado: cada usuário precisa aceitar a versão atual.';
 }

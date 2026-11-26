@@ -120,6 +120,12 @@ function toast(m, err, acao) {
   }
   clearTimeout(toast.t); toast.t = setTimeout(function () { t.className = 'hidden'; }, acao ? 9000 : 4500);
 }
+/** Debounce: só executa depois de ms sem novas chamadas, com os argumentos da última (busca que filtra a cada tecla). */
+function adiar(fn, ms) {
+  let t = 0;
+  return function () { const a = arguments; clearTimeout(t); t = setTimeout(function () { fn.apply(null, a); }, ms); };
+}
+const BUSCA_MS = 200;
 /** Blocos cinza animados que ocupam o lugar do conteúdo enquanto ele carrega. */
 function skel(n, cls) {
   let h = ''; for (let i = 0; i < n; i++) h += '<div class="sk ' + (cls || 'sk-row') + '"></div>';
@@ -161,12 +167,56 @@ const perg = function (proc) { return S.db.Cad_Processos_Perguntas.filter(functi
 const tipoProc = function (p) { return S.tipos[p] || ''; };
 const multi = function (p) { return !!(S.cfg.MULTI && S.cfg.MULTI[p]); };
 const semLinha = function (o) { const c = Object.assign({}, o); delete c._row; delete c._saving; delete c.editavel; return c; };
-function modal(html) {
-  const m = $('#modal'); S.lastFocus = document.activeElement;
-  m.innerHTML = '<div class="box">' + html + '</div>'; m.classList.remove('hidden');
-  const b = m.querySelector('[data-fechar]'); if (b && b.focus) b.focus();
+/* <dialogo> */
+/* Diálogos acessíveis (modal, busca, aviso, drawer): guarda quem abriu, leva o foco para dentro, prende o Tab, deixa o fundo
+   inerte (#app e #login, quando o diálogo está fora deles) e devolve o foco ao fechar. O diálogo é localizado pelo seletor
+   a cada uso, porque o drawer é redesenhado a cada render. Abrir de novo o mesmo diálogo (modal em cascata) mantém quem abriu primeiro. */
+const DLG_FOCAVEIS = 'a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+const DLG_FUNDOS = ['#app', '#login'];
+const dlgPilha = [];
+function dlgFocaveis(el) { return Array.prototype.filter.call(el.querySelectorAll(DLG_FOCAVEIS), function (x) { return !x.disabled && x.getAttribute('aria-hidden') !== 'true'; }); }
+function dlgVisivel(el) { return !el.getClientRects || el.getClientRects().length > 0; } // display:none em algum ancestral = invisível
+function dlgAtualizarFundo() {
+  // diálogo que sumiu do DOM sem passar por fecharDialogo (redesenho) sai da pilha: senão o fundo ficaria inerte para sempre
+  for (let i = dlgPilha.length - 1; i >= 0; i--) if (!document.querySelector(dlgPilha[i].sel)) dlgPilha.splice(i, 1);
+  DLG_FUNDOS.forEach(function (s) {
+    const f = document.querySelector(s); if (!f) return;
+    const dentro = dlgPilha.some(function (d) { const el = document.querySelector(d.sel); return el && f.contains(el); });
+    if (dlgPilha.length && !dentro) f.setAttribute('inert', ''); else f.removeAttribute('inert');
+  });
 }
-function fecharModal() { const m = $('#modal'); m.classList.add('hidden'); m.innerHTML = ''; if (S.lastFocus && S.lastFocus.focus) S.lastFocus.focus(); }
+/** Abre (ou reabre) o diálogo do seletor. inicial: onde pôr o foco; volta: quem abriu (padrão: o foco atual),
+    ou um seletor, quando o botão de origem será redesenhado antes do fechamento. */
+function abrirDialogo(sel, inicial, volta) {
+  const el = document.querySelector(sel); if (!el) return;
+  if (!dlgPilha.some(function (d) { return d.sel === sel; })) dlgPilha.push({ sel: sel, volta: volta || document.activeElement });
+  dlgAtualizarFundo();
+  if (el.contains(document.activeElement)) return; // o foco já está dentro (ex.: o render escolheu o campo): não mexe
+  const alvo = inicial || dlgFocaveis(el)[0];
+  if (alvo) alvo.focus(); else { el.setAttribute('tabindex', '-1'); el.focus(); }
+}
+function fecharDialogo(sel) {
+  let i = -1; dlgPilha.forEach(function (d, k) { if (d.sel === sel) i = k; });
+  if (i < 0) return;
+  const d = dlgPilha.splice(i, 1)[0];
+  dlgAtualizarFundo();
+  const v = typeof d.volta === 'string' ? document.querySelector(d.volta) : d.volta;
+  if (v && v.focus && document.contains(v)) v.focus();
+}
+document.addEventListener('keydown', function (e) {
+  if (e.key !== 'Tab' || !dlgPilha.length) return;
+  const el = document.querySelector(dlgPilha[dlgPilha.length - 1].sel); if (!el || !dlgVisivel(el)) return;
+  const f = dlgFocaveis(el); if (!f.length) { e.preventDefault(); return; }
+  const at = document.activeElement, pri = f[0], ult = f[f.length - 1];
+  if (e.shiftKey ? (at === pri || !el.contains(at)) : (at === ult || !el.contains(at))) { e.preventDefault(); (e.shiftKey ? ult : pri).focus(); }
+});
+/* </dialogo> */
+function modal(html) {
+  const m = $('#modal');
+  m.innerHTML = '<div class="box">' + html + '</div>'; m.classList.remove('hidden');
+  abrirDialogo('#modal', m.querySelector('[data-fechar]'));
+}
+function fecharModal() { const m = $('#modal'); m.classList.add('hidden'); m.innerHTML = ''; fecharDialogo('#modal'); }
 
 /* ---------- identidade visual: cor + símbolo (docas e clusters) ---------- */
 const HEX = { Azul: '#1E6FD9', Verde: '#2E9E5B', Vermelho: '#D93025', Laranja: '#F57C00', Amarelo: '#F5C400', Roxo: '#7B3FA0', Rosa: '#E85DA0', Marrom: '#7A4B2A', Preto: '#222222', Branco: '#FFFFFF', Cinza: '#9E9E9E' };
@@ -231,7 +281,8 @@ function renderNav() {
     });
     if (sh) h += '<div class="nsec">' + esc(sec.sec) + '</div>' + sh;
   });
-  $('#nav').innerHTML = h;
+  // o pulso chama isto a cada poucos minutos: sem mudança, o menu não é recriado (mantém foco e hover, sem trabalho de layout)
+  if (h !== S.navHtml) { S.navHtml = h; $('#nav').innerHTML = h; }
   $$('#nav button[data-v]').forEach(function (b) { b.classList.toggle('on', b.dataset.v === S.v || (b.dataset.v === 'acessos' && S.v === 'acessos')); });
 }
 const LOAD = {
@@ -355,9 +406,30 @@ const linhasCorte = {
     });
   }
 };
+/* Chart.js sob demanda: a abertura do app não espera a biblioteca (~200 KB); ela vem na primeira tela com gráfico.
+   Arquivo original do pacote (já minificado na 4.4.1) com hash fixo: se o CDN entregar outro conteúdo, o navegador não executa. */
+const CHART_SRC = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js';
+const CHART_SRI = 'sha256-dEAdc43T4D7l37O2hBIQ/ixOrYqWDEARykugt4qf2PM=';
+/** Um único carregamento em andamento; se o CDN falhar, a próxima tela com gráfico tenta de novo. */
+function carregarChart() {
+  if (carregarChart.p) return carregarChart.p;
+  carregarChart.p = new Promise(function (ok, er) {
+    const s = document.createElement('script');
+    s.src = CHART_SRC; s.integrity = CHART_SRI; s.crossOrigin = 'anonymous'; s.async = true;
+    s.onload = function () { ok(); };
+    s.onerror = function () { carregarChart.p = null; er(new Error('Chart.js não carregou')); };
+    document.head.appendChild(s);
+  });
+  return carregarChart.p;
+}
 function mkChart(id, cfg) {
   const el = document.getElementById(id); if (!el) return;
-  if (typeof Chart === 'undefined') { el.parentNode.innerHTML = vz('Gráfico indisponível (biblioteca não carregou). Os dados estão nas tabelas.'); return; }
+  if (typeof Chart === 'undefined') {
+    // desenha quando a biblioteca chegar, se o gráfico ainda estiver na tela (o usuário pode ter trocado de tela)
+    carregarChart().then(function () { if (document.getElementById(id) === el && typeof Chart !== 'undefined') mkChart(id, cfg); })
+      .catch(function () { if (el.parentNode) el.parentNode.innerHTML = vz('Gráfico indisponível (biblioteca não carregou). Os dados estão nas tabelas.'); });
+    return;
+  }
   Chart.defaults.color = tema() ? '#98A1AB' : '#6B7280'; Chart.defaults.borderColor = tema() ? '#323840' : '#E4E7EB'; Chart.defaults.font.family = '-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
   cfg.options = Object.assign({ maintainAspectRatio: false, responsive: true }, cfg.options || {});
   cfg.options.plugins = Object.assign({ legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true } } }, cfg.options.plugins || {});
@@ -400,10 +472,10 @@ function tabelaInterativa(raiz) {
     });
   });
   Array.prototype.slice.call(raiz.querySelectorAll('input[data-busca]')).forEach(function (i) {
-    i.addEventListener('input', function () {
+    i.addEventListener('input', adiar(function () {
       const q = norm(i.value);
       const alvo = i.closest('.card') || raiz; // a busca age só na tabela do próprio cartão
       Array.prototype.slice.call(alvo.querySelectorAll('table[data-sort] tbody tr')).forEach(function (tr) { tr.classList.toggle('hidden', !!q && norm(tr.textContent).indexOf(q) < 0); });
-    });
+    }, BUSCA_MS));
   });
 }

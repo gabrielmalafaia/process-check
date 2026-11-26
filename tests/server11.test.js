@@ -117,7 +117,7 @@ T('visão: padrão = só o time próprio; auditoria feita pelo líder em outro t
   regra('carlosa@x.com', { o: 'Sim', vo: 'time' }); v = vis('carlosa@x.com'); ok(v.includes(dora.id), 'verOutros=time: vê o histórico dos times que audita');
   regra('carlosa@x.com', { o: 'Sim', vo: 'time', t: 'Outro Lider' }); v = vis('carlosa@x.com'); ok(!v.includes(dora.id), 'só dos times que a regra deixa auditar');
   regra('carlosa@x.com', { o: 'Sim', vp: 'Não' }); v = vis('carlosa@x.com'); ok(!v.includes(propria.id) && v.includes(feita.id), 'ver o próprio time desligado');
-  regra('carlosa@x.com', { o: 'Sim', vp: 'Talvez', vo: 'time' }); v = vis('carlosa@x.com'); ok(v.includes(propria.id) && !v.includes(dora.id), 'regra inválida nunca amplia a visão');
+  regra('carlosa@x.com', { o: 'Sim', vp: 'Talvez', vo: 'time' }); v = vis('carlosa@x.com'); ok(v.includes(feita.id) && !v.includes(propria.id) && !v.includes(dora.id), 'regra inválida nunca amplia a visão (desde a v10.5: só o que o líder auditou)');
 });
 T('visão: dados em cache não passam de um líder com outra regra para outro (mesmo filtro)', () => {
   A.as('owner@x.com'); regra('carlosa@x.com', { o: 'Sim', vo: 'time' }); A.run('limparCache_()');

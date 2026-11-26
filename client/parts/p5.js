@@ -58,25 +58,27 @@ async function concluirAprovacao(r) {
   if (pode('autorizar')) { try { S.pend = Math.max(0, await rpc('contarPendentes')); } catch (x) { S.pend = Math.max(0, S.pend - 1); } }
   S.acTab = 'autorizar'; nav('autorizar');
 }
-/** Consulta silenciosa do número de pendentes (a cada 2 minutos, só com a aba visível e só para quem autoriza). */
-function sondar() {
-  if (!S.u || !pode('autorizar') || document.hidden) return;
-  google.script.run.withSuccessHandler(function (n) {
-    if (typeof n !== 'number' || n === S.pend) return;
-    S.pend = n; renderNav();
-    if (!S.busy && $('#modal').classList.contains('hidden') && (S.v === 'autorizar' || (S.v === 'acessos' && S.acTab === 'autorizar'))) recarregarFila();
-    else if (S.v === 'acessos' && S.ac) atualizarSeloAcessos(); // só o selo: não apaga formulário nem edição em curso
-  }).withFailureHandler(function () { /* silencioso: tenta de novo no próximo ciclo */ }).contarPendentes();
+/* Os selos do menu chegam pelo pulso (v8Pulso, a cada 2 minutos, só com a aba visível): uma chamada só em vez de uma por selo. */
+/** Novo número de pendentes (só para quem autoriza). */
+function aplicarPend(n) {
+  if (typeof n !== 'number' || !pode('autorizar') || n === S.pend) return;
+  S.pend = n; renderNav();
+  if (!S.busy && $('#modal').classList.contains('hidden') && (S.v === 'autorizar' || (S.v === 'acessos' && S.acTab === 'autorizar'))) recarregarFila();
+  else if (S.v === 'acessos' && S.ac) atualizarSeloAcessos(); // só o selo: não apaga formulário nem edição em curso
 }
-
-/** Consulta silenciosa de metas novas (a cada 2 minutos, só com a aba visível). */
-function sondarMetas() {
-  if (!S.u || !tela('minhas') || document.hidden) return;
-  google.script.run.withSuccessHandler(function (n) {
-    if (typeof n !== 'number' || n === S.metasNovas) return;
-    S.metasNovas = n; renderNav();
-    if (S.v === 'minhas' && !S.busy && $('#modal').classList.contains('hidden')) loadMinhas(); // quem já está na tela vê a meta nova na hora
-  }).withFailureHandler(function () { /* silencioso: tenta de novo no próximo ciclo */ }).contarMetasNovas();
+/** Novo número de metas novas. */
+function aplicarMetasNovas(n) {
+  if (typeof n !== 'number' || !tela('minhas') || n === S.metasNovas) return;
+  S.metasNovas = n; renderNav();
+  if (S.v === 'minhas' && !S.busy && $('#modal').classList.contains('hidden')) loadMinhas(); // quem já está na tela vê a meta nova na hora
+}
+/** Resposta do pulso: cada selo que veio é aplicado; o que não veio (sem permissão ou erro no servidor) mantém o último valor. */
+function aplicarPulso(r) {
+  if (!r || !S.u || !Array.isArray(S.u.telas)) return; // boot que falhou deixa S.u sem telas: nada a aplicar
+  aplicarPend(r.pend);
+  aplicarMetasNovas(r.metasNovas);
+  if (r.fb) aplicarFbSonda(r.fb);
+  if (typeof r.online === 'number') { const n = $('#onlineN'); if (n) n.textContent = r.online; }
 }
 
 /* ---------- temas: automático, claro, escuro e laranja ---------- */
@@ -130,9 +132,9 @@ function cmdDesenhar() {
 }
 function cmdAbrir() {
   if (!S.u) return;
-  S.cmd = { lista: [], idx: 0 }; $('#cmdk').classList.remove('hidden'); $('#cmdIn').value = ''; cmdDesenhar(); $('#cmdIn').focus();
+  S.cmd = { lista: [], idx: 0 }; $('#cmdk').classList.remove('hidden'); $('#cmdIn').value = ''; cmdDesenhar(); abrirDialogo('#cmdk', $('#cmdIn'));
 }
-function cmdFechar() { $('#cmdk').classList.add('hidden'); }
+function cmdFechar() { const c = $('#cmdk'); if (c.classList.contains('hidden')) return; c.classList.add('hidden'); fecharDialogo('#cmdk'); }
 function cmdIr(i) { const x = S.cmd.lista[i]; if (!x) return; cmdFechar(); x.go(); }
 function atalhos() {
   modal('<div class="mhd"><h2 id="modalT">Atalhos de teclado</h2><button type="button" class="btn ico" data-fechar aria-label="Fechar">' + ic('x', 16) + '</button></div>' +
@@ -200,19 +202,33 @@ function abrirCadastro() {
   const hs = S.bl.hubs || []; $('#cdHubW').classList.toggle('hidden', !hs.length);
   $('#cdHub').innerHTML = '<option value="">' + esc(tr('Selecione o Hub')) + '</option>' + hs.map(function (h) { return '<option value="' + esc(h.id) + '">' + esc(h.nome) + '</option>'; }).join('');
   $('#cdEmail').value = S.bl.email; $('#cdEmail').readOnly = true;
-  $$('[data-lg-err]').forEach(function (s) { s.textContent = ''; });
+  limparErrosCad();
   painelLogin('lgCad'); $('#cdNome').focus();
+}
+/** Campo de cada erro do cadastro (a chave vem do servidor ou da validação local). */
+const CAMPO_CAD = { nome: 'cdNome', cargo: 'cdCargo', cargoOutro: 'cdOutro', hub: 'cdHub', turno: 'cdTurno', email: 'cdEmail' };
+function limparErrosCad() {
+  $$('[data-lg-err]').forEach(function (s) { s.textContent = ''; });
+  Object.keys(CAMPO_CAD).forEach(function (k) { const c = $('#' + CAMPO_CAD[k]); if (c) c.removeAttribute('aria-invalid'); });
 }
 async function enviarCadastro() {
   if (S.busy) return;
   const o = { nome: $('#cdNome').value.replace(/\s+/g, ' ').trim(), cargo: $('#cdCargo').value, cargoOutro: $('#cdOutro').value.replace(/\s+/g, ' ').trim(), email: $('#cdEmail').value.trim().toLowerCase(), idioma: idiomaAtual(), hub: $('#cdHub').value, turno: $('#cdTurno').value }, e = {};
-  $$('[data-lg-err]').forEach(function (s) { s.textContent = ''; });
+  limparErrosCad();
   if (o.nome.length < 3) e.nome = 'Informe o nome completo.';
   if (!o.cargo) e.cargo = 'Selecione o cargo.'; else if (o.cargo === 'Outros' && o.cargoOutro.length < 2) e.cargoOutro = 'Digite o cargo.';
   if ((S.bl.hubs || []).length && !o.hub) e.hub = 'Selecione o Hub.';
   if ((S.bl.hubs || []).length && o.cargo === 'Líder' && !o.turno) e.turno = 'Selecione o turno.';
   if (!o.email) e.email = 'Campo obrigatório.'; else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(o.email)) e.email = 'E-mail inválido.';
-  const mostrar = function (er) { Object.keys(er).forEach(function (k) { const s = $('[data-lg-err="' + k + '"]'); if (s) s.textContent = er[k]; }); };
+  // erro visível, campo marcado como inválido (lido junto com a mensagem pelo aria-describedby) e foco no primeiro campo com erro
+  const mostrar = function (er) {
+    let primeiro = null;
+    Object.keys(er).forEach(function (k) {
+      const s = $('[data-lg-err="' + k + '"]'); if (s) s.textContent = er[k];
+      const c = CAMPO_CAD[k] && $('#' + CAMPO_CAD[k]); if (c) { c.setAttribute('aria-invalid', 'true'); if (!primeiro) primeiro = c; }
+    });
+    if (primeiro) primeiro.focus();
+  };
   if (Object.keys(e).length) { mostrar(e); return; }
   S.busy = true; const b = $('#cdEnviar'); b.disabled = true; b.textContent = 'Enviando…';
   try {
@@ -304,9 +320,6 @@ function iniciarApp(b) {
   v8Init();
   nav(['matriz', 'form', 'minhas', 'geral'].filter(tela)[0] || S.u.telas[0]);
   setInterval(relUpd, 30000);
-  if (pode('autorizar')) setInterval(sondar, window.PC_POLL || 120000);
-  if (tela('minhas')) setInterval(sondarMetas, window.PC_POLL || 120000);
-  setInterval(sondarFb, window.PC_POLL || 120000);
 }
 let bootLigado = false;
 function tentarDeNovo() {

@@ -107,11 +107,12 @@ T('falha no log desfaz o registro e a designação (nada fica pela metade)', () 
   for (let i = 0; i < 3; i++) baixa('aud1@x.com', 'Davi Reis'); gerar();
   const id = lista().pendencias.find((p) => p.colaborador === 'Davi Reis').id;
   A.as('sl@x.com'); A.run('var __r = registrar_; registrar_ = function () { throw new Error("log fora"); };');
-  nega(() => A.call('designarFeedback', id, 'aud1@x.com'), 'log'); A.run('registrar_ = __r;');
+  // desde a v10.2 o usuário vê a mensagem padrão do desfazer; o erro técnico vai para o log de atividade
+  nega(() => A.call('designarFeedback', id, 'aud1@x.com'), 'nada foi alterado'); A.run('registrar_ = __r;');
   eq(pend().find((p) => p[0] === id)[11], 'Aberta');
   A.call('designarFeedback', id, 'aud1@x.com'); A.as('aud1@x.com');
   A.run('var __r = registrar_; registrar_ = function () { throw new Error("log fora"); };');
-  const antes = regs().length; nega(() => A.call('registrarFeedback', id, 'Conversei sobre as falhas de conferência e orientei o passo a passo correto para cada etapa da doca.'), 'log'); A.run('registrar_ = __r;');
+  const antes = regs().length; nega(() => A.call('registrarFeedback', id, 'Conversei sobre as falhas de conferência e orientei o passo a passo correto para cada etapa da doca.'), 'nada foi alterado'); A.run('registrar_ = __r;');
   eq(regs().length, antes); eq(pend().find((p) => p[0] === id)[11], 'Designada');
 });
 T('atrasado: continua aberto, alerta o Site Leader e o designado, e ainda pode ser registrado', () => {
@@ -161,5 +162,32 @@ T('gatilho com erro não derruba a lista do Site Leader; a geração por Hub reg
 T('o login não falha se o contador de feedback quebrar', () => {
   A.as('sl@x.com'); A.run('var __r = resumoFb_; resumoFb_ = function () { throw new Error("boom"); };');
   const b = A.call('bootstrap'); A.run('resumoFb_ = __r;'); eq(b.fb.fbMeus, 0); ok(b.ok !== false);
+});
+T('sigilo: só o Admin sabe quem auditou; Site Leader e quem dá o feedback não recebem o auditor', () => {
+  const temAud = (r) => JSON.stringify(r).indexOf('aud1@x.com') > -1 && r.pendencias.some((p) => (p.auditores || []).length);
+  const sl = lista('sl@x.com'); ok(sl.pendencias.length > 0, 'cenário sem pendências');
+  ok(sl.pendencias.every((p) => !(p.auditores || []).length && p.auditorias.every((x) => !('aud' in x))), 'Site Leader recebeu o auditor');
+  ok(temAud(lista('owner@x.com')), 'Admin deveria ver quem auditou');
+  A.as('aud1@x.com'); const meus = A.call('meusFeedbacks'); ok(!/"aud"|auditores/.test(JSON.stringify(meus)), 'quem dá o feedback recebeu o auditor');
+});
+T('ver quem auditou: o Admin libera por perfil (permissão ver_auditor); quem recebe vê o nome de quem auditou', () => {
+  A.as('owner@x.com'); const perf = A.call('listarAcessos').perfis.find((p) => p.nome === 'Site Leader');
+  ok(perf.perms.indexOf('ver_auditor') < 0, 'Site Leader começa sem a permissão');
+  const r = A.call('salvarPerfil', Object.assign({}, perf, { perms: perf.perms.concat(['ver_auditor']) }), false); eq(r.ok, true, JSON.stringify(r));
+  const sl = lista('sl@x.com'); ok(sl.pendencias.some((p) => (p.auditores || []).length), 'liberado: Site Leader recebe os auditores');
+  ok(sl.pendencias.some((p) => p.auditorias.some((x) => x.audNome)), 'liberado: cada auditoria traz o nome de quem auditou');
+  A.as('owner@x.com'); eq(A.call('salvarPerfil', Object.assign({}, perf), false).ok, true); // volta a negar
+  ok(lista('sl@x.com').pendencias.every((p) => !(p.auditores || []).length && p.auditorias.every((x) => !x.audNome && !x.aud)), 'negado de novo');
+});
+T('ver quem auditou: quem dá o feedback só vê com a permissão no perfil dele', () => {
+  A.as('aud1@x.com'); ok(!/"aud"|audNome/.test(JSON.stringify(A.call('meusFeedbacks'))), 'sem a permissão não vê');
+  A.as('owner@x.com'); const perf = A.call('listarAcessos').perfis.find((p) => p.nome === 'Auditor');
+  eq(A.call('salvarPerfil', Object.assign({}, perf, { perms: perf.perms.concat(['ver_auditor']) }), false).ok, true);
+  A.as('aud1@x.com'); const m = A.call('meusFeedbacks'); ok(m.some((p) => p.auditorias.some((x) => x.audNome)), 'com a permissão vê quem auditou');
+  A.as('owner@x.com'); eq(A.call('salvarPerfil', Object.assign({}, perf), false).ok, true);
+});
+T('ver quem auditou: só quem edita perfis (Admin) concede; o Site Leader não consegue', () => {
+  A.as('sl@x.com'); let erro = ''; try { const pf = A.call('listarAcessos').perfis.find((p) => p.nome === 'Auditor'); const r = A.call('salvarPerfil', Object.assign({}, pf, { perms: pf.perms.concat(['ver_auditor']) }), false); erro = r.ok ? '' : 'recusado'; } catch (e) { erro = e.message; }
+  ok(erro, 'Site Leader conseguiu conceder');
 });
 fim('v10 fase 3 (feedback)');

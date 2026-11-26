@@ -56,7 +56,12 @@ function pessoasAuditaveis_(a, pessoas) {
   return colabs.concat(pessoas.filter(function (p) { return p.Cargo === 'Líder' && lids.indexOf(semAcento_(p.Nome)) > -1; }));
 }
 /** Regra usada só para VER dados: regra ilegível nunca amplia a visão (cai no padrão). */
-function regraVisao_(a) { const r = regraDe_(a.email); return r.ok ? r : regraPadrao_(); }
+function regraVisao_(a) {
+  const r = regraDe_(a.email);
+  if (r.ok) return r;
+  // regra ilegível: o padrão mostraria o time todo, o que pode ser mais do que a regra pretendia. Fica só o que ele mesmo auditou.
+  return Object.assign(regraPadrao_(), { proprio: false, outros: false, verProprio: false, verOutros: 'proprias' });
+}
 /**
  * O que o líder enxerga de uma auditoria: devolve os colaboradores e líderes que ele pode ver (lids vazio = auditoria oculta).
  * Time próprio: se verProprio. Outros times: o que ele mesmo auditou e, com verOutros='time', os times que a regra o deixa auditar.
@@ -78,7 +83,7 @@ function lideresConfiguraveis_(a) {
   const pf = perfis_();
   return usuariosVisiveis_(a, lerDireto_('Cad_Usuarios')).filter(function (u) {
     const p = pf[String(u.Perfil).trim()];
-    return ativo_(u) && p && p.escopo.modo === 'time' && p.perms.indexOf('regras_lider') < 0 && (!a.hubOn || !a.hubGlobal || String(u.Hub || '').trim() === a.hub);
+    return usuarioAtivo_(u) && p && p.escopo.modo === 'time' && p.perms.indexOf('regras_lider') < 0 && (!a.hubOn || !a.hubGlobal || String(u.Hub || '').trim() === a.hub);
   });
 }
 function regraOut_(r) { return { existe: r.existe, ok: r.ok, proprio: r.proprio, outros: r.outros, times: r.times, turnos: r.turnos, cores: r.cores, processos: r.processos, verProprio: r.verProprio, verOutros: r.verOutros }; }
@@ -180,11 +185,27 @@ function migrarV9() {
   limparCache_();
   return { ok: true, abaCriada: 'Cad_Regras_Lider', perfilSiteLeaderAtualizado: n > 0 };
 }
-/** Líder renomeado no cadastro: acompanha o novo nome nas listas de Times das regras (comparação exata, sem acento ignorado). */
+/**
+ * Líder renomeado no cadastro: acompanha o novo nome nas listas de Times das regras (comparação exata, sem acento ignorado).
+ * Cad_Regras_Lider não tem coluna Hub: com o isolamento ligado, só mexe nas regras de usuários do Hub atual (o mesmo nome pode ser outro líder em outro Hub).
+ * Devolve a função que desfaz as trocas (para gravarComDesfazer_). Se falhar no meio, desfaz sozinha o que já gravou antes de propagar o erro.
+ */
 function renomearTimeRegras_(antigo, novo) {
-  const s = aba_('Cad_Regras_Lider');
-  lerDireto_('Cad_Regras_Lider').forEach(function (r) {
-    const l = listaRegra_(r.Times);
-    if (l.indexOf(antigo) > -1) s.getRange(r._row, 4).setNumberFormat('@').setValue(l.map(function (x) { return x === antigo ? novo : x; }).join('|'));
-  });
+  const s = aba_('Cad_Regras_Lider'), iso = hubsAtivos_(), h = hubAtual_(), doHub = {}, feitas = [];
+  const voltar = function () { feitas.slice().reverse().forEach(function (f) { s.getRange(f[0], 4).setValue(f[1]); }); };
+  if (iso) lerBruto_('Cad_Usuarios').forEach(function (u) { if (h && String(u.Hub || '').trim() === h) doHub[emailDe_(u.Email_Google)] = 1; });
+  if (iso && !h) falhaLog_('renomear líder nas regras', new Error('Sem Hub ativo: as listas de Times das regras não foram atualizadas para "' + novo + '".')); // falha fechada, mas visível no contador da tela de Log
+  try {
+    lerDireto_('Cad_Regras_Lider').forEach(function (r) {
+      if (iso && !doHub[emailDe_(r.Email)]) return; // sem Hub atual, nenhuma regra muda (falha fechada)
+      const l = listaRegra_(r.Times);
+      if (l.indexOf(antigo) < 0) return;
+      s.getRange(r._row, 4).setNumberFormat('@').setValue(l.map(function (x) { return x === antigo ? novo : x; }).join('|'));
+      feitas.push([r._row, String(r.Times)]);
+    });
+  } catch (e) {
+    try { voltar(); } catch (e2) { falhaLog_('desfazer renomeação nas regras', e2); }
+    throw e;
+  }
+  return voltar;
 }

@@ -51,12 +51,12 @@ Todos os direitos reservados. Versão 7.0
       <section class="lg-card hidden" id="lgCad" aria-labelledby="lgT2">
         <h1 id="lgT2">Cadastro</h1>
         <p class="lg-sub">Preencha os dados abaixo. Um administrador vai analisar o pedido.</p>
-        <label>Nome completo <span class="req">*</span><input id="cdNome" maxlength="120" autocomplete="name"><span class="err" data-lg-err="nome"></span></label>
-        <label>Cargo <span class="req">*</span><select id="cdCargo"><option value="">Selecione o cargo</option><option>Analista</option><option>Líder</option><option>Site Leader</option><option>Coordenador</option><option>Outros</option></select><span class="err" data-lg-err="cargo"></span></label>
-        <label class="hidden" id="cdOutroW">Qual é o cargo? <span class="req">*</span><input id="cdOutro" maxlength="60"><span class="err" data-lg-err="cargoOutro"></span></label>
-        <label class="hidden" id="cdHubW">Hub <span class="req">*</span><select id="cdHub"></select><span class="err" data-lg-err="hub"></span></label>
-        <label class="hidden" id="cdTurnoW">Turno <span class="req">*</span><select id="cdTurno"><option value="">Selecione o turno.</option><option>T1</option><option>T2</option><option>T3</option></select><span class="err" data-lg-err="turno"></span></label>
-        <label>E-mail corporativo <span class="req">*</span><input id="cdEmail" type="email" maxlength="120" autocomplete="email"><span class="err" data-lg-err="email"></span><span class="lg-dica">Use o mesmo e-mail da conta Google com a qual você entrou.</span></label>
+        <label>Nome completo <span class="req">*</span><input id="cdNome" aria-describedby="cdErr-nome" maxlength="120" autocomplete="name"></label><span class="err" id="cdErr-nome" data-lg-err="nome"></span>
+        <label>Cargo <span class="req">*</span><select id="cdCargo" aria-describedby="cdErr-cargo"><option value="">Selecione o cargo</option><option>Analista</option><option>Líder</option><option>Site Leader</option><option>Coordenador</option><option>Outros</option></select></label><span class="err" id="cdErr-cargo" data-lg-err="cargo"></span>
+        <label class="hidden" id="cdOutroW">Qual é o cargo? <span class="req">*</span><input id="cdOutro" aria-describedby="cdErr-cargoOutro" maxlength="60"></label><span class="err" id="cdErr-cargoOutro" data-lg-err="cargoOutro"></span>
+        <label class="hidden" id="cdHubW">Hub <span class="req">*</span><select id="cdHub" aria-describedby="cdErr-hub"></select></label><span class="err" id="cdErr-hub" data-lg-err="hub"></span>
+        <label class="hidden" id="cdTurnoW">Turno <span class="req">*</span><select id="cdTurno" aria-describedby="cdErr-turno"><option value="">Selecione o turno.</option><option>T1</option><option>T2</option><option>T3</option></select></label><span class="err" id="cdErr-turno" data-lg-err="turno"></span>
+        <label>E-mail corporativo <span class="req">*</span><input id="cdEmail" aria-describedby="cdErr-email" type="email" maxlength="120" autocomplete="email"><span class="lg-dica">Use o mesmo e-mail da conta Google com a qual você entrou.</span></label><span class="err" id="cdErr-email" data-lg-err="email"></span>
         <div class="lg-acoes"><button type="button" class="btn pri lg-btn" id="cdEnviar">Enviar cadastro</button><button type="button" class="btn lg-btn" id="cdVoltar">Voltar</button></div>
       </section>
       <section class="lg-card hidden" id="lgOk" aria-labelledby="lgT3">
@@ -153,7 +153,7 @@ Todos os direitos reservados. Versão 7.0
   <div id="toast" class="hidden" role="status" aria-live="polite"></div>
   <div id="rpcbar" aria-hidden="true"><i></i></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- o Chart.js é carregado só quando um gráfico vai ser desenhado (carregarChart em JS_Client), com o mesmo hash de integridade -->
   <?!= include('JS_Client'); ?>
 </body>
 </html>

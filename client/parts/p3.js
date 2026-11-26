@@ -111,7 +111,8 @@ function removerColab(F, nome) {
   if (F.colaboradores.length) sincDerivados(F);
 }
 function novoForm(p, chave) {
-  const F = { processo: p || S.procs[0] || '', doca: '', colaboradores: [], lider: '', turno: '', obs: '', resp: {}, k: '', err: {}, faltam: [], busy: false };
+  // cid: identifica este formulário; se o envio for repetido (rede caiu, erro depois de gravar), o servidor não grava duas vezes
+  const F = { processo: p || S.procs[0] || '', doca: '', colaboradores: [], lider: '', turno: '', obs: '', resp: {}, k: '', err: {}, faltam: [], busy: false, cid: 'f-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10) };
   if (chave) { if (tipoProc(F.processo)) aplicarDoca(F, chave); else aplicarLider(F, chave); }
   S.F = F;
 }
@@ -276,8 +277,8 @@ async function finalizar() {
   const bf = $('#bFin'); if (bf) { bf.disabled = true; bf.textContent = 'Salvando…'; }
   try {
     await pend.catch(function () {});
-    const respostas = itens.map(function (i) { const r = F.resp[i._row]; return { k: i._row, ok: r === 'na' ? null : r }; });
-    const r = await rpc('salvarAuditoria', { processo: F.processo, doca: F.doca, colaboradores: F.colaboradores, lider: F.lider, turno: F.turno, observacoes: F.obs, respostas: respostas });
+    const respostas = itens.map(function (i) { const r = F.resp[i._row]; return { k: i._row, id: i.ID_Subprocesso, ok: r === 'na' ? null : r }; }); // id: o servidor confere que a linha ainda é o mesmo item
+    const r = await rpc('salvarAuditoria', { processo: F.processo, doca: F.doca, colaboradores: F.colaboradores, lider: F.lider, turno: F.turno, observacoes: F.obs, respostas: respostas, clientId: F.cid });
     if (!r.ok) { F.busy = false; F.err = r.erros || {}; F.faltam = r.faltam || []; renderForm(true); toast('O servidor recusou a auditoria. Corrija os campos destacados.', true); return; }
     toast('Auditoria salva: ' + String(r.pct).replace('.', ',') + '% — ' + r.status); S.F = null; S.mx = {}; nav('matriz');
   } catch (e) { F.busy = false; if (bf) { bf.disabled = false; bf.textContent = 'Finalizar auditoria'; } }
@@ -393,8 +394,10 @@ document.addEventListener('input', function (e) {
 const SCH = {
   Cad_Estrutura: [['Tipo', ['Doca', 'Cluster'], 1, 'Tipo'], ['Identificador', 'text', 1, 'Identificador (ex: A-10)'], ['Cor', 'COR', 1, 'Cor'], ['Simbolo', 'SIMB', 1, 'Símbolo'], ['Lider_Padrao', 'LIDER', 0, 'Líder padrão'], ['Turno_Padrao', 'TURNO', 0, 'Turno padrão']],
   Cad_Pessoas: [['Nome', 'text', 1, 'Nome'], ['Cargo', ['Líder', 'Colaborador'], 1, 'Cargo'], ['Turno', 'TURNO', 1, 'Turno'], ['Lider', 'LIDER', 0, 'Líder (obrigatório p/ colaborador)'], ['Status_Ativo', ['Sim', 'Não'], 1, 'Ativo']],
-  Cad_Processos_Perguntas: [['Processo', 'PROC', 1, 'Processo'], ['ID_Subprocesso', 'text', 1, 'Sub-processo'], ['Descricao_Item', 'text', 1, 'Descrição do item'], ['Requisito_Critico', ['Sim', 'Não'], 1, 'Crítico'], ['Subprocesso_EN', 'text', 0, 'Sub-processo em inglês (opcional)'], ['Subprocesso_ES', 'text', 0, 'Sub-processo em espanhol (opcional)'], ['Descricao_EN', 'text', 0, 'Descrição em inglês (opcional)'], ['Descricao_ES', 'text', 0, 'Descrição em espanhol (opcional)']]
+  Cad_Processos_Perguntas: [['Processo', 'PROC', 1, 'Processo'], ['ID_Subprocesso', 'text', 1, 'Sub-processo'], ['Descricao_Item', 'text', 1, 'Descrição do item'], ['Requisito_Critico', ['Sim', 'Não'], 1, 'Crítico'], ['Subprocesso_EN', 'text', 0, 'Sub-processo em inglês (opcional)'], ['Subprocesso_ES', 'text', 0, 'Sub-processo em espanhol (opcional)'], ['Descricao_EN', 'text', 0, 'Descrição em inglês (opcional)'], ['Descricao_ES', 'text', 0, 'Descrição em espanhol (opcional)'], ['Feedback_Imediato', ['Sim', 'Não'], 0, 'Feedback imediato (não conforme gera feedback na hora)']]
 };
+/** Feedback imediato: só Site Leader e Admin (permissão de obrigações) veem e definem o campo; o servidor também não o envia aos outros. */
+function campoCadVisivel(c) { return c[0] !== 'Feedback_Imediato' || pode('obrigacoes'); }
 const ABA_NOME = { Cad_Estrutura: 'Docas e clusters', Cad_Pessoas: 'Pessoas', Cad_Processos_Perguntas: 'Perguntas' };
 const ABA_NOVO = { Cad_Estrutura: 'Nova doca ou cluster', Cad_Pessoas: 'Nova pessoa', Cad_Processos_Perguntas: 'Nova pergunta' };
 const ABA_EDIT = { Cad_Estrutura: 'Editar doca ou cluster', Cad_Pessoas: 'Editar pessoa', Cad_Processos_Perguntas: 'Editar pergunta' };
@@ -446,6 +449,7 @@ function acoesLinha(x) {
   if (x.r._saving) return '<span class="muted">Salvando…</span>';
   return '<div class="acts"><button type="button" class="btn sm" data-e="' + x.i + '">' + ic('pencil', 14) + 'Editar</button><span class="rmw"><button type="button" class="btn sm ico" data-m="' + x.i + '" aria-label="Mais ações" aria-haspopup="menu" aria-expanded="' + (S.cadMenu === x.i) + '">' + ic('more', 16) + '</button>' + (S.cadMenu === x.i ? menuLinha(x) : '') + '</span></div>';
 }
+const listaCadAdiada = adiar(function () { if (S.v === 'cad') listaCad(); }, BUSCA_MS); // a tela pode ter mudado durante a espera
 function listaCad() {
   const aba = S.cad, L = linhasCad(), el = $('#cList'); if (!el) return;
   const n = $('#cCount'); if (n) n.textContent = L.length + (L.length === 1 ? ' registro' : ' registros');
@@ -455,7 +459,7 @@ function listaCad() {
     el.innerHTML = ordem.map(function (k) {
       return '<details class="grupo" open><summary><span class="gt">' + esc(k) + '</span><span class="gn">' + g[k].length + '</span><button type="button" class="btn sm" data-addsub="' + esc(k) + '">' + ic('plus', 14) + 'Item</button></summary>' +
         g[k].map(function (x) {
-          return '<div class="lin' + (x.r._saving ? ' saving' : '') + '"><div class="ld">' + esc(x.r.Descricao_Item) + (x.r.Requisito_Critico === 'Sim' ? ' <span class="crit">CRÍTICO</span>' : '') + '</div>' + acoesLinha(x) + '</div>';
+          return '<div class="lin' + (x.r._saving ? ' saving' : '') + '"><div class="ld">' + esc(x.r.Descricao_Item) + (x.r.Requisito_Critico === 'Sim' ? ' <span class="crit">CRÍTICO</span>' : '') + (x.r.Feedback_Imediato === 'Sim' ? ' <span class="crit">' + esc(tr('FEEDBACK IMEDIATO')) + '</span>' : '') + '</div>' + acoesLinha(x) + '</div>';
         }).join('') + '</details>';
     }).join('') || '<div class="empty">' + (S.cadQ ? 'Nada encontrado para esta busca.' : 'Nenhuma pergunta neste processo. Use Nova pergunta para criar a primeira.') + '</div>';
     return;
@@ -472,7 +476,7 @@ function renderCad(preset) {
   const abas = abasCad();
   if (!abas.length) { $('#v-cad').innerHTML = '<div class="card">' + vz('Seu perfil não tem permissão de cadastro.') + '</div>'; return; }
   if (abas.indexOf(S.cad) < 0) { S.cad = abas[0]; S.edit = null; S.cadOpen = false; }
-  const aba = S.cad, sch = SCH[aba], ed = preset ? preset.edit : S.edit;
+  const aba = S.cad, sch = SCH[aba].filter(campoCadVisivel), ed = preset ? preset.edit : S.edit;
   if (preset) S.cadOpen = true;
   S.edit = ed || null;
   if (aba === 'Cad_Processos_Perguntas' && S.procs.indexOf(S.cadProc) < 0) S.cadProc = S.procs[0] || '';
@@ -494,8 +498,19 @@ function renderCad(preset) {
   atualizarPrevCS();
   if (preset && preset.erros) mostrarErrosCad(preset.erros);
   if (S.cadOpen && !preset) { const f = $('#v-cad .drawer [data-c]'); if (f && f.focus) f.focus(); }
+  // o drawer segue o estado em todo render: aberto = diálogo (Tab preso); fechado por qualquer caminho (X, Esc, salvar, trocar aba) = foco volta.
+  // Recusado pelo servidor (preset): o foco vai ao primeiro campo com erro. A origem é guardada por seletor: a lista é redesenhada.
+  if (S.cadOpen) abrirDialogo('#v-cad .drawer.open', preset ? $('#v-cad .drawer .invalid') : null, S.cadVolta || '#cNovo');
+  else fecharDialogo('#v-cad .drawer.open');
 }
-function abrirDrawer(ed, pre) { S.edit = ed || null; S.cadPre = pre || null; S.cadOpen = true; renderCad(); }
+/** Seletor estável de quem abriu o drawer (botão Novo ou o Editar da linha), para devolver o foco depois do redesenho. */
+function seletorVolta(el) {
+  if (!el || !el.getAttribute) return null;
+  if (el.id) return '#' + el.id;
+  const e = el.getAttribute('data-e');
+  return e === null ? null : '#v-cad [data-e="' + e + '"]';
+}
+function abrirDrawer(ed, pre) { S.cadVolta = seletorVolta(document.activeElement); S.edit = ed || null; S.cadPre = pre || null; S.cadOpen = true; renderCad(); }
 function fecharDrawer() { if (!S.cadOpen) return; S.cadOpen = false; S.edit = null; S.cadPre = null; renderCad(); }
 function atualizarPrevCS() {
   const el = $('#csPrev'); if (!el) return;
@@ -584,14 +599,24 @@ async function desfazerExclusao(aba, r) {
     S.db[aba] = x.linhas; S.mx = {}; fbarFill(); if (S.v === 'cad') renderCad(); toast('Registro restaurado');
   } catch (e) { /* aviso exibido */ } finally { S.busy = false; }
 }
+/** Nova lista com o item da linha row trocado com o vizinho (dir -1 acima, 1 abaixo), mesma regra do servidor:
+    só troca com o vizinho do mesmo processo. Cada item fica com a linha da posição nova. A lista original não muda. null = nada a trocar. */
+function trocarVizinho(linhas, row, dir) {
+  const d = Number(dir) < 0 ? -1 : 1, a = linhas.find(function (x) { return x._row === row; }), b = linhas.find(function (x) { return x._row === row + d; });
+  if (!a || !b || b.Processo !== a.Processo) return null;
+  return linhas.map(function (x) { return x === a ? Object.assign({}, b, { _row: a._row }) : x === b ? Object.assign({}, a, { _row: b._row }) : x; });
+}
+/** Ordenação otimista: a troca aparece na hora; se o servidor recusar ou falhar, a lista volta ao que era e o aviso aparece. */
 async function moverCad(i, dir) {
   if (S.busy) return;
   const aba = S.cad, r = S.db[aba][i]; if (!r) return;
+  const antes = S.db[aba], nova = trocarVizinho(antes, r._row, dir);
   S.cadMenu = -1; S.busy = true;
+  if (nova) { S.db[aba] = nova; renderCad(); }
   try {
     const x = await rpc('moverCadastro', aba, r._row, semLinha(r), dir);
-    if (!x.ok) toast(x.msg, true); else { S.db[aba] = x.linhas; S.mx = {}; }
-  } catch (e) { /* aviso exibido */ } finally { S.busy = false; renderCad(); }
+    if (!x.ok) { S.db[aba] = antes; toast(x.msg, true); } else { S.db[aba] = x.linhas; S.mx = {}; }
+  } catch (e) { S.db[aba] = antes; /* aviso exibido */ } finally { S.busy = false; renderCad(); }
 }
 document.addEventListener('click', function (e) {
   const t = e.target;
@@ -626,7 +651,7 @@ document.addEventListener('change', function (e) {
 document.addEventListener('input', function (e) {
   const t = e.target;
   if (!t.closest || !t.closest('#v-cad')) return;
-  if (t.id === 'cBusca') { S.cadQ = t.value; S.cadMenu = -1; listaCad(); return; }
+  if (t.id === 'cBusca') { S.cadQ = t.value; S.cadMenu = -1; listaCadAdiada(); return; }
   if (!t.dataset.c) return;
   t.classList.remove('invalid');
   const s = $('#v-cad [data-err="' + t.dataset.c + '"]'); if (s) s.textContent = '';
@@ -643,12 +668,13 @@ function loadCfgBase() {
     '<label>Vida útil da auditoria (dias) <span class="req">*</span><input type="number" min="1" step="1" id="k1" value="' + esc(S.cfg.DIAS_VIDA_UTIL_AUDITORIA) + '"><span class="err" id="e1"></span></label>' +
     '<label>Nota de corte (%) <span class="req">*</span><input type="number" min="0" max="100" step="any" id="k2" value="' + esc(S.cfg.NOTA_CORTE_PCT) + '"><span class="err" id="e2"></span></label>' +
     '<label>Nota média (%) <span class="req">*</span><input type="number" min="0" max="100" step="any" id="k3" value="' + esc(S.cfg.NOTA_MEDIA_PCT) + '"><span class="err" id="e3"></span></label>' +
-    '<label>Poucas auditorias: abaixo de <span class="req">*</span><input type="number" min="1" max="50" step="1" id="k4" value="' + esc(S.cfg.POUCAS_AUDITORIAS == null ? 3 : S.cfg.POUCAS_AUDITORIAS) + '"><small class="muted">Quem tem menos auditorias que isso aparece com o aviso "Poucas auditorias", porque a nota média ainda não é confiável.</small><span class="err" id="e4"></span></label></div>' +
+    '<label>Poucas auditorias: abaixo de <span class="req">*</span><input type="number" min="1" max="50" step="1" id="k4" value="' + esc(S.cfg.POUCAS_AUDITORIAS == null ? 3 : S.cfg.POUCAS_AUDITORIAS) + '"><small class="muted">Quem tem menos auditorias que isso aparece com o aviso "Poucas auditorias", porque a nota média ainda não é confiável.</small><span class="err" id="e4"></span></label>' +
+    '<label>Feedback obrigatório: auditorias abaixo da nota média <span class="req">*</span><input type="number" min="1" max="50" step="1" id="k5" aria-describedby="k5d e5" value="' + esc(S.cfg.FEEDBACK_MIN_AUDITORIAS == null ? 3 : S.cfg.FEEDBACK_MIN_AUDITORIAS) + '"><small class="muted" id="k5d">Quantas auditorias abaixo da nota média, em 30 dias, tornam o feedback obrigatório. Vale para os próximos feedbacks gerados; os que já existem não mudam.</small><span class="err" id="e5"></span></label></div>' +
     '<div class="card" style="max-width:760px"><b>Como as cores são definidas</b><div id="kFaixas" class="legend" style="flex-direction:column;gap:6px"></div></div>' +
     '<div class="card" style="max-width:760px"><b>Vários colaboradores por auditoria</b><p class="muted">Marque os processos em que uma mesma auditoria pode valer para mais de um colaborador (até ' + MAX_COLAB + '). A nota é única e vale para todos.</p>' +
     '<div class="grid" id="kMulti">' + S.procs.map(function (p) { return '<label class="perm"><input type="checkbox" value="' + esc(p) + '"' + (multi(p) ? ' checked' : '') + '><span><b>' + esc(p) + '</b></span></label>'; }).join('') + '</div></div>' +
     '<div class="savebar hidden" id="cfgBar" role="status"><span>Alterações não salvas</span><span class="sp"></span><button type="button" class="btn" id="kDesc">Descartar</button><button type="button" class="btn pri" id="kSalvar">Salvar configurações</button></div>';
-  const foto = function () { return [$('#k1').value, $('#k2').value, $('#k3').value, $('#k4').value].concat($$('#kMulti input').map(function (i) { return i.checked ? '1' : '0'; })).join('|'); };
+  const foto = function () { return [$('#k1').value, $('#k2').value, $('#k3').value, $('#k4').value, $('#k5').value].concat($$('#kMulti input').map(function (i) { return i.checked ? '1' : '0'; })).join('|'); };
   let base = foto();
   const sujo = function () { $('#cfgBar').classList.toggle('hidden', foto() === base); };
   $('#v-cfg').oninput = $('#v-cfg').onchange = sujo;
@@ -662,19 +688,23 @@ function loadCfgBase() {
   };
   faixas(); $('#k2').oninput = $('#k3').oninput = faixas;
   $('#kSalvar').onclick = async function () {
-    ['e1', 'e2', 'e3', 'e4'].forEach(function (id) { $('#' + id).textContent = ''; });
-    const v1 = $('#k1').value, v2 = $('#k2').value, v3 = $('#k3').value, v4 = $('#k4').value, c = Number(v2), m = Number(v3);
-    if (vazio(v4) || !(Number(v4) >= 1) || Number(v4) > 50 || Math.floor(Number(v4)) !== Number(v4)) $('#e4').textContent = 'Informe um número inteiro entre 1 e 50.';
+    ['e1', 'e2', 'e3', 'e4', 'e5'].forEach(function (id) { $('#' + id).textContent = ''; $('#k' + id.slice(1)).removeAttribute('aria-invalid'); });
+    const v1 = $('#k1').value, v2 = $('#k2').value, v3 = $('#k3').value, v4 = $('#k4').value, v5 = $('#k5').value, c = Number(v2), m = Number(v3);
+    const int150 = function (v) { return !vazio(v) && Number(v) >= 1 && Number(v) <= 50 && Math.floor(Number(v)) === Number(v); };
+    if (!int150(v4)) $('#e4').textContent = 'Informe um número inteiro entre 1 e 50.';
+    if (!int150(v5)) $('#e5').textContent = 'Informe um número inteiro entre 1 e 50.';
     if (vazio(v1) || !(Number(v1) >= 1) || Math.floor(Number(v1)) !== Number(v1)) $('#e1').textContent = 'Informe um número inteiro de dias, 1 ou mais.';
     if (vazio(v2) || isNaN(c) || c < 0 || c > 100) $('#e2').textContent = 'Informe um valor entre 0 e 100.';
     if (vazio(v3) || isNaN(m) || m < 0 || m > 100) $('#e3').textContent = 'Informe um valor entre 0 e 100.';
     else if (!$('#e2').textContent && m <= c) $('#e3').textContent = 'A nota média deve ser maior que a nota de corte.';
-    if ($('#e1').textContent || $('#e2').textContent || $('#e3').textContent || $('#e4').textContent) { toast('Corrija os campos destacados.', true); return; }
+    const comErro = ['1', '2', '3', '4', '5'].filter(function (n) { return $('#e' + n).textContent; });
+    comErro.forEach(function (n) { $('#k' + n).setAttribute('aria-invalid', 'true'); });
+    if (comErro.length) { toast('Corrija os campos destacados.', true); $('#k' + comErro[0]).focus(); return; }
     const mu = {}; $$('#kMulti input').forEach(function (i) { mu[i.value] = i.checked; });
     const b = $('#kSalvar'); b.disabled = true; b.textContent = 'Salvando…';
     try {
-      const r = await rpc('salvarConfigs', { dias: v1, corte: v2, media: v3, poucas: v4, multi: mu });
-      if (!r.ok) { if (r.erros.dias) $('#e1').textContent = r.erros.dias; if (r.erros.corte) $('#e2').textContent = r.erros.corte; if (r.erros.media) $('#e3').textContent = r.erros.media; if (r.erros.poucas) $('#e4').textContent = r.erros.poucas; toast('O servidor recusou os valores.', true); }
+      const r = await rpc('salvarConfigs', { dias: v1, corte: v2, media: v3, poucas: v4, fbMin: v5, multi: mu });
+      if (!r.ok) { if (r.erros.dias) $('#e1').textContent = r.erros.dias; if (r.erros.corte) $('#e2').textContent = r.erros.corte; if (r.erros.media) $('#e3').textContent = r.erros.media; if (r.erros.poucas) $('#e4').textContent = r.erros.poucas; if (r.erros.fbMin) $('#e5').textContent = r.erros.fbMin; toast('O servidor recusou os valores.', true); }
       else { S.cfg = r.config; S.mx = {}; base = foto(); sujo(); toast('Configurações salvas'); }
     } catch (e) { /* aviso exibido */ } finally { b.disabled = false; b.textContent = 'Salvar configurações'; }
   };

@@ -76,7 +76,12 @@ T('exportação é registrada no log uma vez por exportação (não a cada lote)
 T('agendamento: sem identidade roda no máximo uma vez por hora; com outra pessoa é negado; dono roda', () => {
   A.as('aud1@x.com'); let m = ''; try { A.call('enviarRelatoriosAgendados'); } catch (e) { m = e.message; } eq(m, 'Acesso negado.');
   A.email = ''; A.efetivo = 'owner@x.com'; A.props = {};
-  A.call('enviarRelatoriosAgendados'); m = ''; try { A.call('enviarRelatoriosAgendados'); } catch (e) { m = e.message; } eq(m, 'Acesso negado.', 'segunda chamada sem identidade na mesma hora');
+  // o limite de uma vez por hora vale no horário do gatilho (22h ou depois): antes disso a execução só é adiada
+  const DR = A.ctx.Date, NOITE = Date.UTC(2026, 10, 26, 22, 30);
+  A.ctx.Date = class extends DR { constructor(...a) { if (a.length) super(...a); else super(NOITE); } static now() { return NOITE; } };
+  try {
+    A.call('enviarRelatoriosAgendados'); m = ''; try { A.call('enviarRelatoriosAgendados'); } catch (e) { m = e.message; } eq(m, 'Acesso negado.', 'segunda chamada sem identidade na mesma hora');
+  } finally { A.ctx.Date = DR; }
   A.as('owner@x.com'); ok(A.call('enviarRelatoriosAgendados') !== undefined);
 });
 fim();

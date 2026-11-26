@@ -149,8 +149,9 @@ const TELAS_ADM = TELAS_ALL.concat('autorizar');
   await TA('Por doca: busca e ordenação no navegador', async () => {
     const t = await abrir(A, 'ana@x.com'); await t.nav('doca');
     const antes = t.$$('#v-doca tbody tr:not(.hidden)').length;
-    t.set('#v-doca input[data-busca]', 'Cluster', 'input'); ok(t.$$('#v-doca tbody tr:not(.hidden)').length < antes);
-    t.set('#v-doca input[data-busca]', '', 'input');
+    // a busca espera a digitação parar (BUSCA_MS = 200 ms no cliente)
+    t.set('#v-doca input[data-busca]', 'Cluster', 'input'); await sleep(260); ok(t.$$('#v-doca tbody tr:not(.hidden)').length < antes);
+    t.set('#v-doca input[data-busca]', '', 'input'); await sleep(260);
     t.$('#v-doca th[data-s="n"]').click();
     eq(t.$('#v-doca th[data-s="n"]').getAttribute('aria-sort'), 'ascending');
   });

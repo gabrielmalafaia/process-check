@@ -26,6 +26,10 @@ async function abrir(A, email, opts) {
   if (!opts.semChart) {
     win.Chart = function (el, cfg) { graficos.push({ id: el.id, cfg }); this.destroy = () => {}; };
     win.Chart.defaults = { font: {} };
+  } else {
+    // o cliente baixa o Chart.js sob demanda; aqui o CDN falha (o jsdom não baixa scripts), como numa rede que bloqueia o CDN
+    const ap = win.HTMLHeadElement.prototype.appendChild;
+    win.HTMLHeadElement.prototype.appendChild = function (n) { const r = ap.call(this, n); if (n.tagName === 'SCRIPT' && /cdn/.test(n.src)) setTimeout(() => n.onerror && n.onerror(new win.Event('error')), 0); return r; };
   }
   const build = (ok, fail) => new Proxy({}, { get(_, name) {
     if (name === 'withSuccessHandler') return f => build(f, fail);

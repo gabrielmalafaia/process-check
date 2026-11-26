@@ -30,11 +30,15 @@ const aba = async (t, id) => { await t.click('#pgTab-' + id); };
     ok(/Feedback designado/.test(t.toast()), t.toast()); ok(/Designado/.test(t.$('#v-programacao table').textContent) && /Audi Dois/.test(t.$('#v-programacao table').textContent));
     eq(A.emails.filter((m) => m.to === 'aud2@x.com').length, 1); eq(t.erros, []);
   });
-  await TA('aviso (não bloqueio) quando o escolhido fez uma das auditorias; ainda designa', async () => {
-    const A = cen(); const t = await abrir(A, 'sl@x.com'); await t.nav('programacao'); await aba(t, 'feedbacks');
+  await TA('aviso (não bloqueio) quando o escolhido fez uma das auditorias: só o Admin vê; ainda designa', async () => {
+    const A = cen(); const t = await abrir(A, 'owner@x.com'); await t.nav('programacao'); await aba(t, 'feedbacks');
     t.set('[data-fb-sel]', 'aud1@x.com'); ok(/fez uma ou mais das auditorias/.test(t.$('[data-fb-av]').textContent));
     t.set('[data-fb-sel]', 'ana@x.com'); eq(t.$('[data-fb-av]').textContent, '');
     t.set('[data-fb-sel]', 'aud1@x.com'); await t.click('[data-fb-des]'); await t.idle(); eq(String(A.sheets.Feedback_Pendencias.d[1][11]), 'Designada'); eq(t.erros, []);
+  });
+  await TA('sigilo: o Site Leader designa sem saber quem auditou (sem o aviso)', async () => {
+    const A = cen(); const t = await abrir(A, 'sl@x.com'); await t.nav('programacao'); await aba(t, 'feedbacks');
+    t.set('[data-fb-sel]', 'aud1@x.com'); eq(t.$('[data-fb-av]').textContent, ''); eq(t.erros, []);
   });
   await TA('designado: tela Meus feedbacks aparece pelos dados, com selo; contador de caracteres libera o botão; registra', async () => {
     const A = cen(); A.as('sl@x.com'); const id = A.call('listarFeedbacks').pendencias[0].id; A.call('designarFeedback', id, 'aud2@x.com');
@@ -93,6 +97,42 @@ const aba = async (t, id) => { await t.click('#pgTab-' + id); };
     const A = cen();
     const en = await abrir(A, 'sl@x.com', { lang: 'en' }); await en.nav('programacao'); await aba(en, 'feedbacks'); ok(/Mandatory feedbacks/.test(en.$('#v-programacao').textContent) && /Waiting for assignment/.test(en.$('#v-programacao').textContent), en.$('#v-programacao').textContent.slice(0, 200));
     const es = await abrir(A, 'sl@x.com', { lang: 'es' }); await es.nav('programacao'); await aba(es, 'feedbacks'); ok(/Feedbacks obligatorios/.test(es.$('#v-programacao').textContent)); eq(en.erros.concat(es.erros), []);
+  });
+  await TA('ver quem auditou: com a permissão liberada pelo Admin, o Site Leader vê "Auditado por" e o aviso ao designar', async () => {
+    const A = cen(); A.as('owner@x.com'); const perf = A.call('listarAcessos').perfis.find((p) => p.nome === 'Site Leader');
+    A.call('salvarPerfil', Object.assign({}, perf, { perms: perf.perms.concat(['ver_auditor']) }), false);
+    const t = await abrir(A, 'sl@x.com'); await t.nav('programacao'); await aba(t, 'feedbacks');
+    ok(/Auditado por Audi Um/.test(t.$('#pgPainel').textContent), 'sem o nome de quem auditou');
+    t.set('[data-fb-sel]', 'aud1@x.com'); ok(/fez uma ou mais das auditorias/.test(t.$('[data-fb-av]').textContent)); eq(t.erros, []);
+  });
+  await TA('ver quem auditou: sem a permissão, nenhum nome de auditor aparece', async () => {
+    const A = cen(); const t = await abrir(A, 'sl@x.com'); await t.nav('programacao'); await aba(t, 'feedbacks');
+    ok(!/Auditado por/.test(t.$('#pgPainel').textContent)); ok(!/Audi Um|aud1@x\.com/.test(JSON.stringify(t.win.__S.fbl.pendencias)), 'o dado chegou ao navegador'); // "responsaveis" lista quem pode ser designado: não é quem auditou
+  });
+  // v10.9: feedback imediato (pergunta marcada pelo Site Leader; uma não conformidade nela gera a pendência na hora)
+  const cenImed = () => {
+    const A = cen(); A.as('owner@x.com');
+    const o = A.call('listarCadastro', 'Cad_Processos_Perguntas').find((x) => x.Processo === 'Recebimento' && x.Descricao_Item === 'Recebimento item 10');
+    A.as('sl@x.com'); A.call('salvarCadastro', 'Cad_Processos_Perguntas', Object.assign({}, o, { Feedback_Imediato: 'Sim' }), o);
+    A.audit('aud1@x.com', 'Recebimento', { conf: 9, nc: 1, f: { doca: '36', colaboradores: ['Bruno Lima'] } });
+    return A;
+  };
+  await TA('feedback imediato: em vermelho, primeiro da lista e com o motivo (a pergunta) para o Site Leader', async () => {
+    const A = cenImed(); const t = await abrir(A, 'sl@x.com'); await t.nav('programacao'); await aba(t, 'feedbacks');
+    const linhas = t.$$('#pgPainel tbody tr'); ok(linhas[0].classList.contains('fb-imed'), 'imediato deveria vir primeiro e marcado');
+    ok(/Feedback imediato/.test(linhas[0].textContent) && /Recebimento item 10/.test(linhas[0].textContent), linhas[0].textContent);
+    eq(t.$$('#pgPainel tr.fb-imed').length, 1); eq(t.erros, []);
+  });
+  await TA('feedback imediato: quem dá o feedback também vê o destaque e o motivo', async () => {
+    const A = cenImed(); A.as('sl@x.com'); const id = A.call('listarFeedbacks').pendencias.find((p) => p.imediato).id; A.call('designarFeedback', id, 'aud2@x.com');
+    const t = await abrir(A, 'aud2@x.com'); await t.nav('feedbacks');
+    const c = t.$('#v-feedbacks .fb-imed'); ok(c, 'sem destaque'); ok(/Recebimento item 10/.test(c.textContent)); eq(t.erros, []);
+  });
+  await TA('cadastro de perguntas: o campo de feedback imediato aparece só para Site Leader e Admin', async () => {
+    const A = cen();
+    const abre = async (email) => { const t = await abrir(A, email); await t.nav('cad'); const tb = t.$('#v-cad [data-t="Cad_Processos_Perguntas"]'); if (tb) await t.click(tb); await t.click(t.$('#v-cad [data-addsub]')); return t; };
+    const sl = await abre('sl@x.com'); ok(sl.$('[data-c="Feedback_Imediato"]'), 'Site Leader deveria ver o campo'); eq(sl.erros, []);
+    const an = await abre('ana@x.com'); ok(!an.$('[data-c="Feedback_Imediato"]'), 'Analista não deveria ver o campo'); eq(an.erros, []);
   });
   console.log('Cliente v10 fase 3 (feedback): ' + R.ok + ' passaram, ' + R.f.length + ' falharam');
   R.f.forEach(x => console.log('  FALHA: ' + x)); process.exit(R.f.length ? 1 : 0);

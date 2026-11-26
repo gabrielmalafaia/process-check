@@ -7,10 +7,11 @@ Todos os direitos reservados. Versão 7.0
 /* Tokens. Laranja só como acento; neutros no resto; cores vivas só para STATUS (verde, amarelo, vermelho). */
 :root{
   --p:#CC3D15;--p-s:rgba(204,61,21,.10);--p-d:#AD3010;--on-p:#FFFFFF;
-  --bg:#F5F6F7;--card:#FFFFFF;--tx:#1F2328;--tx2:#4B5563;--mut:#6B7280;--bd:#E4E7EB;--bd2:#CBD2D9;--hov:#F3F4F6;
+  --bg:#F5F6F7;--card:#FFFFFF;--tx:#1F2328;--tx2:#4B5563;--mut:#5F6672;--bd:#E4E7EB;--bd2:#CBD2D9;--hov:#F3F4F6;
   --ink:#2F3640;--ink2:#A7AFB8;
   --ok:#1E9E5A;--warn:#F2B100;--bad:#D93025;--gr:#9AA3AD;--ok-t:#146C3C;--warn-t:#7A5800;--bad-t:#B3261E;
   --ok-s:rgba(30,158,90,.12);--warn-s:rgba(242,177,0,.18);--bad-s:rgba(217,48,37,.10);
+  --ok-cartao:#17804A; /* verde do cartão da Matriz com texto branco pequeno: 4,97:1 (o --ok dá 3,45:1) */
   --side:#FFFFFF;--hm:47,54,64;
   --r:8px;--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;
   --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
@@ -151,10 +152,11 @@ label>small,.lab>small{display:block;margin-top:3px}
 /* status */
 .pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:500;white-space:nowrap}
 .pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
-.pill.verde{background:var(--ok-s);color:var(--ok)}
-.pill.observacao{background:var(--warn-s);color:#9A7000}
+/* texto de status nos tokens -t (passam 4,5:1 sobre o fundo suave); o ponto colorido continua com a cor viva */
+.pill.verde{background:var(--ok-s);color:var(--ok-t)}
+.pill.observacao{background:var(--warn-s);color:var(--warn-t)}
 [data-theme=dark] .pill.observacao{color:var(--warn)}
-.pill.vermelho{background:var(--bad-s);color:var(--bad)}
+.pill.vermelho{background:var(--bad-s);color:var(--bad-t)}
 .pill.neutro{background:var(--hov);color:var(--mut)}
 .pill.no_ritmo{background:var(--ok-s);color:var(--ok-t)}.pill.atingida{background:var(--ok-s);color:var(--ok-t)}
 .pill.em_risco{background:var(--warn-s);color:var(--warn-t)}.pill.nao_atingida{background:var(--bad-s);color:var(--bad-t)}
@@ -215,7 +217,7 @@ td.cell-ell{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:n
 .mc:hover{filter:brightness(.96)}
 .mc b{font-size:17px}.mc small{opacity:.95;font-size:12px}
 .mc small.un{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
-.mc.verde{background:var(--ok)}.mc.vermelho{background:var(--bad)}
+.mc.verde{background:var(--ok-cartao)}.mc.vermelho{background:var(--bad)}
 .mc.observacao{background:var(--warn);color:#222}
 .mc.rascunho{background:repeating-linear-gradient(135deg,#F5B400 0 10px,#FFD54F 10px 20px);color:#222;border:2px dashed #7A5C00}
 .mc.rascunho::after{content:"!";position:absolute;top:8px;right:10px;width:20px;height:20px;border-radius:50%;background:#222;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
@@ -232,6 +234,9 @@ td .cs{margin-right:6px}
 /* formulário */
 .badge{background:var(--hov);border:1px solid var(--bd);border-radius:999px;padding:4px 10px;font-size:12px;display:inline-flex;align-items:center;gap:6px}
 .crit{color:var(--bad);font-size:11px;font-weight:700;margin-left:6px;letter-spacing:.3px}
+/* feedback imediato: faixa e texto em vermelho (cor de status sempre acompanhada do texto "Feedback imediato") */
+tr.fb-imed td:first-child{box-shadow:inset 4px 0 0 var(--bad)}.card.fb-imed{border-left:4px solid var(--bad)}.fb-imed-m{margin:6px 0;font-size:13px;color:var(--bad-t)}
+.fb-itens{margin:6px 0 10px;font-size:13px}.fb-itens ul{margin:4px 0 6px;padding-left:18px}.fb-itens li{margin:2px 0}.fb-itens .fb-nc{color:var(--bad-t)}.fb-itens p{margin:4px 0}
 .item{display:flex;justify-content:space-between;gap:var(--s3);align-items:center;padding:10px var(--s2);border-bottom:1px solid var(--bd);flex-wrap:wrap;border-radius:var(--r)}
 .item.miss{border:1px solid var(--bad);background:var(--bad-s)}
 .rb{display:flex;gap:6px}
@@ -352,6 +357,9 @@ body.col .autoria{display:none}
 .lg-acoes{display:flex;flex-direction:column;gap:var(--s2);margin-top:var(--s5)}
 .lg-card label{margin-bottom:var(--s3)}
 .lg-card .err{color:var(--bad);font-size:12px;display:block;margin-top:3px}
+/* erro do cadastro fica logo depois do rótulo (fora dele, para não entrar no nome do campo): encosta no campo e some quando vazio */
+.lg-card label + .err{margin:calc(-1 * var(--s3) + 3px) 0 var(--s3)}
+.lg-card .err:empty,.lg-card label.hidden + .err{display:none}
 .lg-tema{position:absolute;top:14px;right:16px;display:flex;gap:8px;z-index:3}
 .sw{display:inline-block;width:18px;height:18px;border-radius:50%;border:1px solid var(--bd2);padding:0;cursor:pointer;flex-shrink:0}
 .sw-light{background:#FFFFFF}

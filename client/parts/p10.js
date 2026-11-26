@@ -11,9 +11,25 @@ function aplicarFb(fb, user) {
   if (S.fb.fbTotalMeus > 0 && i < 0) user.telas.push('feedbacks');
   else if (S.fb.fbTotalMeus === 0 && i > -1) user.telas.splice(i, 1);
 }
+/** Itens da auditoria para quem dá o feedback: não conformes à vista (o assunto da conversa), conformes recolhidos. Sem itens (visão do Site Leader ou detalhe ilegível): nada. */
+function fbItens(x) {
+  if (!x.nc && !x.conf) return '';
+  const nome = function (i) { return esc((LANG === 'en' ? i.desc_en : LANG === 'es' ? i.desc_es : '') || i.desc) + (i.critico ? '<span class="crit">' + esc(tr('CRÍTICO')) + '</span>' : ''); };
+  const lista = function (l) { return '<ul>' + l.map(function (i) { return '<li>' + nome(i) + '</li>'; }).join('') + '</ul>'; };
+  const nc = x.nc || [], cf = x.conf || [];
+  return '<div class="fb-itens"><b class="fb-nc">' + esc(tpl(tr('Não conformes ({0})'), [nc.length])) + '</b>' + (nc.length ? lista(nc) : '<p class="muted">' + esc(tr('Nenhum item não conforme.')) + '</p>') +
+    (cf.length ? '<details><summary>' + esc(tpl(tr('Conformes ({0})'), [cf.length])) + '</summary>' + lista(cf) + '</details>' : '') + '</div>';
+}
+/** Feedback imediato: selo e motivo (as perguntas marcadas que ficaram não conformes, no texto da época). */
+function fbMotivo(p) {
+  if (!p.imediato) return '';
+  const nomes = (p.motivos || []).map(function (i) { return (LANG === 'en' ? i.desc_en : LANG === 'es' ? i.desc_es : '') || i.desc; });
+  return '<div class="fb-imed-m"><b>' + esc(tr('Feedback imediato')) + '</b>' + (nomes.length ? '<br>' + esc(tpl(tr('Motivo: {0}'), [nomes.join('; ')])) : '') + '</div>';
+}
 function fbAuditorias(p) {
   if (!p.auditorias.length) return '';
-  return '<details><summary>' + esc(tpl(tr('{0} auditoria(s) abaixo de {1}%'), [p.qtd, p.corte])) + '</summary><ul class="lista-fb">' + p.auditorias.map(function (x) { return '<li>' + esc(fmtD(x.data) + ' · ' + x.proc + ' · ' + pc(x.pct)) + '</li>'; }).join('') + '</ul></details>';
+  const temItens = p.auditorias.some(function (x) { return x.nc || x.conf; });
+  return '<details' + (temItens ? ' open' : '') + '><summary>' + esc(tpl(tr('{0} auditoria(s) abaixo de {1}%'), [p.qtd, p.corte])) + '</summary><ul class="lista-fb">' + p.auditorias.map(function (x) { return '<li>' + esc(fmtD(x.data) + ' · ' + x.proc + ' · ' + pc(x.pct)) + (x.audNome ? '<br><small class="muted">' + esc(tpl(tr('Auditado por {0}'), [x.audNome])) + '</small>' : '') + fbItens(x) + '</li>'; }).join('') + '</ul></details>'; // quem auditou só vem do servidor para quem tem "ver_auditor"
 }
 function fbTime(p) {
   const mudou = p.timeAtual !== p.timeEpoca || p.turnoAtual !== p.turnoEpoca;
@@ -43,9 +59,9 @@ function desenharFeedbacksSL() {
       ? (p.registro ? '<details><summary>' + esc(tr('Ver feedback registrado')) + '</summary><p style="margin:6px 0 2px;white-space:pre-wrap">' + esc(p.registro.texto) + '</p><small class="muted">' + esc(tpl(tr('Registrado por {0} em {1}'), [p.registro.autor, fmtDt(p.registro.registradoEm)])) + '</small></details>' : '')
       : '<label class="fld" style="margin:0"><span class="sr-only">' + esc(tpl(tr('Quem dará o feedback a {0}'), [p.colaborador])) + '</span><select data-fb-sel="' + esc(p.id) + '">' + opts(p) + '</select></label>' +
         '<button type="button" class="btn sm pri" style="margin-top:6px" data-fb-des="' + esc(p.id) + '" aria-label="' + esc(tpl(tr(p.status === 'Designada' ? 'Reatribuir o feedback de {0}' : 'Designar o feedback de {0}'), [p.colaborador])) + '">' + esc(tr(p.status === 'Designada' ? 'Reatribuir' : 'Designar')) + '</button><div class="muted" role="status" data-fb-av="' + esc(p.id) + '"></div>';
-    return '<tr><td>' + esc(p.colaborador) + '<br>' + fbTime(p) + '</td><td>' + fbAuditorias(p) + '</td><td>' + fbSituacao(p) + (p.status !== 'Aberta' && p.designadoNome ? '<br><small class="muted">' + esc(p.designadoNome) + '</small>' : '') + (p.status === 'Designada' && p.avisoPendente ? '<br><small class="muted">' + esc(tr('Aviso por e-mail pendente')) + '</small>' : '') + '</td><td>' + acao + '</td></tr>';
+    return '<tr' + (p.imediato ? ' class="fb-imed"' : '') + '><td>' + esc(p.colaborador) + '<br>' + fbTime(p) + fbMotivo(p) + '</td><td>' + fbAuditorias(p) + '</td><td>' + fbSituacao(p) + (p.status !== 'Aberta' && p.designadoNome ? '<br><small class="muted">' + esc(p.designadoNome) + '</small>' : '') + (p.status === 'Designada' && p.avisoPendente ? '<br><small class="muted">' + esc(tr('Aviso por e-mail pendente')) + '</small>' : '') + '</td><td>' + acao + '</td></tr>';
   };
-  const ord = R.pendencias.slice().sort(function (a, b) { const k = { Aberta: 0, Designada: 1, Concluida: 2 }; return k[a.status] - k[b.status] || String(a.prazo).localeCompare(String(b.prazo)); });
+  const ord = R.pendencias.slice().sort(function (a, b) { const k = { Aberta: 0, Designada: 1, Concluida: 2 }; return k[a.status] - k[b.status] || (b.imediato ? 1 : 0) - (a.imediato ? 1 : 0) || String(a.prazo).localeCompare(String(b.prazo)); }); // feedback imediato primeiro em cada situação
   el.innerHTML = '<div class="card"><div class="hd"><b>' + esc(tr('Feedbacks obrigatórios')) + '</b></div>' +
     '<p class="muted" style="margin:6px 0 10px">' + esc(tpl(tr('Quando um colaborador tem {0} ou mais auditorias abaixo da nota média em {1} dias, o feedback passa a ser obrigatório. Escolha quem vai conversar com ele: o líder tem {2} dias para registrar o que foi falado (mínimo de {3} caracteres).'), [R.minimo, R.janela, R.prazoDias, FB_MIN])) + '</p>' +
     '<div id="fbErr" role="alert"></div>' +
@@ -87,7 +103,7 @@ function desenharFeedbacksMeus() {
   const rasc = fbRascunhos();
   const feitos = L.filter(function (p) { return p.status === 'Concluida'; }), abertos = L.filter(function (p) { return p.status === 'Designada'; }).sort(function (a, b) { return String(a.prazo).localeCompare(String(b.prazo)); });
   const card = function (p) {
-    const c = '<div class="card"><div class="hd"><b role="heading" aria-level="3">' + esc(p.colaborador) + '</b>' + fbSituacao(p) + '</div><p style="margin:4px 0">' + fbTime(p) + '</p>' + fbAuditorias(p);
+    const c = '<div class="card' + (p.imediato ? ' fb-imed' : '') + '"><div class="hd"><b role="heading" aria-level="3">' + esc(p.colaborador) + '</b>' + fbSituacao(p) + '</div><p style="margin:4px 0">' + fbTime(p) + '</p>' + fbMotivo(p) + fbAuditorias(p);
     if (p.status === 'Concluida') return c + (p.registro ? '<p style="margin:10px 0 2px;white-space:pre-wrap">' + esc(p.registro.texto) + '</p><small class="muted">' + esc(tpl(tr('Registrado em {0}'), [fmtDt(p.registro.registradoEm)])) + '</small>' : '') + '</div>';
     return c + '<label class="fld" style="margin-top:10px"><span>' + esc(tr('O que foi conversado com o colaborador')) + '<span class="sr-only"> — ' + esc(p.colaborador) + '</span></span><textarea data-fb-txt="' + esc(p.id) + '" rows="5" maxlength="2000" aria-describedby="fbc-' + esc(p.id) + '" required aria-required="true"></textarea></label>' +
       '<div class="muted" id="fbc-' + esc(p.id) + '" data-fb-cont="' + esc(p.id) + '">' + esc(tpl(tr('0 de {0} caracteres no mínimo'), [FB_MIN])) + '</div><div class="sr-only" role="status" data-fb-live="' + esc(p.id) + '"></div>' +
@@ -121,18 +137,19 @@ async function registrarFbUI(id) {
 }
 
 /* ---- contadores (selos do menu) ---- */
+/** Novos contadores de feedback (do pulso ou de sondarFb). */
+function aplicarFbSonda(fb) {
+  if (!fb || JSON.stringify(fb) === JSON.stringify(S.fb)) return;
+  aplicarFb(fb, S.u); renderNav();
+  const ab = $('#pgTab-feedbacks'); if (ab && pgNaTela()) ab.innerHTML = pgRotuloAba('feedbacks', tr('Feedbacks obrigatórios'), pgNAcao());
+  if (!tela('feedbacks') && fbNaTela()) nav(['matriz', 'form', 'minhas', 'geral'].filter(tela)[0] || S.u.telas[0]);
+  else if (fbNaTela() && !S.busy && $('#modal').classList.contains('hidden') && !$$('#v-feedbacks textarea').some(function (t) { return t.value; })) loadFeedbacksMeus(); // nunca apaga um texto em digitação
+}
+/** Consulta imediata dos contadores de feedback (depois de registrar um feedback; o resto chega pelo pulso). */
 function sondarFb() {
   if (!S.u || document.hidden) return Promise.resolve();
   return new Promise(function (ok) {
-    google.script.run.withSuccessHandler(function (fb) {
-      if (fb && JSON.stringify(fb) !== JSON.stringify(S.fb)) {
-        aplicarFb(fb, S.u); renderNav();
-        const ab = $('#pgTab-feedbacks'); if (ab && pgNaTela()) ab.innerHTML = pgRotuloAba('feedbacks', tr('Feedbacks obrigatórios'), pgNAcao());
-        if (!tela('feedbacks') && fbNaTela()) nav(['matriz', 'form', 'minhas', 'geral'].filter(tela)[0] || S.u.telas[0]);
-        else if (fbNaTela() && !S.busy && $('#modal').classList.contains('hidden') && !$$('#v-feedbacks textarea').some(function (t) { return t.value; })) loadFeedbacksMeus(); // nunca apaga um texto em digitação
-      }
-      ok();
-    }).withFailureHandler(function () { ok(); }).contarFeedbacks();
+    google.script.run.withSuccessHandler(function (fb) { aplicarFbSonda(fb); ok(); }).withFailureHandler(function () { ok(); }).contarFeedbacks();
   });
 }
 function fbEventos() {

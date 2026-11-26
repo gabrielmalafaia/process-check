@@ -139,7 +139,8 @@ T('reenvio das 22h: usuário desativado, de outro Hub ou com perfil inválido sa
   A.as('sl@x.com'); A.emails.length = 0; A.mailFalha = true; const r = criar({ qtd: 14 }); A.mailFalha = false;
   const i = linhas().findIndex((l) => l[7] === 14); eq(String(linhas()[i][17]), '');
   A.sheets.Cad_Usuarios.d.forEach((l) => { if (l[0] === 'carlosa@x.com') l[3] = 'Não'; }); A.run('limparCache_()');
-  A.run('reenviarAvisosMetas_()'); eq(mails().length, 0); eq(String(linhas()[i][17]), 'sem destino');
+  // desde a v10.3 o "sem destino" leva a data, para o destinatário ser reavaliado depois
+  A.run('reenviarAvisosMetas_()'); eq(mails().length, 0); ok(/^sem destino \d{4}-\d{2}-\d{2}/.test(String(linhas()[i][17])), String(linhas()[i][17]));
   A.sheets.Cad_Usuarios.d.forEach((l) => { if (l[0] === 'carlosa@x.com') l[3] = 'Sim'; }); A.run('limparCache_()');
 });
 T('contador não fica preso: meta não aberta e fora da janela de 30 dias não conta e não impede de zerar', () => {

@@ -3,7 +3,12 @@ const R = { ok: 0, falhas: [], nome: '' };
 function T(nome, fn) {
   try { fn(); R.ok++; } catch (e) { R.falhas.push(nome + '\n      -> ' + String(e.message).split('\n').slice(0, 4).join('\n         ')); }
 }
-const eq = (a, b, m) => assert.deepStrictEqual(JSON.parse(JSON.stringify(a)), JSON.parse(JSON.stringify(b)), m);
+// sem mensagem, o Node 26 recusa `undefined` no assert; aqui a falha mostra o esperado e o recebido
+const json = (x) => (x === undefined ? undefined : JSON.parse(JSON.stringify(x)));
+const eq = (a, b, m) => {
+  const A = json(a), B = json(b);
+  try { assert.deepStrictEqual(A, B); } catch (e) { throw new Error((m ? m + ': ' : '') + 'esperado ' + String(JSON.stringify(B)).slice(0, 300) + ', veio ' + String(JSON.stringify(A)).slice(0, 300)); }
+};
 const ok = (c, m) => assert.ok(c, m || 'esperava verdadeiro');
 function nega(fn, trecho, m) {
   let err = null;
